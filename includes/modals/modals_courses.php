@@ -1,0 +1,87 @@
+<!-- Modal Agregar Curso -->
+<div id="addCourseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800 text-center">Agregar Curso</h2>
+    <form action="courses_back/add_course.php" method="POST">
+      <div class="mb-4">
+        <label for="courseName" class="block text-gray-700">Nombre</label>
+        <input type="text" name="name" id="courseName" class="w-full px-3 py-2 border rounded" required>
+      </div>
+      <div class="mb-4">
+        <label for="courseDescription" class="block text-gray-700">Descripción</label>
+        <textarea name="description" id="courseDescription" class="w-full px-3 py-2 border rounded"></textarea>
+      </div>
+      <div class="mb-4">
+        <label for="courseYear" class="block text-gray-700">Año</label>
+        <input type="number" name="year" id="courseYear" class="w-full px-3 py-2 border rounded" required>
+      </div>
+      <div class="mb-4">
+        <label for="courseShift" class="block text-gray-700">Turno</label>
+        <select name="shift" id="courseShift" class="w-full px-3 py-2 border rounded" required>
+          <option value="morning">Mañana</option>
+          <option value="afternoon">Tarde</option>
+          <option value="night">Noche</option>
+        </select>
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="closeModal('addCourseModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Agregar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar Curso -->
+<div id="editCourseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800 text-center">Editar Curso</h2>
+    <form action="courses_back/edit_course.php" method="POST">
+      <input type="hidden" name="course_id" id="editCourseId">
+      <div class="mb-4">
+        <label for="editCourseName" class="block text-gray-700">Nombre</label>
+        <input type="text" name="name" id="editCourseName" class="w-full px-3 py-2 border rounded" required>
+      </div>
+      <div class="mb-4">
+        <label for="editCourseDescription" class="block text-gray-700">Descripción</label>
+        <textarea name="description" id="editCourseDescription" class="w-full px-3 py-2 border rounded"></textarea>
+      </div>
+      <div class="mb-4">
+        <label for="editCourseYear" class="block text-gray-700">Año</label>
+        <input type="number" name="year" id="editCourseYear" class="w-full px-3 py-2 border rounded" required>
+      </div>
+      <div class="mb-4">
+        <label for="editCourseShift" class="block text-gray-700">Turno</label>
+        <select name="shift" id="editCourseShift" class="w-full px-3 py-2 border rounded" required>
+          <option value="morning">Mañana</option>
+          <option value="afternoon">Tarde</option>
+          <option value="night">Noche</option>
+        </select>
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="closeModal('editCourseModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Funciones para abrir y cerrar modals
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  // Llenar modal de edición
+  function openEditModalCourse(course) {
+    document.getElementById('editCourseId').value = course.course_id;
+    document.getElementById('editCourseName').value = course.name;
+    document.getElementById('editCourseDescription').value = course.description;
+    document.getElementById('editCourseYear').value = course.year;
+    document.getElementById('editCourseShift').value = course.shift;
+    openModal('editCourseModal');
+  }
+</script>
