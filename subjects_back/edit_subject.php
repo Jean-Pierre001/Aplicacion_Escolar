@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':subject_id' => $subject_id
         ]);
 
-        header('Location: ../index.php');
+        header('Location: ../subject.php');
         exit;
     } catch (PDOException $e) {
         die("Error al actualizar materia: " . $e->getMessage());

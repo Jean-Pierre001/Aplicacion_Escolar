@@ -8,7 +8,7 @@ if (isset($_GET['id'])) {
     $stmt->bindParam(':teacher_id', $teacher_id);
 
     if ($stmt->execute()) {
-        header('Location: ../index_teachers.php');
+        header('Location: ../teachers.php');
         exit;
     } else {
         echo "Error al eliminar docente.";

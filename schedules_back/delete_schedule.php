@@ -9,6 +9,6 @@ if ($schedule_id) {
     $stmt->execute([':schedule_id' => $schedule_id]);
 }
 
-header('Location: ../index_schedules.php');
+header('Location: ../schedules.php');
 exit;
 ?>

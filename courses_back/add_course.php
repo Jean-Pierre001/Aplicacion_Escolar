@@ -15,7 +15,7 @@ try {
         ':year' => $year,
         ':shift' => $shift
     ]);
-    header("Location: ../index_courses.php");
+    header("Location: ../courses.php");
     exit();
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();

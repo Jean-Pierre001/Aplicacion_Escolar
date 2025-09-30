@@ -24,6 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-header('Location: ../index_schedules.php');
+header('Location: ../schedules.php');
 exit;
 ?>

@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$first_name, $last_name, $email, $hashed_password, $role]);
-            header("Location: ../index_users.php");
+            header("Location: ../users.php");
             exit;
         } catch (PDOException $e) {
             echo "Error al agregar usuario: " . $e->getMessage();

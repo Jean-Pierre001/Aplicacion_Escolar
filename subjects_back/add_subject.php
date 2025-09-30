@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':description' => $description
         ]);
 
-        header('Location: ../index.php'); // Redirige a la lista de materias
+        header('Location: ../subject.php'); // Redirige a la lista de materias
         exit;
     } catch (PDOException $e) {
         die("Error al agregar materia: " . $e->getMessage());

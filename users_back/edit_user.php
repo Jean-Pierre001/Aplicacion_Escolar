@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $conn->prepare("UPDATE users SET first_name=?, last_name=?, email=?, role=? WHERE user_id=?");
                 $stmt->execute([$first_name, $last_name, $email, $role, $user_id]);
             }
-            header("Location: ../index_users.php");
+            header("Location: ../users.php");
             exit;
         } catch (PDOException $e) {
             echo "Error al editar usuario: " . $e->getMessage();

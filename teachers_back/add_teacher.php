@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':user_id', $user_id);
 
         if ($stmt->execute()) {
-            header('Location: ../index_teachers.php');
+            header('Location: ../teachers.php');
             exit;
         } else {
             echo "Error al agregar docente.";
