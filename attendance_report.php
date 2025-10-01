@@ -1,5 +1,4 @@
 <?php
-// attendance_report.php
 include 'includes/header.php';
 include 'includes/sidebar.php';
 include 'includes/navbar.php';
@@ -11,7 +10,6 @@ include 'includes/conn.php';
     <h1 class="text-4xl font-bold text-gray-800 mb-6">Consulta de Reportes de Asistencia</h1>
 
     <div class="mb-6 flex flex-wrap items-center gap-4">
-      <!-- Selección de Curso -->
       <select id="selectCourse" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500">
         <option value="">Seleccionar Curso</option>
         <?php
@@ -22,7 +20,6 @@ include 'includes/conn.php';
         ?>
       </select>
 
-      <!-- Selección de Materia -->
       <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500">
         <option value="">Seleccionar Materia</option>
         <?php
@@ -33,10 +30,8 @@ include 'includes/conn.php';
         ?>
       </select>
 
-      <!-- Selección de Fecha -->
       <input type="date" id="selectDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500">
 
-      <!-- Botón Cargar -->
       <button id="loadReport" class="ml-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center">
         <i class="fa-solid fa-table-list mr-2"></i> Cargar Reporte
       </button>
@@ -52,9 +47,18 @@ include 'includes/conn.php';
       </button>
     </div>
 
-    <!-- Contenedor de la tabla -->
     <div id="reportTableContainer" class="overflow-x-auto rounded-lg shadow-lg border border-gray-200"></div>
   </main>
+</div>
+
+<!-- Modal de vista previa -->
+<div id="fileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-lg w-4/5 h-4/5 p-4 relative">
+      <button id="closeModal" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+        Cerrar
+      </button>
+      <div id="modalContent" class="w-full h-full flex items-center justify-center"></div>
+  </div>
 </div>
 
 <script>
@@ -64,7 +68,7 @@ const selectDate = document.getElementById('selectDate');
 const loadReportBtn = document.getElementById('loadReport');
 const tableContainer = document.getElementById('reportTableContainer');
 
-// Cargar reporte en tabla
+// Cargar reporte
 function loadReport() {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
@@ -79,7 +83,6 @@ function loadReport() {
     .then(res => res.text())
     .then(html => tableContainer.innerHTML = html);
 }
-
 loadReportBtn.addEventListener('click', loadReport);
 
 // Exportar PDF
@@ -87,10 +90,7 @@ document.getElementById('exportPDF').addEventListener('click', () => {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const date = selectDate.value;
-  if (!courseId || !subjectId || !date) {
-    alert('Seleccione curso, materia y fecha.');
-    return;
-  }
+  if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
   window.open(`attendance_back/export_pdf.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
 });
 
@@ -99,10 +99,68 @@ document.getElementById('exportExcel').addEventListener('click', () => {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const date = selectDate.value;
-  if (!courseId || !subjectId || !date) {
-    alert('Seleccione curso, materia y fecha.');
-    return;
-  }
+  if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
   window.open(`attendance_back/export_excel.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
+});
+
+// Guardar cambios
+tableContainer.addEventListener('click', function(e) {
+    if(e.target && e.target.id === 'saveAttendanceBtn') {
+        const form = document.getElementById('attendanceForm');
+        if(!form) { alert('No hay formulario cargado'); return; }
+
+        const formData = new FormData(form);
+
+        fetch('attendance_back/update_attendance_bulk.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(response => {
+            if(response.success) {
+                alert('Cambios guardados correctamente.');
+                response.updated.forEach(u => {
+                    const row = document.querySelector(`select[name='status[${u.attendance_id}]']`).closest('tr');
+                    row.querySelector('td:last-child').textContent = u.updated_at;
+                });
+            } else { alert('Error: ' + response.error); }
+        });
+    }
+});
+
+// Vista previa archivos
+const modal = document.getElementById('fileModal');
+const modalContent = document.getElementById('modalContent');
+const closeModal = document.getElementById('closeModal');
+
+tableContainer.addEventListener('click', function(e) {
+    if(e.target && e.target.classList.contains('previewBtn')){
+        const file = e.target.getAttribute('data-file');
+        const ext = file.split('.').pop().toLowerCase();
+        modalContent.innerHTML = '';
+
+        if(ext === 'pdf'){
+            const iframe = document.createElement('iframe');
+            iframe.src = file;
+            iframe.className = 'w-full h-full';
+            modalContent.appendChild(iframe);
+        } else if(['jpg','jpeg','png','gif','webp'].includes(ext)){
+            const img = document.createElement('img');
+            img.src = file;
+            img.className = 'max-w-full max-h-full object-contain';
+            modalContent.appendChild(img);
+        } else {
+            modalContent.innerHTML = "<p class='text-center text-red-600'>Archivo no visualizable</p>";
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+});
+
+closeModal.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    modalContent.innerHTML = '';
 });
 </script>
