@@ -63,8 +63,6 @@ const selectSubject = document.getElementById('selectSubject');
 const selectDate = document.getElementById('selectDate');
 const loadReportBtn = document.getElementById('loadReport');
 const tableContainer = document.getElementById('reportTableContainer');
-const exportPDFBtn = document.getElementById('exportPDF');
-const exportExcelBtn = document.getElementById('exportExcel');
 
 // Cargar reporte en tabla
 function loadReport() {
@@ -85,7 +83,7 @@ function loadReport() {
 loadReportBtn.addEventListener('click', loadReport);
 
 // Exportar PDF
-exportPDFBtn.addEventListener('click', () => {
+document.getElementById('exportPDF').addEventListener('click', () => {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const date = selectDate.value;
@@ -97,7 +95,7 @@ exportPDFBtn.addEventListener('click', () => {
 });
 
 // Exportar Excel
-exportExcelBtn.addEventListener('click', () => {
+document.getElementById('exportExcel').addEventListener('click', () => {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const date = selectDate.value;

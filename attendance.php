@@ -75,19 +75,31 @@ generateReportBtn.addEventListener('click', () => {
     return;
   }
 
-  // Recoger estados de asistencia de la tabla
   const rows = document.querySelectorAll('#attendanceTableContainer tbody tr');
-  let data = [];
-  rows.forEach(row => {
+  let formData = new FormData();
+
+  formData.append('course_id', courseId);
+  formData.append('subject_id', subjectId);
+  formData.append('attendance_date', attendanceDate);
+
+  rows.forEach((row, index) => {
     const studentId = row.dataset.studentId;
-    const status = row.querySelector('input[type="checkbox"]').checked ? 'present' : 'absent';
-    data.push({ student_id: studentId, status });
+    const status = row.querySelector('input[name="present"]').checked ? 'present' : 'absent';
+    const justification = row.querySelector('input[name="justification"]').checked ? 1 : 0;
+    const fileInput = row.querySelector('input[name="justification_file"]');
+    const file = fileInput.files[0] ?? null;
+
+    formData.append(`data[${index}][student_id]`, studentId);
+    formData.append(`data[${index}][status]`, status);
+    formData.append(`data[${index}][justification]`, justification);
+    if (file) {
+      formData.append(`data[${index}][justification_file]`, file);
+    }
   });
 
   fetch('api/generate_report.php', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ course_id: courseId, subject_id: subjectId, attendance_date: attendanceDate, data })
+    body: formData
   })
   .then(res => res.json())
   .then(resp => {
@@ -95,7 +107,7 @@ generateReportBtn.addEventListener('click', () => {
       alert('Asistencia registrada correctamente.');
       loadAttendance();
     } else {
-      alert('Error al registrar asistencia.');
+      alert('Error al registrar asistencia: ' + resp.error);
     }
   });
 });
