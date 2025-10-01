@@ -15,17 +15,17 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200" id="subjectsTable">
+    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <table class="min-w-full border-collapse" id="subjectsTable">
         <thead class="bg-gradient-to-r from-green-500 to-green-700 text-white">
           <tr>
-            <th class="px-6 py-3 text-left font-medium uppercase">ID</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Nombre</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Descripción</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Descripción</th>
             <th class="px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           <?php
           try {
               $sql = "SELECT * FROM subjects ORDER BY subject_id ASC";
@@ -33,11 +33,12 @@ include 'includes/conn.php'; // Conexión PDO
               $subjects = $stmt->fetchAll();
 
               if ($subjects) {
-                  foreach ($subjects as $subject) {
-                      echo "<tr class='hover:bg-gray-50'>";
-                      echo "<td class='px-6 py-4'>{$subject['subject_id']}</td>";
-                      echo "<td class='px-6 py-4'>{$subject['name']}</td>";
-                      echo "<td class='px-6 py-4'>{$subject['description']}</td>";
+                  foreach ($subjects as $i => $subject) {
+                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$subject['subject_id']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$subject['name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$subject['description']}</td>";
                       echo "<td class='px-6 py-4 flex space-x-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalSubject(".json_encode($subject).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center'><i class='fa-solid fa-pen mr-1'></i>Editar</a>";
                       echo "<a href='subjects_back/delete_subject.php?id={$subject['subject_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center' onclick=\"return confirm('¿Estás seguro de eliminar esta materia?')\"><i class='fa-solid fa-trash mr-1'></i>Eliminar</a>";

@@ -15,19 +15,19 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200" id="usersTable">
+    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <table class="min-w-full border-collapse" id="usersTable">
         <thead class="bg-gradient-to-r from-purple-500 to-purple-700 text-white">
           <tr>
-            <th class="px-6 py-3 text-left font-medium uppercase">ID</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Nombre</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Apellido</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Email</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Rol</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Apellido</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Email</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Rol</th>
             <th class="px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           <?php
           try {
               $sql = "SELECT user_id, first_name, last_name, email, role FROM users ORDER BY user_id ASC";
@@ -35,13 +35,14 @@ include 'includes/conn.php'; // Conexión PDO
               $users = $stmt->fetchAll();
 
               if ($users) {
-                  foreach ($users as $user) {
-                      echo "<tr class='hover:bg-gray-50'>";
-                      echo "<td class='px-6 py-4'>{$user['user_id']}</td>";
-                      echo "<td class='px-6 py-4'>{$user['first_name']}</td>";
-                      echo "<td class='px-6 py-4'>{$user['last_name']}</td>";
-                      echo "<td class='px-6 py-4'>{$user['email']}</td>";
-                      echo "<td class='px-6 py-4'>{$user['role']}</td>";
+                  foreach ($users as $i => $user) {
+                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$user['user_id']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$user['first_name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$user['last_name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$user['email']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$user['role']}</td>";
                       echo "<td class='px-6 py-4 flex space-x-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalUser(".json_encode($user).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center'><i class='fa-solid fa-pen mr-1'></i>Editar</a>";
                       echo "<a href='users_back/delete_user.php?id={$user['user_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center' onclick=\"return confirm('¿Estás seguro de eliminar este usuario?')\"><i class='fa-solid fa-trash mr-1'></i>Eliminar</a>";

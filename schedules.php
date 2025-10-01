@@ -15,21 +15,21 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200" id="schedulesTable">
+    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <table class="min-w-full border-collapse">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
-            <th class="px-6 py-3 text-left font-medium uppercase">ID</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Curso</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Materia</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Docente</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Día</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Hora Inicio</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Hora Fin</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Curso</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Materia</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Docente</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Día</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Hora Inicio</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Hora Fin</th>
             <th class="px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           <?php
           try {
               $sql = "SELECT sch.schedule_id, c.name AS course_name, sub.name AS subject_name, 
@@ -44,15 +44,16 @@ include 'includes/conn.php'; // Conexión PDO
               $schedules = $stmt->fetchAll();
 
               if ($schedules) {
-                  foreach ($schedules as $sch) {
-                      echo "<tr class='hover:bg-gray-50'>";
-                      echo "<td class='px-6 py-4'>{$sch['schedule_id']}</td>";
-                      echo "<td class='px-6 py-4'>{$sch['course_name']}</td>";
-                      echo "<td class='px-6 py-4'>{$sch['subject_name']}</td>";
-                      echo "<td class='px-6 py-4'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
-                      echo "<td class='px-6 py-4'>{$sch['weekday']}</td>";
-                      echo "<td class='px-6 py-4'>{$sch['start_time']}</td>";
-                      echo "<td class='px-6 py-4'>{$sch['end_time']}</td>";
+                  foreach ($schedules as $i => $sch) {
+                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['schedule_id']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['course_name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['subject_name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['weekday']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['start_time']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$sch['end_time']}</td>";
                       echo "<td class='px-6 py-4 flex space-x-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalSchedule(".json_encode($sch).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center'><i class='fa-solid fa-pen mr-1'></i>Editar</a>";
                       echo "<a href='schedules_back/delete_schedule.php?id={$sch['schedule_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center' onclick=\"return confirm('¿Estás seguro de eliminar este horario?')\"><i class='fa-solid fa-trash mr-1'></i>Eliminar</a>";

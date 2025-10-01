@@ -15,25 +15,37 @@ if (!$students) {
 }
 
 // Mostrar tabla
-echo '<table class="min-w-full divide-y divide-gray-200">';
-echo '<thead class="bg-gradient-to-r from-green-500 to-green-700 text-white">
-<tr>
-<th class="px-6 py-3">ID</th>
-<th class="px-6 py-3">Nombre</th>
-<th class="px-6 py-3">Apellido</th>
-<th class="px-6 py-3">Presente</th>
-<th class="px-6 py-3">Justificación</th>
-<th class="px-6 py-3">Archivo</th>
-</tr></thead>';
-echo '<tbody>';
-foreach ($students as $student) {
-    echo "<tr data-student-id='{$student['student_id']}' class='hover:bg-gray-50'>";
-    echo "<td class='px-6 py-4'>{$student['student_id']}</td>";
-    echo "<td class='px-6 py-4'>{$student['first_name']}</td>";
-    echo "<td class='px-6 py-4'>{$student['last_name']}</td>";
-    echo "<td class='px-6 py-4 text-center'><input type='checkbox' name='present' /></td>";
-    echo "<td class='px-6 py-4 text-center'><input type='checkbox' name='justification' /></td>";
-    echo "<td class='px-6 py-4 text-center'><input type='file' name='justification_file' /></td>";
-    echo "</tr>";
+echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
+        <table class='min-w-full border-collapse'>
+        <thead class='text-white bg-gray-800'>
+        <tr>
+          <th class='px-6 py-3 border-r border-gray-300 text-left'>ID</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-left'>Nombre</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-left'>Apellido</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-center'>Presente</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-center'>Justificación</th>
+          <th class='px-6 py-3 text-center'>Archivo</th>
+        </tr>
+        </thead>
+        <tbody>";
+
+foreach ($students as $i => $student) {
+    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+    echo "<tr class='hover:bg-gray-100 {$rowClass}' data-student-id='{$student['student_id']}'>
+            <td class='px-6 py-4 border-r border-gray-300'>{$student['student_id']}</td>
+            <td class='px-6 py-4 border-r border-gray-300'>{$student['first_name']}</td>
+            <td class='px-6 py-4 border-r border-gray-300'>{$student['last_name']}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>
+                <input type='checkbox' name='present' class='form-checkbox' />
+            </td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>
+                <input type='checkbox' name='justification' class='form-checkbox' />
+            </td>
+            <td class='px-6 py-4 text-center'>
+                <input type='file' name='justification_file' class='form-input' />
+            </td>
+          </tr>";
 }
-echo '</tbody></table>';
+
+echo "</tbody></table></div>";
+?>

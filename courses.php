@@ -15,19 +15,19 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200" id="coursesTable">
+    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <table class="min-w-full border-collapse">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
-            <th class="px-6 py-3 text-left font-medium uppercase">ID</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Nombre</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Descripción</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Año</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Turno</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Descripción</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Año</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Turno</th>
             <th class="px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           <?php
           try {
               $sql = "SELECT * FROM courses ORDER BY course_id ASC";
@@ -35,13 +35,14 @@ include 'includes/conn.php'; // Conexión PDO
               $courses = $stmt->fetchAll();
 
               if ($courses) {
-                  foreach ($courses as $course) {
-                      echo "<tr class='hover:bg-gray-50'>";
-                      echo "<td class='px-6 py-4'>{$course['course_id']}</td>";
-                      echo "<td class='px-6 py-4'>{$course['name']}</td>";
-                      echo "<td class='px-6 py-4'>{$course['description']}</td>";
-                      echo "<td class='px-6 py-4'>{$course['year']}</td>";
-                      echo "<td class='px-6 py-4'>{$course['shift']}</td>";
+                  foreach ($courses as $i => $course) {
+                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$course['course_id']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$course['name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$course['description']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$course['year']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$course['shift']}</td>";
                       echo "<td class='px-6 py-4 flex space-x-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalCourse(".json_encode($course).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center'><i class='fa-solid fa-pen mr-1'></i>Editar</a>";
                       echo "<a href='courses_back/delete_course.php?id={$course['course_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center' onclick=\"return confirm('¿Estás seguro de eliminar este curso?')\"><i class='fa-solid fa-trash mr-1'></i>Eliminar</a>";

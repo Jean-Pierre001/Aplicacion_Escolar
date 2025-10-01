@@ -14,18 +14,18 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200" id="teachersTable">
+    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <table class="min-w-full border-collapse" id="teachersTable">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
-            <th class="px-6 py-3 text-left font-medium uppercase">ID</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Nombre</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Apellido</th>
-            <th class="px-6 py-3 text-left font-medium uppercase">Usuario</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Apellido</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Usuario</th>
             <th class="px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           <?php
           try {
               $sql = "SELECT t.teacher_id, t.first_name, t.last_name, u.email AS user_email 
@@ -36,12 +36,13 @@ include 'includes/conn.php'; // Conexión PDO
               $teachers = $stmt->fetchAll();
 
               if ($teachers) {
-                  foreach ($teachers as $teacher) {
-                      echo "<tr class='hover:bg-gray-50'>";
-                      echo "<td class='px-6 py-4'>{$teacher['teacher_id']}</td>";
-                      echo "<td class='px-6 py-4'>{$teacher['first_name']}</td>";
-                      echo "<td class='px-6 py-4'>{$teacher['last_name']}</td>";
-                      echo "<td class='px-6 py-4'>{$teacher['user_email']}</td>";
+                  foreach ($teachers as $i => $teacher) {
+                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$teacher['teacher_id']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$teacher['first_name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$teacher['last_name']}</td>";
+                      echo "<td class='px-6 py-4 border-r border-gray-300'>{$teacher['user_email']}</td>";
                       echo "<td class='px-6 py-4 flex space-x-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalTeacher(".json_encode($teacher).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center'><i class='fa-solid fa-pen mr-1'></i>Editar</a>";
                       echo "<a href='teachers_back/delete_teacher.php?id={$teacher['teacher_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center' onclick=\"return confirm('¿Estás seguro de eliminar este docente?')\"><i class='fa-solid fa-trash mr-1'></i>Eliminar</a>";

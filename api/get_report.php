@@ -28,33 +28,53 @@ if (!$records) {
 }
 
 // Mostrar tabla
-echo "<table class='min-w-full divide-y divide-gray-200'>
-        <thead class='bg-gray-800 text-white'>
+echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
+        <table class='min-w-full border-collapse'>
+        <thead class='bg-gradient-to-r from-gray-700 to-gray-900 text-white'>
         <tr>
-          <th class='px-6 py-3'>#</th>
-          <th class='px-6 py-3'>Alumno</th>
-          <th class='px-6 py-3'>Estado</th>
-          <th class='px-6 py-3'>Justificado</th>
-          <th class='px-6 py-3'>Archivo</th>
-          <th class='px-6 py-3'>Fecha</th>
-          <th class='px-6 py-3'>Hora</th>
+          <th class='px-6 py-3 text-left border-r border-gray-600'>#</th>
+          <th class='px-6 py-3 text-left border-r border-gray-600'>Alumno</th>
+          <th class='px-6 py-3 text-center border-r border-gray-600'>Estado</th>
+          <th class='px-6 py-3 text-center border-r border-gray-600'>Justificado</th>
+          <th class='px-6 py-3 text-center border-r border-gray-600'>Archivo</th>
+          <th class='px-6 py-3 text-center border-r border-gray-600'>Fecha</th>
+          <th class='px-6 py-3 text-center'>Hora</th>
         </tr>
         </thead>
-        <tbody class='bg-white divide-y divide-gray-200'>";
+        <tbody>";
 
+$colColors = ['bg-gray-50', 'bg-gray-100']; // Alternar color de columna
 foreach ($records as $i => $r) {
-    $justifiedText = $r['justification'] ? 'Sí' : 'No';
-    $fileLink = $r['justification_file'] ? "<a href='../{$r['justification_file']}' target='_blank' class='text-blue-600 hover:underline'>Ver</a>" : '—';
+    // Badge Estado
+    $statusBadge = $r['status'] === 'present' 
+        ? "<span class='px-3 py-1 text-sm font-semibold text-green-900 bg-green-200 rounded-full shadow-sm'>Presente</span>"
+        : "<span class='px-3 py-1 text-sm font-semibold text-red-900 bg-red-200 rounded-full shadow-sm'>Ausente</span>";
 
-    echo "<tr class='hover:bg-gray-100'>
-            <td class='px-6 py-4'>".($i+1)."</td>
-            <td class='px-6 py-4'>{$r['first_name']} {$r['last_name']}</td>
-            <td class='px-6 py-4'>".ucfirst($r['status'])."</td>
-            <td class='px-6 py-4 text-center'>{$justifiedText}</td>
-            <td class='px-6 py-4 text-center'>{$fileLink}</td>
-            <td class='px-6 py-4'>{$r['attendance_date']}</td>
-            <td class='px-6 py-4'>{$r['attendance_time']}</td>
+    // Badge Justificado
+    $justifiedBadge = $r['justification']
+        ? "<span class='px-3 py-1 text-sm font-semibold text-blue-900 bg-blue-200 rounded-full shadow-sm'>Sí</span>"
+        : "<span class='px-3 py-1 text-sm font-semibold text-gray-600 bg-gray-200 rounded-full shadow-sm'>No</span>";
+
+    // Archivo
+    $fileLink = $r['justification_file'] 
+        ? "<a href='../{$r['justification_file']}' target='_blank' class='inline-flex items-center text-blue-600 hover:underline'>
+             <i class='fa-solid fa-file-pdf mr-1'></i> Ver
+           </a>" 
+        : "<span class='text-gray-400'>—</span>";
+
+    // Fondo de fila alternado
+    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+
+    echo "<tr class='hover:bg-gray-200 {$rowClass}'>
+            <td class='px-6 py-4 border-r border-gray-300 text-left'>".($i+1)."</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-left'>{$r['first_name']} {$r['last_name']}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$statusBadge}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$justifiedBadge}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$fileLink}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$r['attendance_date']}</td>
+            <td class='px-6 py-4 text-center'>{$r['attendance_time']}</td>
           </tr>";
 }
 
-echo "</tbody></table>";
+echo "</tbody></table></div>";
+?>
