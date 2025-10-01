@@ -77,7 +77,7 @@ function loadReport() {
     return;
   }
 
-  fetch(`attendance_back/get_report.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`)
+  fetch(`api/get_report.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`)
     .then(res => res.text())
     .then(html => tableContainer.innerHTML = html);
 }

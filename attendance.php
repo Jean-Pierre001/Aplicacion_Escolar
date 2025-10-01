@@ -56,7 +56,7 @@ function loadAttendance() {
     return;
   }
 
-  fetch(`attendance_back/get_attendance.php?course_id=${courseId}&subject_id=${subjectId}`)
+  fetch(`api/get_attendance.php?course_id=${courseId}&subject_id=${subjectId}`)
     .then(res => res.text())
     .then(html => tableContainer.innerHTML = html);
 }
@@ -84,7 +84,7 @@ generateReportBtn.addEventListener('click', () => {
     data.push({ student_id: studentId, status });
   });
 
-  fetch('attendance_back/generate_report.php', {
+  fetch('api/generate_report.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ course_id: courseId, subject_id: subjectId, attendance_date: attendanceDate, data })
