@@ -6,17 +6,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $turno = $_POST['turno'] ?? '';
+    $course_id = $_POST['course_id'] ?? null;
 
-    if (!$subject_id || !$name || !$turno) {
+    if (!$subject_id || !$name || !$turno || !$course_id) {
         die('Datos incompletos para actualizar la materia.');
     }
 
     try {
-        $stmt = $conn->prepare("UPDATE subjects SET name = :name, description = :description, turno = :turno WHERE subject_id = :subject_id");
+        $stmt = $conn->prepare("UPDATE subjects SET name = :name, description = :description, turno = :turno, course_id = :course_id WHERE subject_id = :subject_id");
         $stmt->execute([
             ':name' => $name,
             ':description' => $description,
             ':turno' => $turno,
+            ':course_id' => $course_id,
             ':subject_id' => $subject_id
         ]);
 

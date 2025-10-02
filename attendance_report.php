@@ -26,12 +26,6 @@ include 'includes/conn.php';
 
       <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-auto">
         <option value="">Seleccionar Materia</option>
-        <?php
-        $subjects = $conn->query("SELECT subject_id, name FROM subjects")->fetchAll();
-        foreach ($subjects as $subject) {
-            echo "<option value='{$subject['subject_id']}'>{$subject['name']}</option>";
-        }
-        ?>
       </select>
 
       <input type="date" id="selectDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-auto">
@@ -166,5 +160,30 @@ closeModal.addEventListener('click', () => {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     modalContent.innerHTML = '';
+});
+
+selectCourse.addEventListener('change', () => {
+  const courseId = selectCourse.value;
+
+  // Vaciar select de materias
+  selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
+
+  if (!courseId) return;
+
+  // Traer materias por curso
+  fetch(`api/get_subjects.php?course_id=${courseId}`)
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.subject_id;
+        option.textContent = subject.name;
+        selectSubject.appendChild(option);
+      });
+    })
+    .catch(err => console.error('Error cargando materias:', err));
+
+  // Cargar asistencia también
+  loadAttendance();
 });
 </script>

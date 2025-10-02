@@ -12,6 +12,18 @@
         <textarea name="description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
       <div>
+        <label class="block mb-1 font-medium">Curso</label>
+        <select name="course_id" class="w-full border px-3 py-2 rounded" required>
+          <option value="">Selecciona un curso</option>
+          <?php
+          $courses = $conn->query("SELECT * FROM courses ORDER BY name")->fetchAll();
+          foreach ($courses as $course) {
+              echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
+          }
+          ?>
+        </select>
+      </div>
+      <div>
         <label class="block mb-1 font-medium">Turno</label>
         <select name="turno" class="w-full border px-3 py-2 rounded" required>
           <option value="mañana">Mañana</option>
@@ -44,6 +56,18 @@
         <textarea name="description" id="edit_description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
       <div>
+        <label class="block mb-1 font-medium">Curso</label>
+        <select name="course_id" id="edit_course_id" class="w-full border px-3 py-2 rounded" required>
+          <option value="">Selecciona un curso</option>
+          <?php
+          $courses = $conn->query("SELECT * FROM courses ORDER BY name")->fetchAll();
+          foreach ($courses as $course) {
+              echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
+          }
+          ?>
+        </select>
+      </div>
+      <div>
         <label class="block mb-1 font-medium">Turno</label>
         <select name="turno" id="edit_turno" class="w-full border px-3 py-2 rounded" required>
           <option value="mañana">Mañana</option>
@@ -62,19 +86,20 @@
 </div>
 
 <script>
-  function openModal(modalId){
-    document.getElementById(modalId).classList.remove('hidden');
-  }
+function openModal(modalId){
+  document.getElementById(modalId).classList.remove('hidden');
+}
 
-  function closeModal(modalId){
-    document.getElementById(modalId).classList.add('hidden');
-  }
+function closeModal(modalId){
+  document.getElementById(modalId).classList.add('hidden');
+}
 
-  function openEditModalSubject(subject){
-    document.getElementById('edit_subject_id').value = subject.subject_id;
-    document.getElementById('edit_name').value = subject.name;
-    document.getElementById('edit_description').value = subject.description;
-    document.getElementById('edit_turno').value = subject.turno;
-    openModal('editSubjectModal');
-  }
+function openEditModalSubject(subject){
+  document.getElementById('edit_subject_id').value = subject.subject_id;
+  document.getElementById('edit_name').value = subject.name;
+  document.getElementById('edit_description').value = subject.description;
+  document.getElementById('edit_turno').value = subject.turno;
+  document.getElementById('edit_course_id').value = subject.course_id;
+  openModal('editSubjectModal');
+}
 </script>

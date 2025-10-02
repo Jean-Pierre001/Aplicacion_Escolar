@@ -1,5 +1,4 @@
 <?php
-// index_subjects.php
 include 'includes/header.php';
 include 'includes/sidebar.php';
 include 'includes/navbar.php';
@@ -23,6 +22,7 @@ include 'includes/conn.php'; // Conexión PDO
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Descripción</th>
+            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Curso</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Turno</th>
             <th class="px-4 md:px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
@@ -30,7 +30,10 @@ include 'includes/conn.php'; // Conexión PDO
         <tbody>
           <?php
           try {
-              $sql = "SELECT * FROM subjects ORDER BY subject_id ASC";
+              $sql = "SELECT s.*, c.name AS course_name 
+                      FROM subjects s 
+                      LEFT JOIN courses c ON s.course_id = c.course_id
+                      ORDER BY s.subject_id ASC";
               $stmt = $conn->query($sql);
               $subjects = $stmt->fetchAll();
 
@@ -41,6 +44,7 @@ include 'includes/conn.php'; // Conexión PDO
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['subject_id']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['description']}</td>";
+                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['course_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['turno']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
                       echo "<a href='javascript:void(0)' 
@@ -57,10 +61,10 @@ include 'includes/conn.php'; // Conexión PDO
                       echo "</tr>";
                   }
               } else {
-                  echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay materias registradas</td></tr>";
+                  echo "<tr><td colspan='6' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay materias registradas</td></tr>";
               }
           } catch (PDOException $e) {
-              echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
+              echo "<tr><td colspan='6' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
           }
           ?>
         </tbody>
