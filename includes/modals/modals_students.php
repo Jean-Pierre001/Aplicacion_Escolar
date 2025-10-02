@@ -108,3 +108,40 @@
     openModal('editStudentModal');
   }
 </script>
+
+<!-- Modal Mover Estudiantes -->
+<div id="moveStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Mover Estudiantes</h2>
+    <form id="moveStudentsForm" action="students_back/move_students.php" method="POST">
+      <input type="hidden" name="from_course_id" id="from_course_id">
+
+      <label for="to_course_id" class="block mb-2 font-medium">Seleccionar Curso Destino</label>
+      <select name="to_course_id" id="to_course_id" class="w-full border rounded px-3 py-2 mb-4">
+        <?php
+        // Traemos todos los cursos
+        $courses = $conn->query("SELECT course_id, name FROM courses ORDER BY name")->fetchAll();
+        foreach ($courses as $c) {
+            echo "<option value='{$c['course_id']}'>{$c['name']}</option>";
+        }
+        ?>
+      </select>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeMoveModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-700">Mover</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModalMoveStudents(fromCourseId, courseName) {
+    document.getElementById('from_course_id').value = fromCourseId;
+    document.getElementById('moveStudentsModal').classList.remove('hidden');
+  }
+
+  function closeMoveModal() {
+    document.getElementById('moveStudentsModal').classList.add('hidden');
+  }
+</script>
