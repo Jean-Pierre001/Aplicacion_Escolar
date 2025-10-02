@@ -186,4 +186,34 @@ selectCourse.addEventListener('change', () => {
   // Cargar asistencia también
   loadAttendance();
 });
+
+tableContainer.addEventListener('click', function(e){
+    if(e.target.closest('.deleteFileBtn')){
+        const btn = e.target.closest('.deleteFileBtn');
+        const attendance_id = btn.getAttribute('data-id');
+        const file_path = btn.getAttribute('data-file');
+
+        if(confirm('¿Desea eliminar este archivo?')){
+            const formData = new FormData();
+            formData.append('attendance_id', attendance_id);
+            formData.append('file_path', file_path);
+
+            fetch('attendance_back/delete_file.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.success){
+                    alert('Archivo eliminado correctamente.');
+                    // Reemplazar botones por input file
+                    const td = btn.closest('td');
+                    td.innerHTML = `<input type='file' name='file[${attendance_id}]' />`;
+                } else {
+                    alert('Error: ' + resp.error);
+                }
+            });
+        }
+    }
+});
 </script>

@@ -36,7 +36,6 @@ echo "<form id='attendanceForm' enctype='multipart/form-data'>
           <th class='px-6 py-3 text-center border-r border-gray-600'>Justificado</th>
           <th class='px-6 py-3 text-center border-r border-gray-600'>Archivo</th>
           <th class='px-6 py-3 text-center border-r border-gray-600'>Fecha</th>
-          <th class='px-6 py-3 text-center'>Última Modificación</th>
         </tr>
         </thead>
         <tbody>";
@@ -52,13 +51,22 @@ foreach ($records as $i => $r) {
 
     // Archivo: mostrar botón solo si existe
     if($r['justification_file']){
-        $fileInput = "<button type='button' class='previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition'
+        $fileInput = "
+            <div class='flex justify-center gap-2'>
+                <button type='button' class='previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition'
                         data-file='{$r['justification_file']}'>
-                        <i class='fa-solid fa-eye mr-1'></i> Ver archivo
-                      </button>";
+                    <i class='fa-solid fa-eye mr-1'></i> Ver
+                </button>
+                <button type='button' class='deleteFileBtn bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700 transition'
+                        data-id='{$r['attendance_id']}' data-file='{$r['justification_file']}'>
+                    <i class='fa-solid fa-trash mr-1'></i> Eliminar
+                </button>
+            </div>
+        ";
     } else {
         $fileInput = "<input type='file' name='file[{$r['attendance_id']}]' />";
     }
+
 
     echo "<tr class='{$rowClass}'>
             <td class='px-6 py-4 border-r border-gray-300'>{$r['first_name']} {$r['last_name']}</td>
@@ -68,7 +76,6 @@ foreach ($records as $i => $r) {
             </td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>{$fileInput}</td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>{$r['attendance_date']}</td>
-            <td class='px-6 py-4 text-center'>{$r['attendance_time']}</td>
           </tr>";
 }
 
