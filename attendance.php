@@ -51,16 +51,30 @@ const attendanceDateInput = document.getElementById('attendanceDate');
 function loadAttendance() {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
-  if (!courseId || !subjectId) {
+  const attendanceDate = attendanceDateInput.value;
+
+  if (!courseId || !subjectId || !attendanceDate) {
     tableContainer.innerHTML = '';
+    generateReportBtn.disabled = true;
+    generateReportBtn.classList.add('opacity-50', 'cursor-not-allowed');
     return;
   }
 
-  fetch(`api/get_attendance.php?course_id=${courseId}&subject_id=${subjectId}`)
+  fetch(`api/get_attendance.php?course_id=${courseId}&subject_id=${subjectId}&attendance_date=${attendanceDate}`)
     .then(res => res.text())
     .then(html => {
       tableContainer.innerHTML = html;
 
+      // Bloquear o desbloquear el botón según el mensaje recibido
+      if (tableContainer.textContent.includes("Ya se tomó la asistencia")) {
+        generateReportBtn.disabled = true;
+        generateReportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        generateReportBtn.disabled = false;
+        generateReportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+
+      // Manejar "marcar todos presentes"
       const checkAllPresent = document.getElementById('checkAllPresent');
       if (checkAllPresent) {
         const presentChecks = tableContainer.querySelectorAll('.present-checkbox');
@@ -71,22 +85,29 @@ function loadAttendance() {
     });
 }
 
+// Eventos de cambio
 selectCourse.addEventListener('change', loadAttendance);
 selectSubject.addEventListener('change', loadAttendance);
+attendanceDateInput.addEventListener('change', loadAttendance);
 
+// Generar informe
 generateReportBtn.addEventListener('click', () => {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const attendanceDate = attendanceDateInput.value;
 
-  if (!courseId || !subjectId) {
-    alert('Seleccione un curso y una materia.');
+  if (!courseId || !subjectId || !attendanceDate) {
+    alert('Seleccione curso, materia y fecha.');
     return;
   }
 
   const rows = document.querySelectorAll('#attendanceTableContainer tbody tr');
-  let formData = new FormData();
+  if (!rows.length) {
+    alert('No hay estudiantes para registrar.');
+    return;
+  }
 
+  let formData = new FormData();
   formData.append('course_id', courseId);
   formData.append('subject_id', subjectId);
   formData.append('attendance_date', attendanceDate);
@@ -121,3 +142,4 @@ generateReportBtn.addEventListener('click', () => {
   });
 });
 </script>
+

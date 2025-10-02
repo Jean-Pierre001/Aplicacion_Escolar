@@ -3,9 +3,24 @@ include '../includes/conn.php';
 
 $course_id = $_GET['course_id'] ?? null;
 $subject_id = $_GET['subject_id'] ?? null;
+$attendance_date = $_GET['attendance_date'] ?? date('Y-m-d'); // Por defecto hoy
 
 if (!$course_id || !$subject_id) {
     echo '<p class="p-4 text-gray-500">Faltan parámetros.</p>';
+    exit;
+}
+
+// ✅ Verificar si ya se tomó asistencia para este curso, materia y fecha
+$stmtCheck = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE course_id = ? AND subject_id = ? AND attendance_date = ?");
+$stmtCheck->execute([$course_id, $subject_id, $attendance_date]);
+$exists = $stmtCheck->fetchColumn();
+
+if ($exists > 0) {
+    echo '<div class="p-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-red-600">
+                Ya se tomó la asistencia de esta clase en la fecha seleccionada.
+            </h2>
+          </div>';
     exit;
 }
 
@@ -19,22 +34,22 @@ if (!$students) {
     exit;
 }
 
-// Mostrar tabla responsive
+// Mostrar tabla
 echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
-        <table class='min-w-full border-collapse table-auto'>
-        <thead class='bg-gray-800 text-white'>
+        <table class='min-w-full border-collapse'>
+        <thead class='text-white bg-gray-800'>
         <tr>
-          <th class='px-4 py-3 border-r border-gray-300 text-left'>ID</th>
-          <th class='px-4 py-3 border-r border-gray-300 text-left'>Nombre</th>
-          <th class='px-4 py-3 border-r border-gray-300 text-left'>Apellido</th>
-          <th class='px-4 py-3 border-r border-gray-300 text-center'>
+          <th class='px-6 py-3 border-r border-gray-300 text-left'>ID</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-left'>Nombre</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-left'>Apellido</th>
+          <th class='px-6 py-3 border-r border-gray-300 text-center'>
             Presente<br>
-            <input type='checkbox' id='checkAllPresent' class='form-checkbox h-5 w-5 text-blue-600'>
+            <input type='checkbox' id='checkAllPresent' class='form-checkbox'>
           </th>
-          <th class='px-4 py-3 border-r border-gray-300 text-center'>
+          <th class='px-6 py-3 border-r border-gray-300 text-center'>
             Justificación<br>
           </th>
-          <th class='px-4 py-3 text-center'>Archivo</th>
+          <th class='px-6 py-3 text-center'>Archivo</th>
         </tr>
         </thead>
         <tbody>";
@@ -42,28 +57,19 @@ echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
 foreach ($students as $i => $student) {
     $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
     echo "<tr class='hover:bg-gray-100 {$rowClass}' data-student-id='{$student['student_id']}'>
-            <td class='px-4 py-3 border-r border-gray-300'>{$student['student_id']}</td>
-            <td class='px-4 py-3 border-r border-gray-300'>{$student['first_name']}</td>
-            <td class='px-4 py-3 border-r border-gray-300'>{$student['last_name']}</td>
-            <td class='px-4 py-3 border-r border-gray-300 text-center'>
-                <input type='checkbox' name='present[{$student['student_id']}]' class='present-checkbox form-checkbox h-5 w-5 text-green-500'/>
+            <td class='px-6 py-4 border-r border-gray-300'>{$student['student_id']}</td>
+            <td class='px-6 py-4 border-r border-gray-300'>{$student['first_name']}</td>
+            <td class='px-6 py-4 border-r border-gray-300'>{$student['last_name']}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>
+                <input type='checkbox' name='present' class='present-checkbox form-checkbox' />
             </td>
-            <td class='px-4 py-3 border-r border-gray-300 text-center'>
-                <input type='checkbox' name='justification[{$student['student_id']}]' class='justification-checkbox form-checkbox h-5 w-5 text-yellow-500'/>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>
+                <input type='checkbox' name='justification' class='justification-checkbox form-checkbox' />
             </td>
-            <td class='px-4 py-3 text-center'>
-                <input type='file' name='justification_file[{$student['student_id']}]' class='form-input w-full md:w-auto'/>
+            <td class='px-6 py-4 text-center'>
+                <input type='file' name='justification_file' class='form-input' />
             </td>
           </tr>";
 }
 
 echo "</tbody></table></div>";
-?>
-
-<script>
-// Checkbox maestro: marcar todos presentes
-document.getElementById('checkAllPresent').addEventListener('change', function() {
-    const checked = this.checked;
-    document.querySelectorAll('.present-checkbox').forEach(cb => cb.checked = checked);
-});
-</script>
