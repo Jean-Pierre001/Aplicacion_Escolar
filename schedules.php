@@ -41,7 +41,16 @@ include 'includes/conn.php'; // Conexión PDO
 
             foreach ($grouped as $course => $courseSchedules) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
-                echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg'>{$course}</div>";
+
+                // 👉 Aquí va el título del curso con botón Exportar Excel
+                echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
+                echo "<span>{$course}</span>";
+                echo "<a href='export_schedule.php?course_id={$courseSchedules[0]['course_id']}' 
+                        class='bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center'>
+                        <i class='fa-solid fa-file-excel mr-1'></i> Exportar Excel
+                      </a>";
+                echo "</div>";
+
                 echo "<div class='overflow-x-auto'>";
                 echo "<table class='min-w-full border-collapse'>";
                 echo "<thead class='bg-gray-100'>
