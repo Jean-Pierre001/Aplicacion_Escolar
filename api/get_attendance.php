@@ -19,22 +19,22 @@ if (!$students) {
     exit;
 }
 
-// Mostrar tabla
+// Mostrar tabla responsive
 echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
-        <table class='min-w-full border-collapse'>
-        <thead class='text-white bg-gray-800'>
+        <table class='min-w-full border-collapse table-auto'>
+        <thead class='bg-gray-800 text-white'>
         <tr>
-          <th class='px-6 py-3 border-r border-gray-300 text-left'>ID</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-left'>Nombre</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-left'>Apellido</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-center'>
+          <th class='px-4 py-3 border-r border-gray-300 text-left'>ID</th>
+          <th class='px-4 py-3 border-r border-gray-300 text-left'>Nombre</th>
+          <th class='px-4 py-3 border-r border-gray-300 text-left'>Apellido</th>
+          <th class='px-4 py-3 border-r border-gray-300 text-center'>
             Presente<br>
-            <input type='checkbox' id='checkAllPresent' class='form-checkbox'>
+            <input type='checkbox' id='checkAllPresent' class='form-checkbox h-5 w-5 text-blue-600'>
           </th>
-          <th class='px-6 py-3 border-r border-gray-300 text-center'>
+          <th class='px-4 py-3 border-r border-gray-300 text-center'>
             Justificación<br>
           </th>
-          <th class='px-6 py-3 text-center'>Archivo</th>
+          <th class='px-4 py-3 text-center'>Archivo</th>
         </tr>
         </thead>
         <tbody>";
@@ -42,19 +42,28 @@ echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
 foreach ($students as $i => $student) {
     $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
     echo "<tr class='hover:bg-gray-100 {$rowClass}' data-student-id='{$student['student_id']}'>
-            <td class='px-6 py-4 border-r border-gray-300'>{$student['student_id']}</td>
-            <td class='px-6 py-4 border-r border-gray-300'>{$student['first_name']}</td>
-            <td class='px-6 py-4 border-r border-gray-300'>{$student['last_name']}</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>
-                <input type='checkbox' name='present' class='present-checkbox form-checkbox' />
+            <td class='px-4 py-3 border-r border-gray-300'>{$student['student_id']}</td>
+            <td class='px-4 py-3 border-r border-gray-300'>{$student['first_name']}</td>
+            <td class='px-4 py-3 border-r border-gray-300'>{$student['last_name']}</td>
+            <td class='px-4 py-3 border-r border-gray-300 text-center'>
+                <input type='checkbox' name='present[{$student['student_id']}]' class='present-checkbox form-checkbox h-5 w-5 text-green-500'/>
             </td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>
-                <input type='checkbox' name='justification' class='justification-checkbox form-checkbox' />
+            <td class='px-4 py-3 border-r border-gray-300 text-center'>
+                <input type='checkbox' name='justification[{$student['student_id']}]' class='justification-checkbox form-checkbox h-5 w-5 text-yellow-500'/>
             </td>
-            <td class='px-6 py-4 text-center'>
-                <input type='file' name='justification_file' class='form-input' />
+            <td class='px-4 py-3 text-center'>
+                <input type='file' name='justification_file[{$student['student_id']}]' class='form-input w-full md:w-auto'/>
             </td>
           </tr>";
 }
 
 echo "</tbody></table></div>";
+?>
+
+<script>
+// Checkbox maestro: marcar todos presentes
+document.getElementById('checkAllPresent').addEventListener('change', function() {
+    const checked = this.checked;
+    document.querySelectorAll('.present-checkbox').forEach(cb => cb.checked = checked);
+});
+</script>

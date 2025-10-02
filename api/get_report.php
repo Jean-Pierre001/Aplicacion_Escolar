@@ -25,72 +25,70 @@ if (!$records) {
     echo "<p class='p-4'>No hay registros para esta fecha.</p>";
     exit;
 }
-
-echo "<form id='attendanceForm' enctype='multipart/form-data'>
-      <div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
-        <table class='min-w-full border-collapse'>
-        <thead class='bg-gradient-to-r from-gray-700 to-gray-900 text-white'>
-        <tr>
-          <th class='px-6 py-3 text-left border-r border-gray-600'>#</th>
-          <th class='px-6 py-3 text-left border-r border-gray-600'>Alumno</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Presente</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Justificado</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Archivo</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Fecha</th>
-          <th class='px-6 py-3 text-center'>Última Modificación</th>
-        </tr>
-        </thead>
-        <tbody>";
-
-foreach ($records as $i => $r) {
-    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-
-    // Select status
-    $statusSelect = "<select name='status[{$r['attendance_id']}]' class='border rounded px-2 py-1'>
-                        <option value='present' ".($r['status']=='present'?'selected':'').">Presente</option>
-                        <option value='absent' ".($r['status']=='absent'?'selected':'').">Ausente</option>
-                     </select>";
-
-    // Archivo: mostrar botón solo si existe
-    if($r['justification_file']){
-        $fileInput = "<button type='button' class='previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition'
-                        data-file='{$r['justification_file']}'>
-                        <i class='fa-solid fa-eye mr-1'></i> Ver archivo
-                      </button>";
-    } else {
-        $fileInput = "<input type='file' name='file[{$r['attendance_id']}]' />";
-    }
-
-    echo "<tr class='{$rowClass}'>
-            <td class='px-6 py-4 border-r border-gray-300'>".($i+1)."</td>
-            <td class='px-6 py-4 border-r border-gray-300'>{$r['first_name']} {$r['last_name']}</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$statusSelect}</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>
-                <input type='checkbox' name='justification[{$r['attendance_id']}]' value='1' ".($r['justification'] ? 'checked' : '')." />
-            </td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$fileInput}</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$r['attendance_date']}</td>
-            <td class='px-6 py-4 text-center'>{$r['attendance_time']}</td>
-          </tr>";
-}
-
-echo "</tbody></table>
-      <div class='mt-4 text-right'>
-        <button type='button' id='saveAttendanceBtn' class='bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center'>
-          <i class='fa-solid fa-floppy-disk mr-2'></i> Guardar cambios
-        </button>
-      </div>
-      </div>
-      </form>";
-
-// Modal para vista previa
-echo "<div id='previewModal' class='fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50'>
-        <div class='bg-white w-4/5 h-4/5 rounded shadow-lg relative'>
-            <button id='closePreview' class='absolute top-2 right-2 text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700'><i class='fa-solid fa-xmark'></i></button>
-            <iframe id='previewFrame' class='w-full h-full rounded' src=''></iframe>
-        </div>
-      </div>";
 ?>
+
+<form id="attendanceForm" enctype="multipart/form-data">
+  <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+    <table class="min-w-full border-collapse table-auto">
+      <thead class="bg-gradient-to-r from-gray-700 to-gray-900 text-white">
+        <tr>
+          <th class="px-4 py-3 text-left border-r border-gray-600">#</th>
+          <th class="px-4 py-3 text-left border-r border-gray-600">Alumno</th>
+          <th class="px-4 py-3 text-center border-r border-gray-600">Presente</th>
+          <th class="px-4 py-3 text-center border-r border-gray-600">Justificado</th>
+          <th class="px-4 py-3 text-center border-r border-gray-600">Archivo</th>
+          <th class="px-4 py-3 text-center border-r border-gray-600">Fecha</th>
+          <th class="px-4 py-3 text-center">Última Modificación</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($records as $i => $r): 
+          $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+        ?>
+        <tr class="hover:bg-gray-100 <?= $rowClass ?>">
+          <td class="px-4 py-3 border-r border-gray-300"><?= $i+1 ?></td>
+          <td class="px-4 py-3 border-r border-gray-300"><?= $r['first_name'] ?> <?= $r['last_name'] ?></td>
+          <td class="px-4 py-3 border-r border-gray-300 text-center">
+            <select name="status[<?= $r['attendance_id'] ?>]" class="border rounded px-2 py-1 w-full md:w-auto">
+              <option value="present" <?= $r['status']=='present'?'selected':'' ?>>Presente</option>
+              <option value="absent" <?= $r['status']=='absent'?'selected':'' ?>>Ausente</option>
+            </select>
+          </td>
+          <td class="px-4 py-3 border-r border-gray-300 text-center">
+            <input type="checkbox" name="justification[<?= $r['attendance_id'] ?>]" value="1" <?= $r['justification']?'checked':'' ?> class="form-checkbox h-5 w-5 text-yellow-500"/>
+          </td>
+          <td class="px-4 py-3 border-r border-gray-300 text-center">
+            <?php if($r['justification_file']): ?>
+              <button type="button" class="previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition flex justify-center items-center"
+                      data-file="<?= $r['justification_file'] ?>">
+                <i class="fa-solid fa-eye mr-1"></i> Ver
+              </button>
+            <?php else: ?>
+              <input type="file" name="file[<?= $r['attendance_id'] ?>]" class="form-input w-full md:w-auto"/>
+            <?php endif; ?>
+          </td>
+          <td class="px-4 py-3 border-r border-gray-300 text-center"><?= $r['attendance_date'] ?></td>
+          <td class="px-4 py-3 text-center"><?= $r['attendance_time'] ?></td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4 text-right">
+    <button type="button" id="saveAttendanceBtn" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center justify-center">
+      <i class="fa-solid fa-floppy-disk mr-2"></i> Guardar cambios
+    </button>
+  </div>
+</form>
+
+<!-- Modal vista previa responsive -->
+<div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white w-full md:w-4/5 h-4/5 rounded shadow-lg relative">
+    <button id="closePreview" class="absolute top-2 right-2 text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700"><i class="fa-solid fa-xmark"></i></button>
+    <iframe id="previewFrame" class="w-full h-full rounded" src=""></iframe>
+  </div>
+</div>
 
 <script>
 // Guardar cambios
@@ -106,7 +104,6 @@ document.getElementById('saveAttendanceBtn').addEventListener('click', function(
     .then(response => {
         if(response.success) {
             alert('Cambios guardados correctamente.');
-            // Actualizar hora en la tabla
             response.updated.forEach(u => {
                 const row = document.querySelector(`select[name='status[${u.attendance_id}]']`).closest('tr');
                 row.querySelector('td:last-child').textContent = u.attendance_time;

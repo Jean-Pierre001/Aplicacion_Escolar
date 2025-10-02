@@ -37,9 +37,9 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!-- Contenedor principal -->
-<div class="flex-1 ml-64">
-  <main class="pt-20 p-6">
-    <div class="flex items-center justify-between mb-6">
+<div class="flex-1 md:ml-64 transition-all duration-300">
+  <main class="pt-20 p-4 md:p-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3">
       <h1 class="text-2xl font-bold">Notificaciones</h1>
       <span class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">
         <?php echo count($rows); ?> pendientes
@@ -47,7 +47,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <?php if (count($rows) > 0): ?>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <?php foreach ($rows as $row): ?>
           <div class="flex items-start p-4 bg-red-50 border-l-4 border-red-500 rounded shadow-sm">
             <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl mr-3 mt-1"></i>
@@ -58,7 +58,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <p class="text-sm text-gray-700 mt-1">
                 Hoy <strong><?php echo $displayDate; ?></strong> no se marcó asistencia 
                 <span class="font-semibold">'present'</span> en 
-                <strong><?php echo htmlspecialchars($row['course_name']); ?></strong> —
+                <strong><?php echo htmlspecialchars($row['course_name']); ?></strong> — 
                 <strong><?php echo htmlspecialchars($row['subject_name']); ?></strong>.
               </p>
             </div>

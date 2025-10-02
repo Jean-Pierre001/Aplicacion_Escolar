@@ -5,12 +5,12 @@ include 'includes/navbar.php';
 include 'includes/conn.php';
 ?>
 
-<div class="flex-1 ml-64">
-  <main class="pt-20 p-6">
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">Asistencia de Alumnos</h1>
+<div class="flex-1 md:ml-64 transition-all duration-300">
+  <main class="pt-20 p-4 md:p-6">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Asistencia de Alumnos</h1>
 
-    <div class="mb-6 flex flex-wrap items-center gap-4">
-      <select id="selectCourse" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div class="mb-6 flex flex-col md:flex-row flex-wrap items-start md:items-center gap-3 md:gap-4">
+      <select id="selectCourse" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
         <option value="">Seleccionar Curso</option>
         <?php
         $courses = $conn->query("SELECT course_id, name FROM courses")->fetchAll();
@@ -20,7 +20,7 @@ include 'includes/conn.php';
         ?>
       </select>
 
-      <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500">
+      <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-auto">
         <option value="">Seleccionar Materia</option>
         <?php
         $subjects = $conn->query("SELECT subject_id, name FROM subjects")->fetchAll();
@@ -30,9 +30,9 @@ include 'includes/conn.php';
         ?>
       </select>
 
-      <input type="date" id="attendanceDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      <input type="date" id="attendanceDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-auto" />
 
-      <button id="generateReport" class="ml-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center">
+      <button id="generateReport" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center ml-0 md:ml-auto w-full md:w-auto justify-center">
         <i class="fa-solid fa-file-lines mr-2"></i> Generar Informe
       </button>
     </div>
@@ -61,7 +61,6 @@ function loadAttendance() {
     .then(html => {
       tableContainer.innerHTML = html;
 
-      // Checkbox maestro Presente
       const checkAllPresent = document.getElementById('checkAllPresent');
       if (checkAllPresent) {
         const presentChecks = tableContainer.querySelectorAll('.present-checkbox');
@@ -75,7 +74,6 @@ function loadAttendance() {
 selectCourse.addEventListener('change', loadAttendance);
 selectSubject.addEventListener('change', loadAttendance);
 
-// Generar informe y guardar en DB
 generateReportBtn.addEventListener('click', () => {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
