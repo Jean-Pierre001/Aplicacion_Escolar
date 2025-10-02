@@ -58,7 +58,18 @@ function loadAttendance() {
 
   fetch(`api/get_attendance.php?course_id=${courseId}&subject_id=${subjectId}`)
     .then(res => res.text())
-    .then(html => tableContainer.innerHTML = html);
+    .then(html => {
+      tableContainer.innerHTML = html;
+
+      // Checkbox maestro Presente
+      const checkAllPresent = document.getElementById('checkAllPresent');
+      if (checkAllPresent) {
+        const presentChecks = tableContainer.querySelectorAll('.present-checkbox');
+        checkAllPresent.addEventListener('change', function() {
+          presentChecks.forEach(chk => chk.checked = this.checked);
+        });
+      }
+    });
 }
 
 selectCourse.addEventListener('change', loadAttendance);
