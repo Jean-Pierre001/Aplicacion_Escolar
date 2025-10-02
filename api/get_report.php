@@ -31,7 +31,6 @@ echo "<form id='attendanceForm' enctype='multipart/form-data'>
         <table class='min-w-full border-collapse'>
         <thead class='bg-gradient-to-r from-gray-700 to-gray-900 text-white'>
         <tr>
-          <th class='px-6 py-3 text-left border-r border-gray-600'>#</th>
           <th class='px-6 py-3 text-left border-r border-gray-600'>Alumno</th>
           <th class='px-6 py-3 text-center border-r border-gray-600'>Presente</th>
           <th class='px-6 py-3 text-center border-r border-gray-600'>Justificado</th>
@@ -62,7 +61,6 @@ foreach ($records as $i => $r) {
     }
 
     echo "<tr class='{$rowClass}'>
-            <td class='px-6 py-4 border-r border-gray-300'>".($i+1)."</td>
             <td class='px-6 py-4 border-r border-gray-300'>{$r['first_name']} {$r['last_name']}</td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>{$statusSelect}</td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>

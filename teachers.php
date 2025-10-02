@@ -23,7 +23,6 @@ include 'includes/conn.php'; // Conexión PDO
       <table class="min-w-full border-collapse" id="teachersTable">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Apellido</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Usuario</th>
@@ -44,7 +43,6 @@ include 'includes/conn.php'; // Conexión PDO
                   foreach ($teachers as $i => $teacher) {
                       $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                       echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['teacher_id']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['first_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['last_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['user_email']}</td>";

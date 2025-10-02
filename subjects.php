@@ -19,7 +19,6 @@ include 'includes/conn.php'; // Conexión PDO
       <table class="min-w-full border-collapse" id="subjectsTable">
         <thead class="bg-gradient-to-r from-green-500 to-green-700 text-white">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Descripción</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Curso</th>
@@ -41,7 +40,6 @@ include 'includes/conn.php'; // Conexión PDO
                   foreach ($subjects as $i => $subject) {
                       $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                       echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['subject_id']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['description']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['course_name']}</td>";

@@ -21,7 +21,6 @@ include 'includes/conn.php'; // Conexión PDO
       <table class="min-w-full border-collapse" id="usersTable">
         <thead class="bg-gradient-to-r from-purple-500 to-purple-700 text-white">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">ID</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Apellido</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Email</th>
@@ -40,7 +39,6 @@ include 'includes/conn.php'; // Conexión PDO
                   foreach ($users as $i => $user) {
                       $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                       echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['user_id']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['first_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['last_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['email']}</td>";

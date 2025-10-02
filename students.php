@@ -45,12 +45,11 @@ include 'includes/conn.php'; // Conexión PDO
                         <i class='fa-solid fa-arrows-right-left mr-1'></i> Mover Estudiantes
                       </a>";
                 echo "</div>";
-                
                 echo "<div class='overflow-x-auto'>";
                 echo "<table class='min-w-full border-collapse'>";
                 echo "<thead class='bg-gray-100'>
                         <tr>
-                          <th class='px-4 py-2 border'>ID</th>
+
                           <th class='px-4 py-2 border'>Apellido</th>
                           <th class='px-4 py-2 border'>Nombre</th>
                           <th class='px-4 py-2 border'>DNI</th>
@@ -62,7 +61,6 @@ include 'includes/conn.php'; // Conexión PDO
                 foreach ($courseStudents as $i => $student) {
                     $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                     echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                    echo "<td class='px-4 py-2 border'>{$student['student_id']}</td>";
                     echo "<td class='px-4 py-2 border'>{$student['last_name']}</td>";
                     echo "<td class='px-4 py-2 border'>{$student['first_name']}</td>";
                     echo "<td class='px-4 py-2 border'>{$student['DNI']}</td>";

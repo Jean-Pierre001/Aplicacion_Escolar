@@ -22,7 +22,6 @@ include 'includes/conn.php'; // Conexión PDO
       <table class="min-w-full border-collapse">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">ID</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Descripción</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Tecnicatura</th>
@@ -40,7 +39,6 @@ include 'includes/conn.php'; // Conexión PDO
                   foreach ($courses as $i => $course) {
                       $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                       echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['course_id']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['description']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['technical_degree']}</td>";
