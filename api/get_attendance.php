@@ -10,10 +10,10 @@ if (!$course_id || !$subject_id) {
     exit;
 }
 
-// ✅ Verificar si ya se tomó asistencia para este curso, materia y fecha
+// Verificar si ya se tomó asistencia para este curso, materia y fecha
 $stmtCheck = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE course_id = ? AND subject_id = ? AND attendance_date = ?");
 $stmtCheck->execute([$course_id, $subject_id, $attendance_date]);
-$exists = $stmtCheck->fetchColumn();
+$exists = (int)$stmtCheck->fetchColumn();
 
 if ($exists > 0) {
     echo '<div class="p-8 text-center">
@@ -24,7 +24,25 @@ if ($exists > 0) {
     exit;
 }
 
-// Traer alumnos del curso
+// ---- Aquí usamos TU tabla `schedules` ----
+// Comprobamos si existe un schedule para el día seleccionado (weekday).
+// La tabla `schedules` tiene `weekday` = 'monday','tuesday',... así que generamos el weekday en minúsculas en inglés.
+$weekday = strtolower(date('l', strtotime($attendance_date))); // 'monday', 'tuesday', ...
+
+$stmtHorario = $conn->prepare("SELECT COUNT(*) FROM schedules WHERE course_id = ? AND subject_id = ? AND weekday = ?");
+$stmtHorario->execute([$course_id, $subject_id, $weekday]);
+$hasSchedule = (int)$stmtHorario->fetchColumn();
+
+if ($hasSchedule === 0) {
+    echo '<div class="p-8 text-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-600">
+                La clase no se dicta en la fecha seleccionada.
+            </h2>
+          </div>';
+    exit;
+}
+
+// Si hay schedule (en ese día), traemos alumnos del curso
 $stmt = $conn->prepare("SELECT student_id, first_name, last_name FROM students WHERE course_id = ?");
 $stmt->execute([$course_id]);
 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);

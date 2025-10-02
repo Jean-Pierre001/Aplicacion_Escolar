@@ -32,7 +32,7 @@ include 'includes/conn.php';
 
       <input type="date" id="attendanceDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-auto" />
 
-      <button id="generateReport" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center ml-0 md:ml-auto w-full md:w-auto justify-center">
+      <button id="generateReport" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center ml-0 md:ml-auto w-full md:w-auto justify-center" disabled>
         <i class="fa-solid fa-file-lines mr-2"></i> Generar Informe
       </button>
     </div>
@@ -48,6 +48,15 @@ const tableContainer = document.getElementById('attendanceTableContainer');
 const generateReportBtn = document.getElementById('generateReport');
 const attendanceDateInput = document.getElementById('attendanceDate');
 
+function setGenerateReportDisabled(disabled) {
+  generateReportBtn.disabled = disabled;
+  if (disabled) {
+    generateReportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  } else {
+    generateReportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+}
+
 function loadAttendance() {
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
@@ -55,8 +64,7 @@ function loadAttendance() {
 
   if (!courseId || !subjectId || !attendanceDate) {
     tableContainer.innerHTML = '';
-    generateReportBtn.disabled = true;
-    generateReportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    setGenerateReportDisabled(true);
     return;
   }
 
@@ -65,23 +73,33 @@ function loadAttendance() {
     .then(html => {
       tableContainer.innerHTML = html;
 
-      // Bloquear o desbloquear el botón según el mensaje recibido
-      if (tableContainer.textContent.includes("Ya se tomó la asistencia")) {
-        generateReportBtn.disabled = true;
-        generateReportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      // Si la respuesta NO contiene una tabla, deshabilitamos el botón.
+      const table = tableContainer.querySelector('table');
+      if (!table) {
+        setGenerateReportDisabled(true);
       } else {
-        generateReportBtn.disabled = false;
-        generateReportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        // Si hay tabla, habilitar el botón salvo que el texto indique que ya se tomó la asistencia
+        if (tableContainer.textContent.includes("Ya se tomó la asistencia")) {
+          setGenerateReportDisabled(true);
+        } else {
+          setGenerateReportDisabled(false);
+        }
       }
 
-      // Manejar "marcar todos presentes"
+      // Manejar "marcar todos presentes" sin duplicar listeners
       const checkAllPresent = document.getElementById('checkAllPresent');
       if (checkAllPresent) {
-        const presentChecks = tableContainer.querySelectorAll('.present-checkbox');
-        checkAllPresent.addEventListener('change', function() {
+        // reasignar el handler para evitar múltiples listeners al recargar varias veces
+        checkAllPresent.onchange = function() {
+          const presentChecks = tableContainer.querySelectorAll('.present-checkbox');
           presentChecks.forEach(chk => chk.checked = this.checked);
-        });
+        };
       }
+    })
+    .catch(err => {
+      console.error('Error cargando asistencia:', err);
+      tableContainer.innerHTML = '<p class="p-4 text-red-500">Error al cargar los datos.</p>';
+      setGenerateReportDisabled(true);
     });
 }
 
@@ -92,6 +110,8 @@ attendanceDateInput.addEventListener('change', loadAttendance);
 
 // Generar informe
 generateReportBtn.addEventListener('click', () => {
+  if (generateReportBtn.disabled) return;
+
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const attendanceDate = attendanceDateInput.value;
@@ -114,15 +134,17 @@ generateReportBtn.addEventListener('click', () => {
 
   rows.forEach((row, index) => {
     const studentId = row.dataset.studentId;
-    const status = row.querySelector('input[name="present"]').checked ? 'present' : 'absent';
-    const justification = row.querySelector('input[name="justification"]').checked ? 1 : 0;
+    const presentInput = row.querySelector('input[name="present"]');
+    const status = presentInput && presentInput.checked ? 'present' : 'absent';
+    const justification = row.querySelector('input[name="justification"]')?.checked ? 1 : 0;
     const fileInput = row.querySelector('input[name="justification_file"]');
-    const file = fileInput.files[0] ?? null;
+    const file = fileInput?.files[0] ?? null;
 
     formData.append(`data[${index}][student_id]`, studentId);
     formData.append(`data[${index}][status]`, status);
     formData.append(`data[${index}][justification]`, justification);
     if (file) {
+      // clave: data[0][justification_file], data[1][justification_file], ...
       formData.append(`data[${index}][justification_file]`, file);
     }
   });
@@ -139,7 +161,10 @@ generateReportBtn.addEventListener('click', () => {
     } else {
       alert('Error al registrar asistencia: ' + resp.error);
     }
+  })
+  .catch(err => {
+    console.error('Error al enviar informe:', err);
+    alert('Error al registrar asistencia.');
   });
 });
 </script>
-

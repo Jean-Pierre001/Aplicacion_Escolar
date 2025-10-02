@@ -7,6 +7,9 @@ include 'includes/conn.php'; // Conexión PDO
 ?>
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
+  <br>
+  <br>
+  <br>
   <main class="pt-20 p-4 md:p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Materias</h1>
