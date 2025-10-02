@@ -15,6 +15,14 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
+    <!-- Filtros dinámicos -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input type="text" id="filterSubjectName" placeholder="Filtrar por Nombre" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterSubjectDesc" placeholder="Filtrar por Descripción" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterSubjectCourse" placeholder="Filtrar por Curso" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterSubjectTurno" placeholder="Filtrar por Turno" class="px-3 py-2 border rounded w-48">
+    </div>
+
     <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
       <table class="min-w-full border-collapse" id="subjectsTable">
         <thead class="bg-gradient-to-r from-green-500 to-green-700 text-white">
@@ -45,24 +53,20 @@ include 'includes/conn.php'; // Conexión PDO
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['course_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$subject['turno']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
-                      echo "<a href='javascript:void(0)' 
-                              onclick='openEditModalSubject(".json_encode($subject).")' 
-                              class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
+                      echo "<a href='javascript:void(0)' onclick='openEditModalSubject(".json_encode($subject).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
                               <i class='fa-solid fa-pen mr-1'></i>Editar
                             </a>";
-                      echo "<a href='subjects_back/delete_subject.php?id={$subject['subject_id']}' 
-                              class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24' 
-                              onclick=\"return confirm('¿Estás seguro de eliminar esta materia?')\">
+                      echo "<a href='subjects_back/delete_subject.php?id={$subject['subject_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24' onclick=\"return confirm('¿Estás seguro de eliminar esta materia?')\">
                               <i class='fa-solid fa-trash mr-1'></i>Eliminar
                             </a>";
                       echo "</td>";
                       echo "</tr>";
                   }
               } else {
-                  echo "<tr><td colspan='6' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay materias registradas</td></tr>";
+                  echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay materias registradas</td></tr>";
               }
           } catch (PDOException $e) {
-              echo "<tr><td colspan='6' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
+              echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
           }
           ?>
         </tbody>
@@ -72,3 +76,41 @@ include 'includes/conn.php'; // Conexión PDO
 </div>
 
 <?php include 'includes/modals/modals_subjects.php'; ?>
+
+<!-- Script de filtros dinámicos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterName = document.getElementById('filterSubjectName');
+    const filterDesc = document.getElementById('filterSubjectDesc');
+    const filterCourse = document.getElementById('filterSubjectCourse');
+    const filterTurno = document.getElementById('filterSubjectTurno');
+    const table = document.getElementById('subjectsTable');
+    const rows = table.querySelectorAll('tbody tr');
+
+    function filterRows() {
+        const nameVal = filterName.value.toLowerCase();
+        const descVal = filterDesc.value.toLowerCase();
+        const courseVal = filterCourse.value.toLowerCase();
+        const turnoVal = filterTurno.value.toLowerCase();
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const name = cells[0].textContent.toLowerCase();
+            const desc = cells[1].textContent.toLowerCase();
+            const course = cells[2].textContent.toLowerCase();
+            const turno = cells[3].textContent.toLowerCase();
+
+            if (name.includes(nameVal) && desc.includes(descVal) && course.includes(courseVal) && turno.includes(turnoVal)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    filterName.addEventListener('input', filterRows);
+    filterDesc.addEventListener('input', filterRows);
+    filterCourse.addEventListener('input', filterRows);
+    filterTurno.addEventListener('input', filterRows);
+});
+</script>

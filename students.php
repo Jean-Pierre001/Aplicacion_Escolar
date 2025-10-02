@@ -16,6 +16,13 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
+    <!-- Filtros dinámicos -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input type="text" id="filterLastName" placeholder="Filtrar por Apellido" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterFirstName" placeholder="Filtrar por Nombre" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterDNI" placeholder="Filtrar por DNI" class="px-3 py-2 border rounded w-48">
+    </div>
+
     <?php
     try {
         // Traemos todos los estudiantes con el nombre y ID del curso
@@ -35,7 +42,7 @@ include 'includes/conn.php'; // Conexión PDO
 
             foreach ($grouped as $course => $courseStudents) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
-                
+
                 // Título del curso + botón Mover Estudiantes
                 echo "<div class='bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
                 echo "<span>{$course}</span>";
@@ -45,11 +52,11 @@ include 'includes/conn.php'; // Conexión PDO
                         <i class='fa-solid fa-arrows-right-left mr-1'></i> Mover Estudiantes
                       </a>";
                 echo "</div>";
+
                 echo "<div class='overflow-x-auto'>";
-                echo "<table class='min-w-full border-collapse'>";
+                echo "<table class='min-w-full border-collapse' id='studentsTable'>";
                 echo "<thead class='bg-gray-100'>
                         <tr>
-
                           <th class='px-4 py-2 border'>Apellido</th>
                           <th class='px-4 py-2 border'>Nombre</th>
                           <th class='px-4 py-2 border'>DNI</th>
@@ -57,7 +64,7 @@ include 'includes/conn.php'; // Conexión PDO
                         </tr>
                       </thead>";
                 echo "<tbody>";
-                
+
                 foreach ($courseStudents as $i => $student) {
                     $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                     echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
@@ -93,3 +100,39 @@ include 'includes/conn.php'; // Conexión PDO
 </div>
 
 <?php include 'includes/modals/modals_students.php' ?>
+
+<!-- Script de filtros dinámicos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterLastName = document.getElementById('filterLastName');
+    const filterFirstName = document.getElementById('filterFirstName');
+    const filterDNI = document.getElementById('filterDNI');
+    const tables = document.querySelectorAll('#studentsTable');
+
+    function filterRows() {
+        const lastNameVal = filterLastName.value.toLowerCase();
+        const firstNameVal = filterFirstName.value.toLowerCase();
+        const dniVal = filterDNI.value.toLowerCase();
+
+        tables.forEach(table => {
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const lastName = cells[0].textContent.toLowerCase();
+                const firstName = cells[1].textContent.toLowerCase();
+                const dni = cells[2].textContent.toLowerCase();
+
+                if (lastName.includes(lastNameVal) && firstName.includes(firstNameVal) && dni.includes(dniVal)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    filterLastName.addEventListener('input', filterRows);
+    filterFirstName.addEventListener('input', filterRows);
+    filterDNI.addEventListener('input', filterRows);
+});
+</script>

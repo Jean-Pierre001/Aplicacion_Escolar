@@ -7,9 +7,7 @@ include 'includes/conn.php'; // Conexión PDO
 ?>
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
-  <br>
-  <br>
-  <br>
+  <br><br><br>
   <main class="pt-20 p-4 md:p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Horarios</h1>
@@ -18,9 +16,15 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
+    <!-- Filtros dinámicos -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input type="text" id="filterSubject" placeholder="Filtrar por Materia" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterTeacher" placeholder="Filtrar por Docente" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterWeekday" placeholder="Filtrar por Día" class="px-3 py-2 border rounded w-48">
+    </div>
+
     <?php
     try {
-        // 🔹 IMPORTANTE: Ahora sí traemos subject_id y teacher_id
         $sql = "SELECT sch.schedule_id, 
                        c.course_id, c.name AS course_name, 
                        sub.subject_id, sub.name AS subject_name, 
@@ -45,7 +49,7 @@ include 'includes/conn.php'; // Conexión PDO
             foreach ($grouped as $course => $courseSchedules) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
 
-                // 👉 Título del curso con botón Exportar Excel
+                // Título del curso con botón Exportar Excel
                 echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
                 echo "<span>{$course}</span>";
                 echo "<a href='export_schedule.php?course_id={$courseSchedules[0]['course_id']}' 
@@ -55,7 +59,7 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "</div>";
 
                 echo "<div class='overflow-x-auto'>";
-                echo "<table class='min-w-full border-collapse'>";
+                echo "<table class='min-w-full border-collapse' id='schedulesTable'>";
                 echo "<thead class='bg-gray-100'>
                         <tr>
                           <th class='px-4 py-2 border'>Materia</th>
@@ -104,3 +108,39 @@ include 'includes/conn.php'; // Conexión PDO
 </div>
 
 <?php include 'includes/modals/modals_schedules.php'; ?>
+
+<!-- Script de filtros dinámicos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSubject = document.getElementById('filterSubject');
+    const filterTeacher = document.getElementById('filterTeacher');
+    const filterWeekday = document.getElementById('filterWeekday');
+    const tables = document.querySelectorAll('#schedulesTable');
+
+    function filterRows() {
+        const subjectVal = filterSubject.value.toLowerCase();
+        const teacherVal = filterTeacher.value.toLowerCase();
+        const weekdayVal = filterWeekday.value.toLowerCase();
+
+        tables.forEach(table => {
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const subject = cells[0].textContent.toLowerCase();
+                const teacher = cells[1].textContent.toLowerCase();
+                const weekday = cells[2].textContent.toLowerCase();
+
+                if (subject.includes(subjectVal) && teacher.includes(teacherVal) && weekday.includes(weekdayVal)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    filterSubject.addEventListener('input', filterRows);
+    filterTeacher.addEventListener('input', filterRows);
+    filterWeekday.addEventListener('input', filterRows);
+});
+</script>

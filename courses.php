@@ -7,9 +7,7 @@ include 'includes/conn.php'; // Conexión PDO
 ?>
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
-  <br>
-  <br>
-  <br>
+  <br><br><br>
   <main class="pt-20 p-4 md:p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Cursos</h1>
@@ -18,8 +16,15 @@ include 'includes/conn.php'; // Conexión PDO
       </a>
     </div>
 
+    <!-- Filtros dinámicos -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input type="text" id="filterName" placeholder="Filtrar por Nombre" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterDescription" placeholder="Filtrar por Descripción" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterDegree" placeholder="Filtrar por Tecnicatura" class="px-3 py-2 border rounded w-48">
+    </div>
+
     <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full border-collapse">
+      <table class="min-w-full border-collapse" id="coursesTable">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Nombre</th>
@@ -70,3 +75,37 @@ include 'includes/conn.php'; // Conexión PDO
 </div>
 
 <?php include 'includes/modals/modals_courses.php'; ?>
+
+<!-- Script de filtros dinámicos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterName = document.getElementById('filterName');
+    const filterDescription = document.getElementById('filterDescription');
+    const filterDegree = document.getElementById('filterDegree');
+    const table = document.getElementById('coursesTable');
+
+    function filterRows() {
+        const nameVal = filterName.value.toLowerCase();
+        const descriptionVal = filterDescription.value.toLowerCase();
+        const degreeVal = filterDegree.value.toLowerCase();
+
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const name = cells[0].textContent.toLowerCase();
+            const description = cells[1].textContent.toLowerCase();
+            const degree = cells[2].textContent.toLowerCase();
+
+            if (name.includes(nameVal) && description.includes(descriptionVal) && degree.includes(degreeVal)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    filterName.addEventListener('input', filterRows);
+    filterDescription.addEventListener('input', filterRows);
+    filterDegree.addEventListener('input', filterRows);
+});
+</script>
