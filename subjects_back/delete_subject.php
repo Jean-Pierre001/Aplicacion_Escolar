@@ -8,7 +8,7 @@ if (isset($_GET['id'])) {
         $stmt = $conn->prepare("DELETE FROM subjects WHERE subject_id = :subject_id");
         $stmt->execute([':subject_id' => $subject_id]);
 
-        header('Location: ../subject.php');
+        header('Location: ../subjects.php');
         exit;
     } catch (PDOException $e) {
         die("Error al eliminar materia: " . $e->getMessage());

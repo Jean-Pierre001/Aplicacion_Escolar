@@ -6,6 +6,9 @@ include 'includes/conn.php';
 ?>
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
+  <br>
+  <br>
+  <br>
   <main class="pt-20 p-4 md:p-6">
     <h1 class="text-4xl font-bold text-gray-800 mb-6">Consulta de Reportes de Asistencia</h1>
 

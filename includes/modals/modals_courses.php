@@ -12,16 +12,8 @@
         <textarea name="description" id="courseDescription" class="w-full px-3 py-2 border rounded"></textarea>
       </div>
       <div class="mb-4">
-        <label for="courseYear" class="block text-gray-700">Año</label>
-        <input type="number" name="year" id="courseYear" class="w-full px-3 py-2 border rounded" required>
-      </div>
-      <div class="mb-4">
-        <label for="courseShift" class="block text-gray-700">Turno</label>
-        <select name="shift" id="courseShift" class="w-full px-3 py-2 border rounded" required>
-          <option value="morning">Mañana</option>
-          <option value="afternoon">Tarde</option>
-          <option value="night">Noche</option>
-        </select>
+        <label for="courseTechDegree" class="block text-gray-700">Tecnicatura</label>
+        <input type="text" name="technical_degree" id="courseTechDegree" class="w-full px-3 py-2 border rounded" placeholder="Opcional">
       </div>
       <div class="flex justify-end space-x-2">
         <button type="button" onclick="closeModal('addCourseModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
@@ -46,16 +38,8 @@
         <textarea name="description" id="editCourseDescription" class="w-full px-3 py-2 border rounded"></textarea>
       </div>
       <div class="mb-4">
-        <label for="editCourseYear" class="block text-gray-700">Año</label>
-        <input type="number" name="year" id="editCourseYear" class="w-full px-3 py-2 border rounded" required>
-      </div>
-      <div class="mb-4">
-        <label for="editCourseShift" class="block text-gray-700">Turno</label>
-        <select name="shift" id="editCourseShift" class="w-full px-3 py-2 border rounded" required>
-          <option value="morning">Mañana</option>
-          <option value="afternoon">Tarde</option>
-          <option value="night">Noche</option>
-        </select>
+        <label for="editCourseTechDegree" class="block text-gray-700">Tecnicatura</label>
+        <input type="text" name="technical_degree" id="editCourseTechDegree" class="w-full px-3 py-2 border rounded" placeholder="Opcional">
       </div>
       <div class="flex justify-end space-x-2">
         <button type="button" onclick="closeModal('editCourseModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
@@ -66,7 +50,6 @@
 </div>
 
 <script>
-  // Funciones para abrir y cerrar modals
   function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
   }
@@ -75,13 +58,11 @@
     document.getElementById(id).classList.add('hidden');
   }
 
-  // Llenar modal de edición
   function openEditModalCourse(course) {
     document.getElementById('editCourseId').value = course.course_id;
     document.getElementById('editCourseName').value = course.name;
     document.getElementById('editCourseDescription').value = course.description;
-    document.getElementById('editCourseYear').value = course.year;
-    document.getElementById('editCourseShift').value = course.shift;
+    document.getElementById('editCourseTechDegree').value = course.technical_degree;
     openModal('editCourseModal');
   }
 </script>

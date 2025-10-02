@@ -8,19 +8,24 @@ include 'includes/conn.php'; // conexión PDO
 // Forzar zona horaria local (Salta, Argentina)
 date_default_timezone_set('America/Argentina/Salta');
 
-// Fecha para comparar con attendance.attendance_date (formato YYYY-MM-DD)
+// Fecha actual
 $today = (new DateTime())->format('Y-m-d');
-// Fecha para mostrar en la UI (formato DD/MM/YYYY)
 $displayDate = (new DateTime())->format('d/m/Y');
 
-// Consulta: materias + cursos sin registros 'present' en la fecha de hoy
+// Día de la semana en inglés (porque schedules.weekday está en enum inglés)
+$weekday = strtolower((new DateTime())->format('l')); // ej: "monday"
+
+// Consulta: materias + cursos que TIENEN clase hoy y no tienen asistencia registrada
 $sql = "
   SELECT 
     c.course_id, c.name AS course_name, 
     s.subject_id, s.name AS subject_name
   FROM courses c
-  JOIN schedules sch ON sch.course_id = c.course_id
-  JOIN subjects s ON s.subject_id = sch.subject_id
+  JOIN schedules sch 
+    ON sch.course_id = c.course_id
+    AND sch.weekday = :weekday
+  JOIN subjects s 
+    ON s.subject_id = sch.subject_id
   LEFT JOIN attendance a 
     ON a.course_id = c.course_id 
     AND a.subject_id = s.subject_id
@@ -32,9 +37,11 @@ $sql = "
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(':today', $today);
+$stmt->bindValue(':weekday', $weekday);
 $stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!-- Contenedor principal -->
 <div class="flex-1 md:ml-64 transition-all duration-300">

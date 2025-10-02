@@ -3,17 +3,15 @@ include '../includes/conn.php';
 
 $name = $_POST['name'] ?? '';
 $description = $_POST['description'] ?? null;
-$year = $_POST['year'] ?? 0;
-$shift = $_POST['shift'] ?? '';
+$technical_degree = $_POST['technical_degree'] ?? null;
 
 try {
-    $sql = "INSERT INTO courses (name, description, year, shift) VALUES (:name, :description, :year, :shift)";
+    $sql = "INSERT INTO courses (name, description, technical_degree) VALUES (:name, :description, :technical_degree)";
     $stmt = $conn->prepare($sql);
     $stmt->execute([
         ':name' => $name,
         ':description' => $description,
-        ':year' => $year,
-        ':shift' => $shift
+        ':technical_degree' => $technical_degree
     ]);
     header("Location: ../courses.php");
     exit();

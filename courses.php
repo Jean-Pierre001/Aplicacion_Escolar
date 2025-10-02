@@ -25,8 +25,7 @@ include 'includes/conn.php'; // Conexión PDO
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">ID</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Descripción</th>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Año</th>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Turno</th>
+            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Tecnicatura</th>
             <th class="px-4 md:px-6 py-3 text-left font-medium uppercase text-sm md:text-base">Acciones</th>
           </tr>
         </thead>
@@ -44,8 +43,7 @@ include 'includes/conn.php'; // Conexión PDO
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['course_id']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['description']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['year']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['shift']}</td>";
+                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['technical_degree']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
                       echo "<a href='javascript:void(0)' 
                               onclick='openEditModalCourse(".json_encode($course).")' 
@@ -61,10 +59,10 @@ include 'includes/conn.php'; // Conexión PDO
                       echo "</tr>";
                   }
               } else {
-                  echo "<tr><td colspan='6' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay cursos registrados</td></tr>";
+                  echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay cursos registrados</td></tr>";
               }
           } catch (PDOException $e) {
-              echo "<tr><td colspan='6' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
+              echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
           }
           ?>
         </tbody>

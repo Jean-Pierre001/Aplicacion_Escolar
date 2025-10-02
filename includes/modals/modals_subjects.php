@@ -11,6 +11,13 @@
         <label class="block mb-1 font-medium">Descripción</label>
         <textarea name="description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
+      <div>
+        <label class="block mb-1 font-medium">Turno</label>
+        <select name="turno" class="w-full border px-3 py-2 rounded" required>
+          <option value="mañana">Mañana</option>
+          <option value="tarde">Tarde</option>
+        </select>
+      </div>
       <div class="flex justify-end space-x-2 mt-4">
         <button type="button" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onclick="closeModal('addSubjectModal')">Cancelar</button>
         <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Agregar</button>
@@ -36,6 +43,13 @@
         <label class="block mb-1 font-medium">Descripción</label>
         <textarea name="description" id="edit_description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
+      <div>
+        <label class="block mb-1 font-medium">Turno</label>
+        <select name="turno" id="edit_turno" class="w-full border px-3 py-2 rounded" required>
+          <option value="mañana">Mañana</option>
+          <option value="tarde">Tarde</option>
+        </select>
+      </div>
       <div class="flex justify-end space-x-2 mt-4">
         <button type="button" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onclick="closeModal('editSubjectModal')">Cancelar</button>
         <button type="submit" class="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600">Guardar</button>
@@ -48,21 +62,19 @@
 </div>
 
 <script>
-  // Abrir modal
   function openModal(modalId){
     document.getElementById(modalId).classList.remove('hidden');
   }
 
-  // Cerrar modal
   function closeModal(modalId){
     document.getElementById(modalId).classList.add('hidden');
   }
 
-  // Abrir modal Editar Materia con datos
   function openEditModalSubject(subject){
     document.getElementById('edit_subject_id').value = subject.subject_id;
     document.getElementById('edit_name').value = subject.name;
     document.getElementById('edit_description').value = subject.description;
+    document.getElementById('edit_turno').value = subject.turno;
     openModal('editSubjectModal');
   }
 </script>
