@@ -20,8 +20,11 @@ include 'includes/conn.php'; // Conexión PDO
 
     <?php
     try {
-        $sql = "SELECT sch.schedule_id, c.course_id, c.name AS course_name, sub.name AS subject_name, 
-                       t.first_name AS teacher_first, t.last_name AS teacher_last,
+        // 🔹 IMPORTANTE: Ahora sí traemos subject_id y teacher_id
+        $sql = "SELECT sch.schedule_id, 
+                       c.course_id, c.name AS course_name, 
+                       sub.subject_id, sub.name AS subject_name, 
+                       t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
                        sch.weekday, sch.start_time, sch.end_time
                 FROM schedules sch
                 LEFT JOIN courses c ON sch.course_id = c.course_id
@@ -42,7 +45,7 @@ include 'includes/conn.php'; // Conexión PDO
             foreach ($grouped as $course => $courseSchedules) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
 
-                // 👉 Aquí va el título del curso con botón Exportar Excel
+                // 👉 Título del curso con botón Exportar Excel
                 echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
                 echo "<span>{$course}</span>";
                 echo "<a href='export_schedule.php?course_id={$courseSchedules[0]['course_id']}' 
