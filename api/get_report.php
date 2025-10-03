@@ -45,8 +45,8 @@ foreach ($records as $i => $r) {
 
     // Select status
     $statusSelect = "<select name='status[{$r['attendance_id']}]' class='border rounded px-2 py-1'>
-                        <option value='present' ".($r['status']=='present'?'selected':'').">Presente</option>
-                        <option value='absent' ".($r['status']=='absent'?'selected':'').">Ausente</option>
+                        <option value='present' ".($r['status']=='Presente'?'selected':'').">Presente</option>
+                        <option value='absent' ".($r['status']=='Ausente'?'selected':'').">Ausente</option>
                      </select>";
 
     // Archivo: mostrar botón solo si existe

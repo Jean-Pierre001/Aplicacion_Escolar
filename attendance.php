@@ -128,8 +128,8 @@ generateReportBtn.addEventListener('click', () => {
 
   rows.forEach((row, index) => {
     const studentId = row.dataset.studentId;
-    const presentInput = row.querySelector('input[name="present"]');
-    const status = presentInput && presentInput.checked ? 'present' : 'absent';
+    const presentInput = row.querySelector('input[name="Presente"]');
+    const status = presentInput && presentInput.checked ? 'Presente' : 'Ausente';
     const justification = row.querySelector('input[name="justification"]')?.checked ? 1 : 0;
     const fileInput = row.querySelector('input[name="justification_file"]');
     const file = fileInput?.files[0] ?? null;
