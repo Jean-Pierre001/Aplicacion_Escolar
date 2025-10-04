@@ -19,6 +19,24 @@ include 'includes/conn.php';
         }
         ?>
       </select>
+
+      <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
+        <option value="">Todas las materias</option>
+        <?php
+        $subjects = $conn->query("SELECT subject_id, name FROM subjects ORDER BY name")->fetchAll();
+        foreach ($subjects as $sub) {
+            echo "<option value='{$sub['subject_id']}'>{$sub['name']}</option>";
+        }
+        ?>
+      </select>
+
+      <input type="date" id="fromDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Desde">
+      <input type="date" id="toDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Hasta">
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="justificationCheck" class="form-checkbox h-5 w-5 text-blue-600">
+        Mostrar solo clases con justificación
+      </label>
     </div>
 
     <div id="studentAttendanceTableContainer" class="overflow-x-auto rounded-lg shadow-lg border border-gray-200"></div>
@@ -27,17 +45,25 @@ include 'includes/conn.php';
 
 <script>
 const selectStudent = document.getElementById('selectStudent');
+const selectSubject = document.getElementById('selectSubject');
+const fromDate = document.getElementById('fromDate');
+const toDate = document.getElementById('toDate');
+const justificationCheck = document.getElementById('justificationCheck');
 const tableContainer = document.getElementById('studentAttendanceTableContainer');
 
 function loadStudentAttendance() {
   const studentId = selectStudent.value;
+  const subjectId = selectSubject.value;
+  const from = fromDate.value;
+  const to = toDate.value;
+  const just = justificationCheck.checked ? 1 : 0;
 
   if (!studentId) {
     tableContainer.innerHTML = '';
     return;
   }
 
-  fetch(`api/get_student_attendance.php?student_id=${studentId}`)
+  fetch(`api/get_student_attendance.php?student_id=${studentId}&subject_id=${subjectId}&from=${from}&to=${to}&just=${just}`)
     .then(res => res.text())
     .then(html => {
       tableContainer.innerHTML = html;
@@ -49,5 +75,8 @@ function loadStudentAttendance() {
 }
 
 selectStudent.addEventListener('change', loadStudentAttendance);
+selectSubject.addEventListener('change', loadStudentAttendance);
+fromDate.addEventListener('change', loadStudentAttendance);
+toDate.addEventListener('change', loadStudentAttendance);
+justificationCheck.addEventListener('change', loadStudentAttendance);
 </script>
-    

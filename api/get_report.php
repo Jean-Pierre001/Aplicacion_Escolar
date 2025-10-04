@@ -22,7 +22,7 @@ $stmt = $conn->prepare("
 $stmt->execute([$course_id, $subject_id, $date]);
 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener profesor
+// Obtener profesor (uno por clase)
 $stmt = $conn->prepare("
     SELECT sa.id, t.teacher_id, t.first_name, t.last_name, sa.status, sa.justification, sa.justification_file
     FROM student_attendance sa
@@ -55,7 +55,7 @@ echo "<form id='attendanceForm' enctype='multipart/form-data'>
         </thead>
         <tbody>";
 
-// Sección Profesor
+// Profesor
 if ($teacher) {
     echo "<tr class='bg-yellow-200 text-black font-bold text-center'><td colspan='6'>Profesor</td></tr>";
 
@@ -87,7 +87,7 @@ if ($teacher) {
           </tr>";
 }
 
-// Sección Alumnos
+// Alumnos
 if ($students) {
     echo "<tr class='bg-green-200 text-black font-bold text-center'><td colspan='6'>Alumnos</td></tr>";
 
@@ -132,61 +132,3 @@ echo "</tbody></table>
       </div>
       </form>";
 ?>
-
-<script>
-// Guardar cambios
-document.getElementById('saveAttendanceBtn').addEventListener('click', function() {
-    const form = document.getElementById('attendanceForm');
-    const formData = new FormData(form);
-
-    fetch('attendance_back/update_attendance_bulk.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(response => {
-        if(response.success) {
-            alert('Cambios guardados correctamente.');
-        } else {
-            alert('Error: ' + response.error);
-        }
-    });
-});
-
-// Vista previa de archivo
-document.querySelectorAll('.previewBtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const file = btn.getAttribute('data-file');
-        const modal = document.getElementById('fileModal');
-        const modalContent = document.getElementById('modalContent');
-        modalContent.innerHTML = '';
-
-        const ext = file.split('.').pop().toLowerCase();
-        if(ext === 'pdf'){
-            const iframe = document.createElement('iframe');
-            iframe.src = file;
-            iframe.className = 'w-full h-full';
-            modalContent.appendChild(iframe);
-        } else if(['jpg','jpeg','png','gif','webp'].includes(ext)){
-            const img = document.createElement('img');
-            img.src = file;
-            img.className = 'max-w-full max-h-full object-contain';
-            modalContent.appendChild(img);
-        } else {
-            modalContent.innerHTML = "<p class='text-center text-red-600'>Archivo no visualizable</p>";
-        }
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    });
-});
-
-// Cerrar modal
-document.getElementById('closeModal').addEventListener('click', () => {
-    const modal = document.getElementById('fileModal');
-    const modalContent = document.getElementById('modalContent');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    modalContent.innerHTML = '';
-});
-</script>

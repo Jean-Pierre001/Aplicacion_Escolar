@@ -14,13 +14,13 @@ if (!$course_id || !$subject_id || !$date) {
 }
 
 $stmt = $conn->prepare("
-    SELECT s.first_name, s.last_name, 'Alumno' AS type, sa.status, sa.justification, sa.justification_file, sa.attendance_date, sa.attendance_time
+    SELECT s.first_name, s.last_name, 'Alumno' AS type, sa.status, sa.justification, sa.justification_file, sa.attendance_date
     FROM student_attendance sa
     JOIN students s ON sa.student_id = s.student_id
     JOIN schedules sc ON sa.schedule_id = sc.schedule_id
     WHERE sc.course_id=? AND sc.subject_id=? AND sa.attendance_date=?
     UNION
-    SELECT t.first_name, t.last_name, 'Profesor' AS type, sa.status, sa.justification, sa.justification_file, sa.attendance_date, sa.attendance_time
+    SELECT t.first_name, t.last_name, 'Profesor' AS type, sa.status, sa.justification, sa.justification_file, sa.attendance_date
     FROM student_attendance sa
     JOIN schedules sc ON sa.schedule_id = sc.schedule_id
     JOIN teachers t ON sc.teacher_id = t.teacher_id
@@ -48,8 +48,7 @@ foreach($records as $i=>$r){
           ->setCellValue("D$row", $r['status'])
           ->setCellValue("E$row", $r['justification'] ? 'Sí':'No')
           ->setCellValue("F$row", $r['justification_file'] ?? '')
-          ->setCellValue("G$row", $r['attendance_date'])
-          ->setCellValue("H$row", $r['attendance_time']);
+          ->setCellValue("G$row", $r['attendance_date']);
     $row++;
 }
 

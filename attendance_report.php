@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`api/get_report.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`)
             .then(res => res.text())
             .then(html => tableContainer.innerHTML = html)
-            .then(() => attachSaveHandler()); // Adjuntar evento después de renderizar tabla
+            .then(() => attachSaveHandler());
     }
     loadReportBtn.addEventListener('click', loadReport);
 
@@ -122,8 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.open(`attendance_back/export_excel.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
     });
 
-    // Vista previa archivos
+    // Delegación de eventos para vista previa y eliminar archivo
     tableContainer.addEventListener('click', function(e) {
+        // Vista previa
         if(e.target && e.target.classList.contains('previewBtn')){
             const file = e.target.getAttribute('data-file');
             const ext = file.split('.').pop().toLowerCase();
@@ -146,6 +147,32 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
+
+        // Eliminar archivo
+        if(e.target && (e.target.classList.contains('deleteFileBtn') || e.target.closest('.deleteFileBtn'))){
+            const btn = e.target.closest('.deleteFileBtn');
+            const attendance_id = btn.getAttribute('data-id');
+            const justification_file = btn.getAttribute('data-file');
+
+            if(!confirm('¿Desea eliminar este archivo?')) return;
+
+            fetch('attendance_back/delete_file.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `attendance_id=${attendance_id}&justification_file=${encodeURIComponent(justification_file)}`
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.success){
+                    alert('Archivo eliminado correctamente');
+                    const td = btn.closest('td');
+                    td.innerHTML = `<input type="file" name="file[${attendance_id}]" />`;
+                } else {
+                    alert('Error: ' + resp.error);
+                }
+            })
+            .catch(err => alert('Error de conexión'));
+        }
     });
 
     closeModal.addEventListener('click', () => {
@@ -154,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modalContent.innerHTML = '';
     });
 
-    // Adjuntar evento al botón "Guardar cambios" de la tabla
+    // Adjuntar evento al botón "Guardar cambios"
     function attachSaveHandler() {
         const saveBtn = document.getElementById('saveAttendanceBtn');
         if(!saveBtn) return;
@@ -171,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => {
                 if(response.success) {
                     alert('Cambios guardados correctamente.');
-                    loadReport(); // Recargar tabla para reflejar cambios
+                    loadReport();
                 } else {
                     alert('Error: ' + response.error);
                 }
