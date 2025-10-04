@@ -6,9 +6,8 @@ $updated = [];
 try {
     foreach ($_POST['status'] as $attendance_id => $status) {
         $justified = isset($_POST['justification'][$attendance_id]) ? 1 : 0;
-        $time = date('H:i:s');
 
-        // Archivo
+        // Manejo de archivo
         $filePath = null;
         if(isset($_FILES['file']['name'][$attendance_id]) && $_FILES['file']['name'][$attendance_id] !== '') {
             $filename = time() . "_" . basename($_FILES['file']['name'][$attendance_id]);
@@ -20,14 +19,14 @@ try {
 
         // Actualizar DB
         if($filePath) {
-            $stmt = $conn->prepare("UPDATE attendance SET status = ?, attendance_time = ?, justification = ?, justification_file = ? WHERE attendance_id = ?");
-            $stmt->execute([$status, $time, $justified, $filePath, $attendance_id]);
+            $stmt = $conn->prepare("UPDATE student_attendance SET status = ?, justification = ?, justification_file = ? WHERE id = ?");
+            $stmt->execute([$status, $justified, $filePath, $attendance_id]);
         } else {
-            $stmt = $conn->prepare("UPDATE attendance SET status = ?, attendance_time = ?, justification = ? WHERE attendance_id = ?");
-            $stmt->execute([$status, $time, $justified, $attendance_id]);
+            $stmt = $conn->prepare("UPDATE student_attendance SET status = ?, justification = ? WHERE id = ?");
+            $stmt->execute([$status, $justified, $attendance_id]);
         }
 
-        $updated[] = ['attendance_id'=>$attendance_id, 'attendance_time'=>$time];
+        $updated[] = ['attendance_id'=>$attendance_id];
     }
 
     echo json_encode(['success'=>true, 'updated'=>$updated]);
@@ -35,3 +34,4 @@ try {
 } catch(PDOException $e) {
     echo json_encode(['success'=>false, 'error'=>$e->getMessage()]);
 }
+?>

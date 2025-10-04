@@ -10,68 +10,117 @@ if (!$course_id || !$subject_id || !$date) {
     exit;
 }
 
+// Obtener estudiantes
 $stmt = $conn->prepare("
-    SELECT a.attendance_id, s.student_id, s.first_name, s.last_name, a.status, a.attendance_date, a.attendance_time,
-           a.justification, a.justification_file
-    FROM attendance a
-    JOIN students s ON a.student_id = s.student_id
-    WHERE a.course_id = ? AND a.subject_id = ? AND a.attendance_date = ?
+    SELECT sa.id, s.student_id, s.first_name, s.last_name, sa.status, sa.justification, sa.justification_file
+    FROM student_attendance sa
+    JOIN students s ON sa.student_id = s.student_id
+    JOIN schedules sc ON sa.schedule_id = sc.schedule_id
+    WHERE sc.course_id = ? AND sc.subject_id = ? AND sa.attendance_date = ?
     ORDER BY s.last_name, s.first_name
 ");
 $stmt->execute([$course_id, $subject_id, $date]);
-$records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if (!$records) {
+// Obtener profesor
+$stmt = $conn->prepare("
+    SELECT sa.id, t.teacher_id, t.first_name, t.last_name, sa.status, sa.justification, sa.justification_file
+    FROM student_attendance sa
+    JOIN schedules sc ON sa.schedule_id = sc.schedule_id
+    JOIN teachers t ON sc.teacher_id = t.teacher_id
+    WHERE sc.course_id = ? AND sc.subject_id = ? AND sa.attendance_date = ?
+    LIMIT 1
+");
+$stmt->execute([$course_id, $subject_id, $date]);
+$teacher = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$students && !$teacher) {
     echo "<p class='p-4'>No hay registros para esta fecha.</p>";
     exit;
 }
 
+// Mostrar tabla
 echo "<form id='attendanceForm' enctype='multipart/form-data'>
       <div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
         <table class='min-w-full border-collapse'>
         <thead class='bg-gradient-to-r from-gray-700 to-gray-900 text-white'>
         <tr>
-          <th class='px-6 py-3 text-left border-r border-gray-600'>Alumno</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Presente</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Justificado</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Archivo</th>
-          <th class='px-6 py-3 text-center border-r border-gray-600'>Fecha</th>
+          <th class='px-6 py-3 border-r border-gray-600'>Nombre</th>
+          <th class='px-6 py-3 border-r border-gray-600 text-center'>Tipo</th>
+          <th class='px-6 py-3 border-r border-gray-600 text-center'>Presente</th>
+          <th class='px-6 py-3 border-r border-gray-600 text-center'>Justificado</th>
+          <th class='px-6 py-3 border-r border-gray-600 text-center'>Archivo</th>
+          <th class='px-6 py-3 border-r border-gray-600 text-center'>Fecha</th>
         </tr>
         </thead>
         <tbody>";
 
-foreach ($records as $i => $r) {
-    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+// Sección Profesor
+if ($teacher) {
+    echo "<tr class='bg-yellow-200 text-black font-bold text-center'><td colspan='6'>Profesor</td></tr>";
 
-    // Select status
-    $statusSelect = "<select name='status[{$r['attendance_id']}]' class='border rounded px-2 py-1'>
-                        <option value='present' ".($r['status']=='Presente'?'selected':'').">Presente</option>
-                        <option value='absent' ".($r['status']=='Ausente'?'selected':'').">Ausente</option>
+    $statusSelect = "<select name='status[{$teacher['id']}]' class='border rounded px-2 py-1'>
+                        <option value='present' ".($teacher['status']=='present'?'selected':'').">Presente</option>
+                        <option value='absent' ".($teacher['status']=='absent'?'selected':'').">Ausente</option>
                      </select>";
 
-    // Archivo: mostrar botón solo si existe
-    if($r['justification_file']){
-        $fileInput = "<button type='button' class='previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition mr-2'
-                        data-file='{$r['justification_file']}'>
-                        <i class='fa-solid fa-eye mr-1'></i> Ver archivo
-                    </button>
-                    <button type='button' class='deleteFileBtn bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700 transition'
-                        data-id='{$r['attendance_id']}' data-file='{$r['justification_file']}'>
-                        <i class='fa-solid fa-trash mr-1'></i> Eliminar
-                    </button>";
-    } else {
-        $fileInput = "<input type='file' name='file[{$r['attendance_id']}]' />";
-    }
+    $fileInput = $teacher['justification_file'] ?
+        "<button type='button' class='previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition mr-2'
+                data-file='{$teacher['justification_file']}'>
+                <i class='fa-solid fa-eye mr-1'></i> Ver archivo
+            </button>
+            <button type='button' class='deleteFileBtn bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700 transition'
+                data-id='{$teacher['id']}' data-file='{$teacher['justification_file']}'>
+                <i class='fa-solid fa-trash mr-1'></i> Eliminar
+            </button>" :
+        "<input type='file' name='file[{$teacher['id']}]' />";
 
-    echo "<tr class='{$rowClass}'>
-            <td class='px-6 py-4 border-r border-gray-300'>{$r['first_name']} {$r['last_name']}</td>
+    echo "<tr class='bg-gray-100'>
+            <td class='px-6 py-4 border-r border-gray-300'>{$teacher['first_name']} {$teacher['last_name']}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>Profesor</td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>{$statusSelect}</td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>
-                <input type='checkbox' name='justification[{$r['attendance_id']}]' value='1' ".($r['justification'] ? 'checked' : '')." />
+                <input type='checkbox' name='justification[{$teacher['id']}]' value='1' ".($teacher['justification'] ? 'checked' : '')." />
             </td>
             <td class='px-6 py-4 border-r border-gray-300 text-center'>{$fileInput}</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$r['attendance_date']}</td>
+            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$date}</td>
           </tr>";
+}
+
+// Sección Alumnos
+if ($students) {
+    echo "<tr class='bg-green-200 text-black font-bold text-center'><td colspan='6'>Alumnos</td></tr>";
+
+    foreach ($students as $i => $r) {
+        $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+
+        $statusSelect = "<select name='status[{$r['id']}]' class='border rounded px-2 py-1'>
+                            <option value='present' ".($r['status']=='present'?'selected':'').">Presente</option>
+                            <option value='absent' ".($r['status']=='absent'?'selected':'').">Ausente</option>
+                         </select>";
+
+        $fileInput = $r['justification_file'] ?
+            "<button type='button' class='previewBtn bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition mr-2'
+                    data-file='{$r['justification_file']}'>
+                    <i class='fa-solid fa-eye mr-1'></i> Ver archivo
+                </button>
+                <button type='button' class='deleteFileBtn bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700 transition'
+                    data-id='{$r['id']}' data-file='{$r['justification_file']}'>
+                    <i class='fa-solid fa-trash mr-1'></i> Eliminar
+                </button>" :
+            "<input type='file' name='file[{$r['id']}]' />";
+
+        echo "<tr class='{$rowClass}'>
+                <td class='px-6 py-4 border-r border-gray-300'>{$r['first_name']} {$r['last_name']}</td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center'>Alumno</td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center'>{$statusSelect}</td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center'>
+                    <input type='checkbox' name='justification[{$r['id']}]' value='1' ".($r['justification'] ? 'checked' : '')." />
+                </td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center'>{$fileInput}</td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center'>{$date}</td>
+              </tr>";
+    }
 }
 
 echo "</tbody></table>
@@ -82,14 +131,6 @@ echo "</tbody></table>
       </div>
       </div>
       </form>";
-
-// Modal para vista previa
-echo "<div id='previewModal' class='fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50'>
-        <div class='bg-white w-4/5 h-4/5 rounded shadow-lg relative'>
-            <button id='closePreview' class='absolute top-2 right-2 text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700'><i class='fa-solid fa-xmark'></i></button>
-            <iframe id='previewFrame' class='w-full h-full rounded' src=''></iframe>
-        </div>
-      </div>";
 ?>
 
 <script>
@@ -106,11 +147,6 @@ document.getElementById('saveAttendanceBtn').addEventListener('click', function(
     .then(response => {
         if(response.success) {
             alert('Cambios guardados correctamente.');
-            // Actualizar hora en la tabla
-            response.updated.forEach(u => {
-                const row = document.querySelector(`select[name='status[${u.attendance_id}]']`).closest('tr');
-                row.querySelector('td:last-child').textContent = u.attendance_time;
-            });
         } else {
             alert('Error: ' + response.error);
         }
@@ -121,15 +157,36 @@ document.getElementById('saveAttendanceBtn').addEventListener('click', function(
 document.querySelectorAll('.previewBtn').forEach(btn => {
     btn.addEventListener('click', () => {
         const file = btn.getAttribute('data-file');
-        document.getElementById('previewFrame').src = file;
-        document.getElementById('previewModal').classList.remove('hidden');
-        document.getElementById('previewModal').classList.add('flex');
+        const modal = document.getElementById('fileModal');
+        const modalContent = document.getElementById('modalContent');
+        modalContent.innerHTML = '';
+
+        const ext = file.split('.').pop().toLowerCase();
+        if(ext === 'pdf'){
+            const iframe = document.createElement('iframe');
+            iframe.src = file;
+            iframe.className = 'w-full h-full';
+            modalContent.appendChild(iframe);
+        } else if(['jpg','jpeg','png','gif','webp'].includes(ext)){
+            const img = document.createElement('img');
+            img.src = file;
+            img.className = 'max-w-full max-h-full object-contain';
+            modalContent.appendChild(img);
+        } else {
+            modalContent.innerHTML = "<p class='text-center text-red-600'>Archivo no visualizable</p>";
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     });
 });
 
-document.getElementById('closePreview').addEventListener('click', () => {
-    document.getElementById('previewModal').classList.add('hidden');
-    document.getElementById('previewModal').classList.remove('flex');
-    document.getElementById('previewFrame').src = '';
+// Cerrar modal
+document.getElementById('closeModal').addEventListener('click', () => {
+    const modal = document.getElementById('fileModal');
+    const modalContent = document.getElementById('modalContent');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    modalContent.innerHTML = '';
 });
 </script>

@@ -7,7 +7,7 @@ include 'includes/conn.php';
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <main class="pt-20 p-4 md:p-6">
-    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Asistencia de Alumnos</h1>
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Asistencia de Clase</h1>
 
     <div class="mb-6 flex flex-col md:flex-row flex-wrap items-start md:items-center gap-3 md:gap-4">
       <select id="selectCourse" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
@@ -21,13 +21,13 @@ include 'includes/conn.php';
       </select>
 
       <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-auto">
-       <option value="">Seleccionar Materia</option>
+        <option value="">Seleccionar Materia</option>
       </select>
 
       <input type="date" id="attendanceDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-auto" />
 
       <button id="generateReport" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center ml-0 md:ml-auto w-full md:w-auto justify-center" disabled>
-        <i class="fa-solid fa-file-lines mr-2"></i> Generar Informe
+        <i class="fa-solid fa-file-lines mr-2"></i> Registrar Asistencia
       </button>
     </div>
 
@@ -66,13 +66,10 @@ function loadAttendance() {
     .then(res => res.text())
     .then(html => {
       tableContainer.innerHTML = html;
-
-      // Si la respuesta NO contiene una tabla, deshabilitamos el botón.
-      const table = tableContainer.querySelector('table');
-      if (!table) {
+      const hasTable = tableContainer.querySelector('table');
+      if (!hasTable) {
         setGenerateReportDisabled(true);
       } else {
-        // Si hay tabla, habilitar el botón salvo que el texto indique que ya se tomó la asistencia
         if (tableContainer.textContent.includes("Ya se tomó la asistencia")) {
           setGenerateReportDisabled(true);
         } else {
@@ -80,10 +77,9 @@ function loadAttendance() {
         }
       }
 
-      // Manejar "marcar todos presentes" sin duplicar listeners
+      // Check-all para alumnos
       const checkAllPresent = document.getElementById('checkAllPresent');
       if (checkAllPresent) {
-        // reasignar el handler para evitar múltiples listeners al recargar varias veces
         checkAllPresent.onchange = function() {
           const presentChecks = tableContainer.querySelectorAll('.present-checkbox');
           presentChecks.forEach(chk => chk.checked = this.checked);
@@ -97,29 +93,36 @@ function loadAttendance() {
     });
 }
 
-// Eventos de cambio
-selectCourse.addEventListener('change', loadAttendance);
+selectCourse.addEventListener('change', () => {
+  const courseId = selectCourse.value;
+  selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
+  if (!courseId) return;
+
+  fetch(`api/get_subjects.php?course_id=${courseId}`)
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(subject => {
+        const opt = document.createElement('option');
+        opt.value = subject.subject_id;
+        opt.textContent = subject.name;
+        selectSubject.appendChild(opt);
+      });
+    })
+    .catch(err => console.error('Error cargando materias:', err));
+
+  loadAttendance();
+});
+
 selectSubject.addEventListener('change', loadAttendance);
 attendanceDateInput.addEventListener('change', loadAttendance);
 
-// Generar informe
 generateReportBtn.addEventListener('click', () => {
   if (generateReportBtn.disabled) return;
 
   const courseId = selectCourse.value;
   const subjectId = selectSubject.value;
   const attendanceDate = attendanceDateInput.value;
-
-  if (!courseId || !subjectId || !attendanceDate) {
-    alert('Seleccione curso, materia y fecha.');
-    return;
-  }
-
   const rows = document.querySelectorAll('#attendanceTableContainer tbody tr');
-  if (!rows.length) {
-    alert('No hay estudiantes para registrar.');
-    return;
-  }
 
   let formData = new FormData();
   formData.append('course_id', courseId);
@@ -127,63 +130,32 @@ generateReportBtn.addEventListener('click', () => {
   formData.append('attendance_date', attendanceDate);
 
   rows.forEach((row, index) => {
-    const studentId = row.dataset.studentId;
-    const presentInput = row.querySelector('input[name="Presente"]');
-    const status = presentInput && presentInput.checked ? 'Presente' : 'Ausente';
-    const justification = row.querySelector('input[name="justification"]')?.checked ? 1 : 0;
-    const fileInput = row.querySelector('input[name="justification_file"]');
-    const file = fileInput?.files[0] ?? null;
+    const type = row.dataset.type; // 'student' o 'teacher'
+    const id = row.dataset.id;
+    const present = row.querySelector('.present-checkbox')?.checked ? 'present' : 'absent';
+    const justification = row.querySelector('.justification-checkbox')?.checked ? 1 : 0;
+    const file = row.querySelector('input[name="justification_file"]')?.files[0] ?? null;
 
-    formData.append(`data[${index}][student_id]`, studentId);
-    formData.append(`data[${index}][status]`, status);
+    formData.append(`data[${index}][type]`, type);
+    formData.append(`data[${index}][id]`, id);
+    formData.append(`data[${index}][status]`, present);
     formData.append(`data[${index}][justification]`, justification);
-    if (file) {
-      // clave: data[0][justification_file], data[1][justification_file], ...
-      formData.append(`data[${index}][justification_file]`, file);
-    }
+    if (file) formData.append(`data[${index}][justification_file]`, file);
   });
 
-  fetch('api/generate_report.php', {
-    method: 'POST',
-    body: formData
-  })
-  .then(res => res.json())
-  .then(resp => {
-    if (resp.success) {
-      alert('Asistencia registrada correctamente.');
-      loadAttendance();
-    } else {
-      alert('Error al registrar asistencia: ' + resp.error);
-    }
-  })
-  .catch(err => {
-    console.error('Error al enviar informe:', err);
-    alert('Error al registrar asistencia.');
-  });
-});
-
-selectCourse.addEventListener('change', () => {
-  const courseId = selectCourse.value;
-
-  // Vaciar select de materias
-  selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
-
-  if (!courseId) return;
-
-  // Traer materias por curso
-  fetch(`api/get_subjects.php?course_id=${courseId}`)
+  fetch('api/generate_report.php', { method: 'POST', body: formData })
     .then(res => res.json())
-    .then(data => {
-      data.forEach(subject => {
-        const option = document.createElement('option');
-        option.value = subject.subject_id;
-        option.textContent = subject.name;
-        selectSubject.appendChild(option);
-      });
+    .then(resp => {
+      if (resp.success) {
+        alert('Asistencia registrada correctamente.');
+        loadAttendance();
+      } else {
+        alert('Error: ' + resp.error);
+      }
     })
-    .catch(err => console.error('Error cargando materias:', err));
-
-  // Cargar asistencia también
-  loadAttendance();
+    .catch(err => {
+      console.error('Error al registrar:', err);
+      alert('Error al registrar asistencia.');
+    });
 });
 </script>

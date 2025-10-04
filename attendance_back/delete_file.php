@@ -24,8 +24,8 @@ if(file_exists($full_path)){
     }
 }
 
-// Actualizar la DB
-$stmt = $conn->prepare("UPDATE attendance SET justification_file = NULL WHERE attendance_id = ?");
+// Actualizar la DB (ahora se puede aplicar a alumnos y profesores)
+$stmt = $conn->prepare("UPDATE student_attendance SET justification_file = NULL WHERE id = ?");
 if($stmt->execute([$attendance_id])){
     echo json_encode(['success'=>true]);
 } else {

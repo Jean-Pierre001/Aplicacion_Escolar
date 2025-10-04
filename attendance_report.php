@@ -6,9 +6,7 @@ include 'includes/conn.php';
 ?>
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
-  <br>
-  <br>
-  <br>
+  <br><br><br>
   <main class="pt-20 p-4 md:p-6">
     <h1 class="text-4xl font-bold text-gray-800 mb-6">Consulta de Reportes de Asistencia</h1>
 
@@ -60,159 +58,125 @@ include 'includes/conn.php';
 </div>
 
 <script>
-const selectCourse = document.getElementById('selectCourse');
-const selectSubject = document.getElementById('selectSubject');
-const selectDate = document.getElementById('selectDate');
-const loadReportBtn = document.getElementById('loadReport');
-const tableContainer = document.getElementById('reportTableContainer');
+document.addEventListener('DOMContentLoaded', function() {
+    const selectCourse = document.getElementById('selectCourse');
+    const selectSubject = document.getElementById('selectSubject');
+    const selectDate = document.getElementById('selectDate');
+    const loadReportBtn = document.getElementById('loadReport');
+    const tableContainer = document.getElementById('reportTableContainer');
+    const modal = document.getElementById('fileModal');
+    const modalContent = document.getElementById('modalContent');
+    const closeModal = document.getElementById('closeModal');
 
-// Cargar reporte
-function loadReport() {
-  const courseId = selectCourse.value;
-  const subjectId = selectSubject.value;
-  const date = selectDate.value;
+    // Cargar materias por curso
+    selectCourse.addEventListener('change', () => {
+        const courseId = selectCourse.value;
+        selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
+        if (!courseId) return;
 
-  if (!courseId || !subjectId || !date) {
-    alert('Seleccione curso, materia y fecha.');
-    return;
-  }
-
-  fetch(`api/get_report.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`)
-    .then(res => res.text())
-    .then(html => tableContainer.innerHTML = html);
-}
-loadReportBtn.addEventListener('click', loadReport);
-
-// Exportar PDF
-document.getElementById('exportPDF').addEventListener('click', () => {
-  const courseId = selectCourse.value;
-  const subjectId = selectSubject.value;
-  const date = selectDate.value;
-  if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
-  window.open(`attendance_back/export_pdf.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
-});
-
-// Exportar Excel
-document.getElementById('exportExcel').addEventListener('click', () => {
-  const courseId = selectCourse.value;
-  const subjectId = selectSubject.value;
-  const date = selectDate.value;
-  if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
-  window.open(`attendance_back/export_excel.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
-});
-
-// Guardar cambios
-tableContainer.addEventListener('click', function(e) {
-    if(e.target && e.target.id === 'saveAttendanceBtn') {
-        const form = document.getElementById('attendanceForm');
-        if(!form) { alert('No hay formulario cargado'); return; }
-
-        const formData = new FormData(form);
-
-        fetch('attendance_back/update_attendance_bulk.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(response => {
-            if(response.success) {
-                alert('Cambios guardados correctamente.');
-                response.updated.forEach(u => {
-                    const row = document.querySelector(`select[name='status[${u.attendance_id}]']`).closest('tr');
-                    row.querySelector('td:last-child').textContent = u.updated_at;
+        fetch(`api/get_subjects.php?course_id=${courseId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.subject_id;
+                    option.textContent = subject.name;
+                    selectSubject.appendChild(option);
                 });
-            } else { alert('Error: ' + response.error); }
+            });
+    });
+
+    // Cargar reporte
+    function loadReport() {
+        const courseId = selectCourse.value;
+        const subjectId = selectSubject.value;
+        const date = selectDate.value;
+
+        if (!courseId || !subjectId || !date) {
+            alert('Seleccione curso, materia y fecha.');
+            return;
+        }
+
+        fetch(`api/get_report.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`)
+            .then(res => res.text())
+            .then(html => tableContainer.innerHTML = html)
+            .then(() => attachSaveHandler()); // Adjuntar evento después de renderizar tabla
+    }
+    loadReportBtn.addEventListener('click', loadReport);
+
+    // Exportar PDF
+    document.getElementById('exportPDF').addEventListener('click', () => {
+        const courseId = selectCourse.value;
+        const subjectId = selectSubject.value;
+        const date = selectDate.value;
+        if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
+        window.open(`attendance_back/export_pdf.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
+    });
+
+    // Exportar Excel
+    document.getElementById('exportExcel').addEventListener('click', () => {
+        const courseId = selectCourse.value;
+        const subjectId = selectSubject.value;
+        const date = selectDate.value;
+        if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
+        window.open(`attendance_back/export_excel.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
+    });
+
+    // Vista previa archivos
+    tableContainer.addEventListener('click', function(e) {
+        if(e.target && e.target.classList.contains('previewBtn')){
+            const file = e.target.getAttribute('data-file');
+            const ext = file.split('.').pop().toLowerCase();
+            modalContent.innerHTML = '';
+
+            if(ext === 'pdf'){
+                const iframe = document.createElement('iframe');
+                iframe.src = file;
+                iframe.className = 'w-full h-full';
+                modalContent.appendChild(iframe);
+            } else if(['jpg','jpeg','png','gif','webp'].includes(ext)){
+                const img = document.createElement('img');
+                img.src = file;
+                img.className = 'max-w-full max-h-full object-contain';
+                modalContent.appendChild(img);
+            } else {
+                modalContent.innerHTML = "<p class='text-center text-red-600'>Archivo no visualizable</p>";
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modalContent.innerHTML = '';
+    });
+
+    // Adjuntar evento al botón "Guardar cambios" de la tabla
+    function attachSaveHandler() {
+        const saveBtn = document.getElementById('saveAttendanceBtn');
+        if(!saveBtn) return;
+
+        saveBtn.addEventListener('click', () => {
+            const form = document.getElementById('attendanceForm');
+            const formData = new FormData(form);
+
+            fetch('attendance_back/update_attendance_bulk.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(response => {
+                if(response.success) {
+                    alert('Cambios guardados correctamente.');
+                    loadReport(); // Recargar tabla para reflejar cambios
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            }).catch(err => alert('Error en la solicitud: '+err));
         });
     }
 });
-
-// Vista previa archivos
-const modal = document.getElementById('fileModal');
-const modalContent = document.getElementById('modalContent');
-const closeModal = document.getElementById('closeModal');
-
-tableContainer.addEventListener('click', function(e) {
-    if(e.target && e.target.classList.contains('previewBtn')){
-        const file = e.target.getAttribute('data-file');
-        const ext = file.split('.').pop().toLowerCase();
-        modalContent.innerHTML = '';
-
-        if(ext === 'pdf'){
-            const iframe = document.createElement('iframe');
-            iframe.src = file;
-            iframe.className = 'w-full h-full';
-            modalContent.appendChild(iframe);
-        } else if(['jpg','jpeg','png','gif','webp'].includes(ext)){
-            const img = document.createElement('img');
-            img.src = file;
-            img.className = 'max-w-full max-h-full object-contain';
-            modalContent.appendChild(img);
-        } else {
-            modalContent.innerHTML = "<p class='text-center text-red-600'>Archivo no visualizable</p>";
-        }
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-});
-
-closeModal.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    modalContent.innerHTML = '';
-});
-
-selectCourse.addEventListener('change', () => {
-  const courseId = selectCourse.value;
-
-  // Vaciar select de materias
-  selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
-
-  if (!courseId) return;
-
-  // Traer materias por curso
-  fetch(`api/get_subjects.php?course_id=${courseId}`)
-    .then(res => res.json())
-    .then(data => {
-      data.forEach(subject => {
-        const option = document.createElement('option');
-        option.value = subject.subject_id;
-        option.textContent = subject.name;
-        selectSubject.appendChild(option);
-      });
-    })
-    .catch(err => console.error('Error cargando materias:', err));
-
-  // Cargar asistencia también
-  loadAttendance();
-});
-
-  tableContainer.addEventListener('click', function(e) {
-      if(e.target && e.target.classList.contains('deleteFileBtn')){
-          const attendance_id = e.target.getAttribute('data-id');
-          const file_path = e.target.getAttribute('data-file');
-
-          if(!confirm('¿Desea eliminar este archivo?')) return;
-
-          const formData = new FormData();
-          formData.append('attendance_id', attendance_id);
-          formData.append('justification_file', file_path); // nombre coherente con DB
-
-          fetch('attendance_back/delete_file.php', {
-              method: 'POST',
-              body: formData
-          })
-          .then(res => res.json())
-          .then(resp => {
-              if(resp.success){
-                  alert('Archivo eliminado correctamente.');
-                  // Opcional: actualizar la fila sin recargar
-                  const row = e.target.closest('tr');
-                  row.querySelector('td:nth-child(4)').innerHTML = "<input type='file' name='file["+attendance_id+"]' />";
-              } else {
-                  alert('Error: ' + resp.error);
-              }
-          });
-      }
-  });
 </script>

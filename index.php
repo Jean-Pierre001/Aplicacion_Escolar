@@ -5,34 +5,33 @@ include 'includes/sidebar.php';
 include 'includes/navbar.php'; 
 include 'includes/conn.php'; // conexión PDO
 
-// Forzar zona horaria local (Salta, Argentina)
+// Zona horaria local
 date_default_timezone_set('America/Argentina/Salta');
 
-// Fecha actual
 $today = (new DateTime())->format('Y-m-d');
 $displayDate = (new DateTime())->format('d/m/Y');
+$weekday = strtolower((new DateTime())->format('l')); // "monday", "tuesday", etc.
 
-// Día de la semana en inglés (porque schedules.weekday está en enum inglés)
-$weekday = strtolower((new DateTime())->format('l')); // ej: "monday"
-
-// Consulta: materias + cursos que TIENEN clase hoy y no tienen asistencia registrada
+// Consulta: cursos y materias con clase hoy y que NO tienen asistencia registrada
 $sql = "
-  SELECT 
-    c.course_id, c.name AS course_name, 
-    s.subject_id, s.name AS subject_name
-  FROM courses c
-  JOIN schedules sch 
-    ON sch.course_id = c.course_id
-    AND sch.weekday = :weekday
-  JOIN subjects s 
-    ON s.subject_id = sch.subject_id
-  LEFT JOIN attendance a 
-    ON a.course_id = c.course_id 
-    AND a.subject_id = s.subject_id
-    AND a.attendance_date = :today
-    AND a.status = 'present'
-  WHERE a.attendance_id IS NULL
-  GROUP BY c.course_id, s.subject_id
+    SELECT 
+        c.course_id, c.name AS course_name,
+        s.subject_id, s.name AS subject_name,
+        t.teacher_id, t.first_name AS teacher_fname, t.last_name AS teacher_lname
+    FROM courses c
+    JOIN schedules sch 
+        ON sch.course_id = c.course_id
+        AND sch.weekday = :weekday
+    JOIN subjects s
+        ON s.subject_id = sch.subject_id
+    JOIN teachers t
+        ON t.teacher_id = sch.teacher_id
+    LEFT JOIN student_attendance sa
+        ON sa.schedule_id = sch.schedule_id
+        AND sa.attendance_date = :today
+    WHERE sa.id IS NULL
+    GROUP BY c.course_id, s.subject_id
+    ORDER BY c.name, s.name
 ";
 
 $stmt = $conn->prepare($sql);
@@ -41,7 +40,6 @@ $stmt->bindValue(':weekday', $weekday);
 $stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!-- Contenedor principal -->
 <div class="flex-1 md:ml-64 transition-all duration-300">
@@ -63,10 +61,10 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 Falta de asistencia registrada
               </p>
               <p class="text-sm text-gray-700 mt-1">
-                Hoy <strong><?php echo $displayDate; ?></strong> no se marcó asistencia 
-                <span class="font-semibold">'present'</span> en 
-                <strong><?php echo htmlspecialchars($row['course_name']); ?></strong> — 
-                <strong><?php echo htmlspecialchars($row['subject_name']); ?></strong>.
+                Hoy <strong><?php echo $displayDate; ?></strong> no se registró asistencia 
+                para <strong><?php echo htmlspecialchars($row['course_name']); ?></strong> — 
+                <strong><?php echo htmlspecialchars($row['subject_name']); ?></strong> 
+                a cargo de <strong><?php echo htmlspecialchars($row['teacher_fname'].' '.$row['teacher_lname']); ?></strong>.
               </p>
             </div>
           </div>
