@@ -59,6 +59,11 @@
           <i class="fas fa-file-alt mr-3"></i> Consulta Estudiante
         </a>
       </li>
+      <li>
+        <a href="teachers_attendance.php" class="flex items-center p-2 rounded hover:bg-blue-700">
+          <i class="fas fa-file-alt mr-3"></i> Consulta Docentes
+        </a>
+      </li>
     </ul>
   </nav>
 </aside>

@@ -25,6 +25,7 @@ include 'includes/conn.php'; // Conexión PDO
 
     <?php
     try {
+        // Consulta excluyendo sábado
         $sql = "SELECT sch.schedule_id, 
                        c.course_id, c.name AS course_name, 
                        sub.subject_id, sub.name AS subject_name, 
@@ -34,6 +35,7 @@ include 'includes/conn.php'; // Conexión PDO
                 LEFT JOIN courses c ON sch.course_id = c.course_id
                 LEFT JOIN subjects sub ON sch.subject_id = sub.subject_id
                 LEFT JOIN teachers t ON sch.teacher_id = t.teacher_id
+                WHERE sch.weekday != 'Saturday'
                 ORDER BY c.course_id, sch.weekday, sch.start_time";
 
         $stmt = $conn->query($sql);
@@ -45,6 +47,15 @@ include 'includes/conn.php'; // Conexión PDO
             foreach ($schedules as $sch) {
                 $grouped[$sch['course_name']][] = $sch;
             }
+
+            // Array para traducir días
+            $weekdays_es = [
+                'monday'    => 'Lunes',
+                'tuesday'   => 'Martes',
+                'wednesday' => 'Miércoles',
+                'thursday'  => 'Jueves',
+                'friday'    => 'Viernes'
+            ];
 
             foreach ($grouped as $course => $courseSchedules) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
@@ -73,10 +84,12 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "<tbody>";
                 foreach ($courseSchedules as $i => $sch) {
                     $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                    $weekday_es = $weekdays_es[strtolower($sch['weekday'])] ?? ucfirst($sch['weekday']);
+
                     echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
                     echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
                     echo "<td class='px-4 py-2 border'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$sch['weekday']}</td>";
+                    echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
                     echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
                     echo "<td class='px-4 py-2 border'>{$sch['end_time']}</td>";
                     echo "<td class='px-4 py-2 border flex flex-wrap gap-2'>
