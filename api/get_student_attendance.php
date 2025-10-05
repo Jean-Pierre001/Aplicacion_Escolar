@@ -12,101 +12,104 @@ if (!$student_id) {
     exit;
 }
 
-// Construir filtros dinámicos
-$filters = "sa.student_id = ?";
-$params = [$student_id];
+try {
+    $filters = "sa.student_id = ?";
+    $params = [$student_id];
 
-if ($subject_id) {
-    $filters .= " AND sub.subject_id = ?";
-    $params[] = $subject_id;
-}
+    if ($subject_id) {
+        $filters .= " AND sub.subject_id = ?";
+        $params[] = $subject_id;
+    }
+    if ($from) {
+        $filters .= " AND sa.attendance_date >= ?";
+        $params[] = $from;
+    }
+    if ($to) {
+        $filters .= " AND sa.attendance_date <= ?";
+        $params[] = $to;
+    }
+    if ($just == 1) {
+        $filters .= " AND sa.justification = 1";
+    }
 
-if ($from) {
-    $filters .= " AND sa.attendance_date >= ?";
-    $params[] = $from;
-}
+    $stmt = $conn->prepare("
+        SELECT sa.id AS attendance_id, sa.attendance_date, sa.status, sa.justification, sa.justification_file,
+               c.name AS course_name, sub.name AS subject_name,
+               t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
+               ta.status AS teacher_status
+        FROM student_attendance sa
+        INNER JOIN schedules sc ON sa.schedule_id = sc.schedule_id
+        INNER JOIN courses c ON sc.course_id = c.course_id
+        INNER JOIN subjects sub ON sc.subject_id = sub.subject_id
+        INNER JOIN teachers t ON sc.teacher_id = t.teacher_id
+        LEFT JOIN teacher_attendance ta 
+            ON ta.schedule_id = sc.schedule_id 
+            AND ta.attendance_date = sa.attendance_date 
+            AND ta.teacher_id = t.teacher_id
+        WHERE $filters
+        ORDER BY sa.attendance_date DESC
+    ");
+    $stmt->execute($params);
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ($to) {
-    $filters .= " AND sa.attendance_date <= ?";
-    $params[] = $to;
-}
+    if (!$records) {
+        echo '<p class="p-4 text-gray-500">Este alumno no tiene registros de asistencia con los filtros aplicados.</p>';
+        exit;
+    }
 
-if ($just == 1) {
-    $filters .= " AND sa.justification = 1";
-}
-
-// Consulta
-$stmt = $conn->prepare("
-    SELECT sa.id AS attendance_id, sa.attendance_date, sa.status, sa.justification, sa.justification_file,
-           c.name AS course_name, sub.name AS subject_name,
-           t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
-           ta.status AS teacher_status
-    FROM student_attendance sa
-    INNER JOIN schedules sc ON sa.schedule_id = sc.schedule_id
-    INNER JOIN courses c ON sc.course_id = c.course_id
-    INNER JOIN subjects sub ON sc.subject_id = sub.subject_id
-    INNER JOIN teachers t ON sc.teacher_id = t.teacher_id
-    LEFT JOIN teacher_attendance ta ON ta.schedule_id = sc.schedule_id AND ta.attendance_date = sa.attendance_date AND ta.teacher_id = t.teacher_id
-    WHERE $filters
-    ORDER BY sa.attendance_date DESC
-");
-$stmt->execute($params);
-$records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-if (!$records) {
-    echo '<p class="p-4 text-gray-500">Este alumno no tiene registros de asistencia con los filtros aplicados.</p>';
-    exit;
-}
-
-// Variables para resumen
-$total_classes = 0;
-$total_attended = 0;
-foreach ($records as $r) {
-    if ($r['teacher_status'] === 'present') {
-        $total_classes++;
-        if ($r['status'] === 'present' || $r['justification']) {
-            $total_attended++;
+    // Resumen
+    $total_classes = 0;
+    $total_attended = 0;
+    foreach ($records as $r) {
+        if ($r['teacher_status'] === 'present') {
+            $total_classes++;
+            if ($r['status'] === 'present' || $r['justification']) {
+                $total_attended++;
+            }
         }
     }
+
+    echo "<div class='mb-4 p-4 bg-gray-100 rounded-lg shadow'>
+            <p class='font-semibold'>Resumen de asistencia:</p>
+            <p>Clases con profesor presente: {$total_classes}</p>
+            <p>Asistencias del alumno (incluye inasistencias justificadas): {$total_attended}</p>
+            <p>Porcentaje de asistencia: " . ($total_classes > 0 ? round(($total_attended / $total_classes) * 100, 2) : 0) . "%</p>
+          </div>";
+
+    echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
+            <table class='min-w-full border-collapse'>
+            <thead class='text-white bg-gray-800'>
+            <tr>
+              <th class='px-6 py-3 border-r border-gray-300 text-left'>Fecha</th>
+              <th class='px-6 py-3 border-r border-gray-300 text-left'>Curso</th>
+              <th class='px-6 py-3 border-r border-gray-300 text-left'>Materia</th>
+              <th class='px-6 py-3 border-r border-gray-300 text-center'>Estado</th>
+              <th class='px-6 py-3 border-r border-gray-300 text-center'>Justificación</th>
+              <th class='px-6 py-3 text-center'>Archivo</th>
+            </tr>
+            </thead>
+            <tbody>";
+
+    foreach ($records as $i => $r) {
+        $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+        $statusColor = $r['status'] === 'present' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold';
+        $justText = $r['justification'] ? 'Sí' : 'No';
+        $fileLink = $r['justification_file']
+            ? "<a href='{$r['justification_file']}' target='_blank' class='text-blue-600 underline'>Ver</a>"
+            : "-";
+
+        echo "<tr class='hover:bg-gray-100 {$rowClass}'>
+                <td class='px-6 py-4 border-r border-gray-300'>" . date('d/m/Y', strtotime($r['attendance_date'])) . "</td>
+                <td class='px-6 py-4 border-r border-gray-300'>{$r['course_name']}</td>
+                <td class='px-6 py-4 border-r border-gray-300'>{$r['subject_name']}</td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center {$statusColor}'>" . ($r['status'] === 'present' ? 'Presente' : 'Ausente') . "</td>
+                <td class='px-6 py-4 border-r border-gray-300 text-center'>{$justText}</td>
+                <td class='px-6 py-4 text-center'>{$fileLink}</td>
+              </tr>";
+    }
+
+    echo "</tbody></table></div>";
+} catch (PDOException $e) {
+    echo '<p class="p-4 text-red-500">Error al obtener los datos de asistencia.</p>';
 }
-
-// Resumen arriba
-echo "<div class='mb-4 p-4 bg-gray-100 rounded-lg shadow'>
-        <p class='font-semibold'>Resumen de asistencia:</p>
-        <p>Clases con profesor presente: {$total_classes}</p>
-        <p>Asistencias del alumno (incluye inasistencias justificadas): {$total_attended}</p>
-        <p>Porcentaje de asistencia: ".($total_classes > 0 ? round(($total_attended / $total_classes) * 100, 2) : 0)."%</p>
-      </div>";
-
-// Tabla
-echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
-        <table class='min-w-full border-collapse'>
-        <thead class='text-white bg-gray-800'>
-        <tr>
-          <th class='px-6 py-3 border-r border-gray-300 text-left'>Fecha</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-left'>Curso</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-left'>Materia</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-center'>Estado</th>
-          <th class='px-6 py-3 border-r border-gray-300 text-center'>Justificación</th>
-          <th class='px-6 py-3 text-center'>Archivo</th>
-        </tr>
-        </thead>
-        <tbody>";
-
-foreach ($records as $i => $r) {
-    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-    $statusColor = $r['status'] === 'present' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold';
-    $justText = $r['justification'] ? 'Sí' : 'No';
-    $fileLink = $r['justification_file'] ? "<a href='{$r['justification_file']}' target='_blank' class='text-blue-600 underline'>Ver</a>" : "-";
-
-    echo "<tr class='hover:bg-gray-100 {$rowClass}'>
-            <td class='px-6 py-4 border-r border-gray-300'>".date('d/m/Y', strtotime($r['attendance_date']))."</td>
-            <td class='px-6 py-4 border-r border-gray-300'>{$r['course_name']}</td>
-            <td class='px-6 py-4 border-r border-gray-300'>{$r['subject_name']}</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center {$statusColor}'>".($r['status'] === 'present' ? 'Presente' : 'Ausente')."</td>
-            <td class='px-6 py-4 border-r border-gray-300 text-center'>{$justText}</td>
-            <td class='px-6 py-4 text-center'>{$fileLink}</td>
-          </tr>";
-}
-
-echo "</tbody></table></div>";
+?>
