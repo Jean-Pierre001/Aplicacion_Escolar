@@ -7,6 +7,11 @@ include 'includes/conn.php';
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <main class="pt-20 p-4 md:p-6">
+
+    <br>
+    <br>
+    <br>
+
     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Asistencia de Clase</h1>
 
     <div class="mb-6 flex flex-col md:flex-row flex-wrap items-start md:items-center gap-3 md:gap-4">

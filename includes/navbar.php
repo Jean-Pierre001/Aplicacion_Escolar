@@ -1,5 +1,5 @@
 <!-- navbar.php -->
-<header class="fixed top-0 left-0 md:left-64 right-0 bg-white shadow flex justify-between items-center p-5 z-30 transition-all duration-300">
+<header class="fixed top-0 left-0 md:left-64 right-0 bg-white shadow flex justify-between items-center p-6 z-30 transition-all duration-300">
   <!-- Botón hamburguesa en móvil -->
   <button id="menu-toggle" class="md:hidden text-gray-700">
     <i class="fas fa-bars text-xl"></i>
@@ -7,7 +7,7 @@
 
   <div class="flex items-center space-x-4">
     <div class="flex items-center space-x-2">
-      <span class="font-medium">Panel de asistencia</span>
+      <span class="font-medium">Sistema Integral De Asistencia</span>
     </div>
   </div>
 </header>

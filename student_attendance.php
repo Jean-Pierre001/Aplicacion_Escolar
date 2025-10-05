@@ -12,6 +12,8 @@ include 'includes/conn.php';
     <br>
     <br>
 
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Consulta De Estudiante</h1>
+
     <div class="mb-6 flex flex-col md:flex-row flex-wrap items-start md:items-center gap-3 md:gap-4">
 
       <!-- Seleccionar curso -->
