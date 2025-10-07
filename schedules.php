@@ -21,15 +21,16 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterSubject" placeholder="Filtrar por Materia" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterTeacher" placeholder="Filtrar por Docente" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterWeekday" placeholder="Filtrar por Día" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterShift" placeholder="Filtrar por Turno" class="px-3 py-2 border rounded w-48">
     </div>
 
     <?php
     try {
-        // Consulta incluyendo grupo
+        // Consulta incluyendo turno
         $sql = "SELECT sch.schedule_id, 
                        c.course_id, c.name AS course_name, 
                        g.group_id, g.name AS group_name,
-                       sub.subject_id, sub.name AS subject_name, 
+                       sub.subject_id, sub.name AS subject_name, sub.turno AS subject_shift,
                        t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
                        sch.weekday, sch.start_time, sch.end_time
                 FROM schedules sch
@@ -81,6 +82,7 @@ include 'includes/conn.php'; // Conexión PDO
                     echo "<thead class='bg-gray-100'>
                             <tr>
                               <th class='px-4 py-2 border'>Materia</th>
+                              <th class='px-4 py-2 border'>Turno</th>
                               <th class='px-4 py-2 border'>Docente</th>
                               <th class='px-4 py-2 border'>Día</th>
                               <th class='px-4 py-2 border'>Hora Inicio</th>
@@ -95,6 +97,7 @@ include 'includes/conn.php'; // Conexión PDO
 
                         echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
                         echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sch['subject_shift']}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
                         echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
@@ -137,22 +140,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterSubject = document.getElementById('filterSubject');
     const filterTeacher = document.getElementById('filterTeacher');
     const filterWeekday = document.getElementById('filterWeekday');
+    const filterShift = document.getElementById('filterShift');
     const tables = document.querySelectorAll('#schedulesTable');
 
     function filterRows() {
         const subjectVal = filterSubject.value.toLowerCase();
         const teacherVal = filterTeacher.value.toLowerCase();
         const weekdayVal = filterWeekday.value.toLowerCase();
+        const shiftVal = filterShift.value.toLowerCase();
 
         tables.forEach(table => {
             const rows = table.querySelectorAll('tbody tr');
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 const subject = cells[0].textContent.toLowerCase();
-                const teacher = cells[1].textContent.toLowerCase();
-                const weekday = cells[2].textContent.toLowerCase();
+                const shift = cells[1].textContent.toLowerCase();
+                const teacher = cells[2].textContent.toLowerCase();
+                const weekday = cells[3].textContent.toLowerCase();
 
-                if (subject.includes(subjectVal) && teacher.includes(teacherVal) && weekday.includes(weekdayVal)) {
+                if (
+                    subject.includes(subjectVal) &&
+                    teacher.includes(teacherVal) &&
+                    weekday.includes(weekdayVal) &&
+                    shift.includes(shiftVal)
+                ) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -164,5 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
     filterSubject.addEventListener('input', filterRows);
     filterTeacher.addEventListener('input', filterRows);
     filterWeekday.addEventListener('input', filterRows);
+    filterShift.addEventListener('input', filterRows);
 });
 </script>
