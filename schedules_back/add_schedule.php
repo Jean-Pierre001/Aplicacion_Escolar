@@ -8,10 +8,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $weekday = $_POST['weekday'] ?? null;
     $start_time = $_POST['start_time'] ?? null;
     $end_time = $_POST['end_time'] ?? null;
+    $group_id = $_POST['group_id'] ?? null;
 
-    if ($course_id && $subject_id && $teacher_id && $weekday && $start_time && $end_time) {
-        $sql = "INSERT INTO schedules (course_id, subject_id, teacher_id, weekday, start_time, end_time)
-                VALUES (:course_id, :subject_id, :teacher_id, :weekday, :start_time, :end_time)";
+    if ($course_id && $subject_id && $teacher_id && $weekday && $start_time && $end_time && $group_id) {
+        $sql = "INSERT INTO schedules (course_id, subject_id, teacher_id, weekday, start_time, end_time, group_id)
+                VALUES (:course_id, :subject_id, :teacher_id, :weekday, :start_time, :end_time, :group_id)";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':course_id' => $course_id,
@@ -19,7 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':teacher_id' => $teacher_id,
             ':weekday' => $weekday,
             ':start_time' => $start_time,
-            ':end_time' => $end_time
+            ':end_time' => $end_time,
+            ':group_id' => $group_id
         ]);
     }
 }

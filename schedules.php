@@ -25,27 +25,31 @@ include 'includes/conn.php'; // Conexión PDO
 
     <?php
     try {
-        // Consulta excluyendo sábado
+        // Consulta incluyendo grupo
         $sql = "SELECT sch.schedule_id, 
                        c.course_id, c.name AS course_name, 
+                       g.group_id, g.name AS group_name,
                        sub.subject_id, sub.name AS subject_name, 
                        t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
                        sch.weekday, sch.start_time, sch.end_time
                 FROM schedules sch
                 LEFT JOIN courses c ON sch.course_id = c.course_id
+                LEFT JOIN groups g ON sch.group_id = g.group_id
                 LEFT JOIN subjects sub ON sch.subject_id = sub.subject_id
                 LEFT JOIN teachers t ON sch.teacher_id = t.teacher_id
                 WHERE sch.weekday != 'Saturday'
-                ORDER BY c.course_id, sch.weekday, sch.start_time";
+                ORDER BY c.course_id, g.group_id, sch.weekday, sch.start_time";
 
         $stmt = $conn->query($sql);
         $schedules = $stmt->fetchAll();
 
         if ($schedules) {
-            // Agrupar por curso
+            // Agrupar por curso y grupo
             $grouped = [];
             foreach ($schedules as $sch) {
-                $grouped[$sch['course_name']][] = $sch;
+                $course = $sch['course_name'];
+                $group = $sch['group_name'] ?? 'general';
+                $grouped[$course][$group][] = $sch;
             }
 
             // Array para traducir días
@@ -57,56 +61,62 @@ include 'includes/conn.php'; // Conexión PDO
                 'friday'    => 'Viernes'
             ];
 
-            foreach ($grouped as $course => $courseSchedules) {
+            foreach ($grouped as $course => $groups) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
-
-                // Título del curso con botón Exportar Excel
                 echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
                 echo "<span>{$course}</span>";
-                echo "<a href='export_schedule.php?course_id={$courseSchedules[0]['course_id']}' 
+                echo "<a href='export_schedule.php?course_id={$groups[array_key_first($groups)][0]['course_id']}' 
                         class='bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center'>
                         <i class='fa-solid fa-file-excel mr-1'></i> Exportar Excel
                       </a>";
                 echo "</div>";
 
-                echo "<div class='overflow-x-auto'>";
-                echo "<table class='min-w-full border-collapse' id='schedulesTable'>";
-                echo "<thead class='bg-gray-100'>
-                        <tr>
-                          <th class='px-4 py-2 border'>Materia</th>
-                          <th class='px-4 py-2 border'>Docente</th>
-                          <th class='px-4 py-2 border'>Día</th>
-                          <th class='px-4 py-2 border'>Hora Inicio</th>
-                          <th class='px-4 py-2 border'>Hora Fin</th>
-                          <th class='px-4 py-2 border'>Acciones</th>
-                        </tr>
-                      </thead>";
-                echo "<tbody>";
-                foreach ($courseSchedules as $i => $sch) {
-                    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-                    $weekday_es = $weekdays_es[strtolower($sch['weekday'])] ?? ucfirst($sch['weekday']);
+                foreach ($groups as $group_name => $courseSchedules) {
+                    if ($group_name !== 'general') {
+                        echo "<div class='bg-gray-200 px-4 py-1 font-semibold text-gray-700'>Grupo: {$group_name}</div>";
+                    }
 
-                    echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                    echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
-                    echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$sch['end_time']}</td>";
-                    echo "<td class='px-4 py-2 border flex flex-wrap gap-2'>
-                            <a href='javascript:void(0)' 
-                               onclick='openEditModalSchedule(".json_encode($sch).")' 
-                               class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
-                               <i class='fa-solid fa-pen mr-1'></i>Editar
-                            </a>
-                            <a href='schedules_back/delete_schedule.php?id={$sch['schedule_id']}' 
-                               class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24' 
-                               onclick=\"return confirm('¿Estás seguro de eliminar este horario?')\">
-                               <i class='fa-solid fa-trash mr-1'></i>Eliminar
-                            </a>
-                          </td>";
-                    echo "</tr>";
+                    echo "<div class='overflow-x-auto'>";
+                    echo "<table class='min-w-full border-collapse' id='schedulesTable'>";
+                    echo "<thead class='bg-gray-100'>
+                            <tr>
+                              <th class='px-4 py-2 border'>Materia</th>
+                              <th class='px-4 py-2 border'>Docente</th>
+                              <th class='px-4 py-2 border'>Día</th>
+                              <th class='px-4 py-2 border'>Hora Inicio</th>
+                              <th class='px-4 py-2 border'>Hora Fin</th>
+                              <th class='px-4 py-2 border'>Acciones</th>
+                            </tr>
+                          </thead>";
+                    echo "<tbody>";
+                    foreach ($courseSchedules as $i => $sch) {
+                        $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                        $weekday_es = $weekdays_es[strtolower($sch['weekday'])] ?? ucfirst($sch['weekday']);
+
+                        echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
+                        echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sch['end_time']}</td>";
+                        echo "<td class='px-4 py-2 border flex flex-wrap gap-2'>
+                                <a href='javascript:void(0)' 
+                                   onclick='openEditModalSchedule(".json_encode($sch).")' 
+                                   class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
+                                   <i class='fa-solid fa-pen mr-1'></i>Editar
+                                </a>
+                                <a href='schedules_back/delete_schedule.php?id={$sch['schedule_id']}' 
+                                   class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24' 
+                                   onclick=\"return confirm('¿Estás seguro de eliminar este horario?')\">
+                                   <i class='fa-solid fa-trash mr-1'></i>Eliminar
+                                </a>
+                              </td>";
+                        echo "</tr>";
+                    }
+                    echo "</tbody></table></div>";
                 }
-                echo "</tbody></table></div></div>";
+
+                echo "</div>"; // cierre div curso
             }
 
         } else {
@@ -122,7 +132,6 @@ include 'includes/conn.php'; // Conexión PDO
 
 <?php include 'includes/modals/modals_schedules.php'; ?>
 
-<!-- Script de filtros dinámicos -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filterSubject = document.getElementById('filterSubject');

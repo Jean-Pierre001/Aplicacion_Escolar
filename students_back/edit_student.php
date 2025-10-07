@@ -7,9 +7,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $last_name  = trim($_POST['last_name']);
     $DNI        = !empty($_POST['DNI']) ? $_POST['DNI'] : null;
     $course_id  = $_POST['course_id'];
+    $group_id   = !empty($_POST['group_id']) ? $_POST['group_id'] : null; // Nuevo campo
 
     try {
-        $sql = "UPDATE students SET first_name = :first_name, last_name = :last_name, DNI = :DNI, course_id = :course_id 
+        $sql = "UPDATE students 
+                SET first_name = :first_name, 
+                    last_name  = :last_name, 
+                    DNI        = :DNI, 
+                    course_id  = :course_id, 
+                    group_id   = :group_id
                 WHERE student_id = :student_id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -17,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':last_name'  => $last_name,
             ':DNI'        => $DNI,
             ':course_id'  => $course_id,
+            ':group_id'   => $group_id,
             ':student_id' => $student_id
         ]);
 
