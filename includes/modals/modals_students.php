@@ -1,3 +1,8 @@
+<?php
+// Asumiendo que $conn ya está incluido en la página principal
+$courses = $conn->query("SELECT course_id, name FROM courses")->fetchAll();
+?>
+
 <!-- Modal Agregar Estudiante -->
 <div id="addStudentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
@@ -17,14 +22,19 @@
       </div>
       <div>
         <label class="block mb-1 font-medium">Curso</label>
-        <select name="course_id" class="w-full border px-3 py-2 rounded" required>
+        <select name="course_id" class="w-full border px-3 py-2 rounded" required onchange="loadGroups(this.value, 'add_group_id')">
           <option value="">Seleccione un curso</option>
           <?php
-          $courses = $conn->query("SELECT course_id, name FROM courses")->fetchAll();
           foreach($courses as $course){
               echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
           }
           ?>
+        </select>
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Grupo (Opcional)</label>
+        <select name="group_id" id="add_group_id" class="w-full border px-3 py-2 rounded">
+          <option value="">Seleccione un grupo</option>
         </select>
       </div>
       <div class="flex justify-end space-x-2 mt-4">
@@ -58,13 +68,19 @@
       </div>
       <div>
         <label class="block mb-1 font-medium">Curso</label>
-        <select name="course_id" id="edit_course_id" class="w-full border px-3 py-2 rounded" required>
+        <select name="course_id" id="edit_course_id" class="w-full border px-3 py-2 rounded" required onchange="loadGroups(this.value, 'edit_group_id')">
           <option value="">Seleccione un curso</option>
           <?php
           foreach($courses as $course){
               echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
           }
           ?>
+        </select>
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Grupo (Opcional)</label>
+        <select name="group_id" id="edit_group_id" class="w-full border px-3 py-2 rounded">
+          <option value="">Seleccione un grupo</option>
         </select>
       </div>
       <div class="flex justify-end space-x-2 mt-4">
@@ -78,6 +94,30 @@
   </div>
 </div>
 
+<!-- Modal Mover Estudiantes -->
+<div id="moveStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Mover Estudiantes</h2>
+    <form id="moveStudentsForm" action="students_back/move_students.php" method="POST">
+      <input type="hidden" name="from_course_id" id="from_course_id">
+
+      <label for="to_course_id" class="block mb-2 font-medium">Seleccionar Curso Destino</label>
+      <select name="to_course_id" id="to_course_id" class="w-full border rounded px-3 py-2 mb-4">
+        <?php
+        foreach ($courses as $c) {
+            echo "<option value='{$c['course_id']}'>{$c['name']}</option>";
+        }
+        ?>
+      </select>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeMoveModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-700">Mover</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   // Abrir modal
   function openModal(modalId){
@@ -87,6 +127,15 @@
   // Cerrar modal
   function closeModal(modalId){
     document.getElementById(modalId).classList.add('hidden');
+  }
+
+  function openModalMoveStudents(fromCourseId) {
+    document.getElementById('from_course_id').value = fromCourseId;
+    document.getElementById('moveStudentsModal').classList.remove('hidden');
+  }
+
+  function closeMoveModal() {
+    document.getElementById('moveStudentsModal').classList.add('hidden');
   }
 
   // Abrir modal Editar con datos
@@ -105,43 +154,35 @@
         }
     }
 
+    // Cargar grupos del curso seleccionado y marcar el grupo actual
+    loadGroups(student.course_id, 'edit_group_id', student.group_id);
+
     openModal('editStudentModal');
   }
-</script>
 
-<!-- Modal Mover Estudiantes -->
-<div id="moveStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg w-96 p-6">
-    <h2 class="text-xl font-bold mb-4">Mover Estudiantes</h2>
-    <form id="moveStudentsForm" action="students_back/move_students.php" method="POST">
-      <input type="hidden" name="from_course_id" id="from_course_id">
+  // Función para cargar grupos según curso
+  function loadGroups(courseId, groupSelectId, selectedGroupId = null) {
+    const select = document.getElementById(groupSelectId);
+    select.innerHTML = '<option value="">Cargando...</option>';
 
-      <label for="to_course_id" class="block mb-2 font-medium">Seleccionar Curso Destino</label>
-      <select name="to_course_id" id="to_course_id" class="w-full border rounded px-3 py-2 mb-4">
-        <?php
-        // Traemos todos los cursos
-        $courses = $conn->query("SELECT course_id, name FROM courses ORDER BY name")->fetchAll();
-        foreach ($courses as $c) {
-            echo "<option value='{$c['course_id']}'>{$c['name']}</option>";
-        }
-        ?>
-      </select>
+    if (!courseId) {
+      select.innerHTML = '<option value="">Seleccione un grupo</option>';
+      return;
+    }
 
-      <div class="flex justify-end gap-2">
-        <button type="button" onclick="closeMoveModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
-        <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-700">Mover</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script>
-  function openModalMoveStudents(fromCourseId, courseName) {
-    document.getElementById('from_course_id').value = fromCourseId;
-    document.getElementById('moveStudentsModal').classList.remove('hidden');
-  }
-
-  function closeMoveModal() {
-    document.getElementById('moveStudentsModal').classList.add('hidden');
+    fetch('students_back/get_groups.php?course_id=' + courseId)
+      .then(res => res.json())
+      .then(data => {
+        let options = '<option value="">Seleccione un grupo</option>';
+        data.forEach(g => {
+          let selected = selectedGroupId && selectedGroupId == g.group_id ? 'selected' : '';
+          options += `<option value="${g.group_id}" ${selected}>${g.name}</option>`;
+        });
+        select.innerHTML = options;
+      })
+      .catch(err => {
+        console.error(err);
+        select.innerHTML = '<option value="">Error al cargar grupos</option>';
+      });
   }
 </script>

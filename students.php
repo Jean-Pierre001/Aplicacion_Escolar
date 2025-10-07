@@ -21,15 +21,17 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterLastName" placeholder="Filtrar por Apellido" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterFirstName" placeholder="Filtrar por Nombre" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterDNI" placeholder="Filtrar por DNI" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterGroup" placeholder="Filtrar por Grupo" class="px-3 py-2 border rounded w-48">
     </div>
 
     <?php
     try {
-        // Traemos todos los estudiantes con el nombre y ID del curso
-        $sql = "SELECT s.student_id, s.last_name, s.first_name, s.DNI, c.course_id, c.name AS course_name
+        // Traemos todos los estudiantes con el nombre y ID del curso y grupo
+        $sql = "SELECT s.student_id, s.last_name, s.first_name, s.DNI, c.course_id, c.name AS course_name, g.group_id, g.name AS group_name
                 FROM students s
                 LEFT JOIN courses c ON s.course_id = c.course_id
-                ORDER BY c.name, s.last_name, s.first_name";
+                LEFT JOIN groups g ON s.group_id = g.group_id
+                ORDER BY c.name, g.name, s.last_name, s.first_name";
         $stmt = $conn->query($sql);
         $students = $stmt->fetchAll();
 
@@ -60,6 +62,7 @@ include 'includes/conn.php'; // Conexión PDO
                           <th class='px-4 py-2 border'>Apellido</th>
                           <th class='px-4 py-2 border'>Nombre</th>
                           <th class='px-4 py-2 border'>DNI</th>
+                          <th class='px-4 py-2 border'>Grupo</th>
                           <th class='px-4 py-2 border'>Acciones</th>
                         </tr>
                       </thead>";
@@ -67,10 +70,12 @@ include 'includes/conn.php'; // Conexión PDO
 
                 foreach ($courseStudents as $i => $student) {
                     $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                    $groupDisplay = $student['group_name'] ?? '-';
                     echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
                     echo "<td class='px-4 py-2 border'>{$student['last_name']}</td>";
                     echo "<td class='px-4 py-2 border'>{$student['first_name']}</td>";
                     echo "<td class='px-4 py-2 border'>{$student['DNI']}</td>";
+                    echo "<td class='px-4 py-2 border'>{$groupDisplay}</td>";
                     echo "<td class='px-4 py-2 border flex gap-2 justify-start'>
                             <a href='javascript:void(0)' 
                                onclick='openEditModal(".json_encode($student).")' 
@@ -107,12 +112,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterLastName = document.getElementById('filterLastName');
     const filterFirstName = document.getElementById('filterFirstName');
     const filterDNI = document.getElementById('filterDNI');
+    const filterGroup = document.getElementById('filterGroup');
     const tables = document.querySelectorAll('#studentsTable');
 
     function filterRows() {
         const lastNameVal = filterLastName.value.toLowerCase();
         const firstNameVal = filterFirstName.value.toLowerCase();
         const dniVal = filterDNI.value.toLowerCase();
+        const groupVal = filterGroup.value.toLowerCase();
 
         tables.forEach(table => {
             const rows = table.querySelectorAll('tbody tr');
@@ -121,8 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const lastName = cells[0].textContent.toLowerCase();
                 const firstName = cells[1].textContent.toLowerCase();
                 const dni = cells[2].textContent.toLowerCase();
+                const group = cells[3].textContent.toLowerCase();
 
-                if (lastName.includes(lastNameVal) && firstName.includes(firstNameVal) && dni.includes(dniVal)) {
+                if (lastName.includes(lastNameVal) && firstName.includes(firstNameVal) && dni.includes(dniVal) && group.includes(groupVal)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -134,5 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
     filterLastName.addEventListener('input', filterRows);
     filterFirstName.addEventListener('input', filterRows);
     filterDNI.addEventListener('input', filterRows);
+    filterGroup.addEventListener('input', filterRows);
 });
 </script>

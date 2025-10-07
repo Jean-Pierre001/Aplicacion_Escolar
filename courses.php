@@ -58,6 +58,11 @@ include 'includes/conn.php'; // Conexión PDO
                               onclick=\"return confirm('¿Estás seguro de eliminar este curso?')\">
                               <i class='fa-solid fa-trash mr-1'></i>Eliminar
                             </a>";
+                      echo "<a href='javascript:void(0)' 
+                              onclick='openManageGroupsModal({$course['course_id']}, \"{$course['name']}\")' 
+                              class='text-blue-500 hover:text-blue-700 bg-blue-100 px-3 py-1 rounded flex items-center justify-center w-32 text-sm md:text-base'>
+                              <i class='fa-solid fa-layer-group mr-1'></i>Grupos
+                            </a>";      
                       echo "</td>";
                       echo "</tr>";
                   }
