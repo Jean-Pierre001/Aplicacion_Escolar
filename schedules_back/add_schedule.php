@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $weekday    = $_POST['weekday'] ?? null;
     $start_time = $_POST['start_time'] ?? null;
     $end_time   = $_POST['end_time'] ?? null;
-    $group_id   = !empty($_POST['group_id']) ? $_POST['group_id'] : null; // ✅ si está vacío, será NULL
+    $group_id   = !empty($_POST['group_id']) ? $_POST['group_id'] : null; 
 
     // Verificar solo los campos obligatorios
     if ($course_id && $subject_id && $teacher_id && $weekday && $start_time && $end_time) {
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':weekday'    => $weekday,
                 ':start_time' => $start_time,
                 ':end_time'   => $end_time,
-                ':group_id'   => $group_id // puede ser NULL
+                ':group_id'   => $group_id 
             ]);
         } catch (PDOException $e) {
             die("❌ Error al agregar horario: " . $e->getMessage());
