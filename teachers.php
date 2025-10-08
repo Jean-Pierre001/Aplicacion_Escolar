@@ -17,8 +17,8 @@ include 'includes/conn.php'; // Conexión PDO
 
     <!-- Filtros dinámicos -->
     <div class="flex flex-wrap gap-2 mb-4">
-      <input type="text" id="filterTeacherName" placeholder="Filtrar por Nombre" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterTeacherLastName" placeholder="Filtrar por Apellido" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterTeacherName" placeholder="Filtrar por Nombre" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterTeacherEmail" placeholder="Filtrar por Usuario" class="px-3 py-2 border rounded w-48">
     </div>
 
@@ -26,8 +26,8 @@ include 'includes/conn.php'; // Conexión PDO
       <table class="min-w-full border-collapse" id="teachersTable">
         <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Apellido</th>
+            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
             <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Usuario</th>
             <th class="px-4 md:px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
@@ -46,8 +46,8 @@ include 'includes/conn.php'; // Conexión PDO
                   foreach ($teachers as $i => $teacher) {
                       $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                       echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['first_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['last_name']}</td>";
+                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['first_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$teacher['user_email']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalTeacher(".json_encode($teacher).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
@@ -90,9 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         rows.forEach(row => {
             const cells = row.querySelectorAll('td');
-            const firstName = cells[0].textContent.toLowerCase();
-            const lastName = cells[1].textContent.toLowerCase();
-            const email = cells[2].textContent.toLowerCase();
+            const lastName = cells[0].textContent.toLowerCase(); // Apellido
+            const firstName = cells[1].textContent.toLowerCase(); // Nombre
+            const email = cells[2].textContent.toLowerCase(); // Usuario
 
             if (firstName.includes(nameVal) && lastName.includes(lastVal) && email.includes(emailVal)) {
                 row.style.display = '';

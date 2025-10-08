@@ -157,8 +157,8 @@
     <h2 class="text-xl font-semibold mb-4 text-gray-800 text-center">Buscar Docente</h2>
 
     <div class="flex flex-wrap gap-3 mb-4">
-      <input type="text" id="searchTeacherFirst" placeholder="Nombre" class="px-3 py-2 border rounded flex-1">
       <input type="text" id="searchTeacherLast" placeholder="Apellido" class="px-3 py-2 border rounded flex-1">
+      <input type="text" id="searchTeacherFirst" placeholder="Nombre" class="px-3 py-2 border rounded flex-1">
       <button id="btnSearchTeacher" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
         <i class="fa-solid fa-magnifying-glass mr-1"></i> Buscar
       </button>
@@ -168,8 +168,8 @@
       <table class="min-w-full border-collapse">
         <thead class="bg-gray-100">
           <tr>
-            <th class="px-4 py-2 border">Nombre</th>
             <th class="px-4 py-2 border">Apellido</th>
+            <th class="px-4 py-2 border">Nombre</th>
             <th class="px-4 py-2 border">Acción</th>
           </tr>
         </thead>
@@ -246,8 +246,8 @@
 
   // Búsqueda dinámica de docentes
   document.getElementById('btnSearchTeacher').addEventListener('click', function() {
-    const first = document.getElementById('searchTeacherFirst').value;
     const last = document.getElementById('searchTeacherLast').value;
+    const first = document.getElementById('searchTeacherFirst').value;
 
     fetch(`schedules_back/search_teachers.php?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`)
       .then(res => res.json())
@@ -264,11 +264,11 @@
           const row = document.createElement('tr');
           row.classList.add('hover:bg-gray-50');
           row.innerHTML = `
-            <td class="px-4 py-2 border">${t.first_name}</td>
             <td class="px-4 py-2 border">${t.last_name}</td>
+            <td class="px-4 py-2 border">${t.first_name}</td>
             <td class="px-4 py-2 border text-center">
               <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-                onclick="selectTeacher(${t.teacher_id}, '${t.first_name} ${t.last_name}')">
+                onclick="selectTeacher(${t.teacher_id}, '${t.last_name} ${t.first_name}')">
                 Seleccionar
               </button>
             </td>`;

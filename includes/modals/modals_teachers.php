@@ -4,12 +4,12 @@
     <h2 class="text-xl font-semibold mb-4">Agregar Docente</h2>
     <form id="addTeacherForm" action="teachers_back/add_teacher.php" method="POST" class="space-y-4">
       <div>
-        <label class="block mb-1 font-medium">Nombre</label>
-        <input type="text" name="first_name" class="w-full border px-3 py-2 rounded" required>
-      </div>
-      <div>
         <label class="block mb-1 font-medium">Apellido</label>
         <input type="text" name="last_name" class="w-full border px-3 py-2 rounded" required>
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Nombre</label>
+        <input type="text" name="first_name" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Usuario (Opcional)</label>
@@ -41,12 +41,12 @@
     <form id="editTeacherForm" action="teachers_back/edit_teacher.php" method="POST" class="space-y-4">
       <input type="hidden" name="teacher_id" id="edit_teacher_id">
       <div>
-        <label class="block mb-1 font-medium">Nombre</label>
-        <input type="text" name="first_name" id="edit_first_name" class="w-full border px-3 py-2 rounded" required>
-      </div>
-      <div>
         <label class="block mb-1 font-medium">Apellido</label>
         <input type="text" name="last_name" id="edit_last_name" class="w-full border px-3 py-2 rounded" required>
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Nombre</label>
+        <input type="text" name="first_name" id="edit_first_name" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Usuario (Opcional)</label>
@@ -82,8 +82,8 @@
 
   function openEditModalTeacher(teacher){
     document.getElementById('edit_teacher_id').value = teacher.teacher_id;
-    document.getElementById('edit_first_name').value = teacher.first_name;
     document.getElementById('edit_last_name').value = teacher.last_name;
+    document.getElementById('edit_first_name').value = teacher.first_name;
     document.getElementById('edit_user_id').value = teacher.user_id;
     openModal('editTeacherModal');
   }

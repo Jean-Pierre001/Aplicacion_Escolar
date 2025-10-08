@@ -98,7 +98,7 @@ include 'includes/conn.php'; // Conexión PDO
                         echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
                         echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['subject_shift']}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sch['teacher_first']} {$sch['teacher_last']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sch['teacher_last']}  {$sch['teacher_first']}</td>";
                         echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['end_time']}</td>";
