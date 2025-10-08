@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
         if (!courseId) return;
 
-        fetch(`api/get_subjects.php?course_id=${courseId}`)
+        fetch(`api/get_subjects_report.php?course_id=${courseId}`)
             .then(res => res.json())
             .then(data => {
                 data.forEach(subject => {

@@ -7,12 +7,16 @@ if (!$course_id) {
     exit;
 }
 
-// Asumiendo que hay tabla course_subject que relaciona cursos y materias
-$stmt = $conn->prepare("
-    SELECT s.subject_id, s.name 
-    FROM subjects s
-    JOIN courses c ON s.subject_id = s.subject_id
-    WHERE c.course_id = ?
-");
-$stmt->execute([$course_id]);
-echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+try {
+    // Filtra materias que pertenecen al curso recibido
+    $stmt = $conn->prepare("
+        SELECT subject_id, name
+        FROM subjects
+        WHERE course_id = ?
+    ");
+    $stmt->execute([$course_id]);
+    
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+} catch (PDOException $e) {
+    echo json_encode(['error' => $e->getMessage()]);
+}

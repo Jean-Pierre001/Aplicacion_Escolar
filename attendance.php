@@ -43,9 +43,9 @@ include 'includes/conn.php';
 <script>
 const selectCourse = document.getElementById('selectCourse');
 const selectSubject = document.getElementById('selectSubject');
+const attendanceDateInput = document.getElementById('attendanceDate');
 const tableContainer = document.getElementById('attendanceTableContainer');
 const generateReportBtn = document.getElementById('generateReport');
-const attendanceDateInput = document.getElementById('attendanceDate');
 
 function setGenerateReportDisabled(disabled) {
   generateReportBtn.disabled = disabled;
@@ -71,18 +71,14 @@ function loadAttendance() {
     .then(res => res.text())
     .then(html => {
       tableContainer.innerHTML = html;
+
       const hasTable = tableContainer.querySelector('table');
-      if (!hasTable) {
+      if (!hasTable || tableContainer.textContent.includes("Ya se tomó la asistencia")) {
         setGenerateReportDisabled(true);
       } else {
-        if (tableContainer.textContent.includes("Ya se tomó la asistencia")) {
-          setGenerateReportDisabled(true);
-        } else {
-          setGenerateReportDisabled(false);
-        }
+        setGenerateReportDisabled(false);
       }
 
-      // Check-all para alumnos
       const checkAllPresent = document.getElementById('checkAllPresent');
       if (checkAllPresent) {
         checkAllPresent.onchange = function() {
@@ -98,6 +94,7 @@ function loadAttendance() {
     });
 }
 
+// Cuando cambia el curso, cargar materias y asistencia
 selectCourse.addEventListener('change', () => {
   const courseId = selectCourse.value;
   selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
@@ -109,7 +106,20 @@ selectCourse.addEventListener('change', () => {
       data.forEach(subject => {
         const opt = document.createElement('option');
         opt.value = subject.subject_id;
-        opt.textContent = subject.name;
+        opt.textContent = subject.subject_name;
+
+        // Colores según estado
+        if (subject.status === 'done') {
+          opt.style.backgroundColor = '#d1fae5';
+          opt.style.color = '#065f46';
+        } else if (subject.status === 'pending') {
+          opt.style.backgroundColor = '#fee2e2';
+          opt.style.color = '#991b1b';
+        } else if (subject.status === 'no_class') {
+          opt.style.backgroundColor = '#f3f4f6';
+          opt.style.color = '#374151';
+        }
+
         selectSubject.appendChild(opt);
       });
     })
@@ -135,7 +145,7 @@ generateReportBtn.addEventListener('click', () => {
   formData.append('attendance_date', attendanceDate);
 
   rows.forEach((row, index) => {
-    const type = row.dataset.type; // 'student' o 'teacher'
+    const type = row.dataset.type;
     const id = row.dataset.id;
     const present = row.querySelector('.present-checkbox')?.checked ? 'present' : 'absent';
     const justification = row.querySelector('.justification-checkbox')?.checked ? 1 : 0;

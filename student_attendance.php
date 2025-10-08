@@ -38,7 +38,9 @@ include 'includes/conn.php';
       </select>
 
       <!-- Fechas -->
+      <h1>Desde</h1>
       <input type="date" id="fromDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Desde">
+      <h1>Hasta</h1>
       <input type="date" id="toDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Hasta">
 
       <!-- Checkbox de justificación -->
