@@ -34,7 +34,7 @@ try {
 
     $stmt = $conn->prepare("
         SELECT sa.id AS attendance_id, sa.attendance_date, sa.status, sa.justification, sa.justification_file,
-               c.name AS course_name, sub.name AS subject_name,
+               c.name AS course_name, sub.name AS subject_name, sub.turno,
                t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
                ta.status AS teacher_status
         FROM student_attendance sa
@@ -57,25 +57,39 @@ try {
         exit;
     }
 
-    // Resumen
-    $total_classes = 0;
-    $total_attended = 0;
+    // 🔹 Calcular asistencia considerando turnos (mañana/tarde)
+    $attendance_by_day = []; // Fecha => ['mañana' => false, 'tarde' => false]
+
     foreach ($records as $r) {
-        if ($r['teacher_status'] === 'present') {
-            $total_classes++;
-            if ($r['status'] === 'present' || $r['justification']) {
-                $total_attended++;
-            }
+        $date = $r['attendance_date'];
+        $turno = $r['turno']; // viene de subjects
+        if (!isset($attendance_by_day[$date])) {
+            $attendance_by_day[$date] = ['mañana' => false, 'tarde' => false];
+        }
+        if ($r['status'] === 'present' || $r['justification']) {
+            $attendance_by_day[$date][$turno] = true;
         }
     }
 
+    // Calcular totales
+    $total_classes = 0;
+    $total_attended = 0;
+    foreach ($attendance_by_day as $day => $turns) {
+        $total_classes += 2; // mañana + tarde
+        $total_attended += ($turns['mañana'] ? 1 : 0) + ($turns['tarde'] ? 1 : 0);
+    }
+
+    $percentage = $total_classes > 0 ? round(($total_attended / $total_classes) * 100, 2) : 0;
+
+    // 🔹 Mostrar resumen
     echo "<div class='mb-4 p-4 bg-gray-100 rounded-lg shadow'>
             <p class='font-semibold'>Resumen de asistencia:</p>
-            <p>Clases con profesor presente: {$total_classes}</p>
+            <p>Clases totales (mañana + tarde): {$total_classes}</p>
             <p>Asistencias del alumno (incluye inasistencias justificadas): {$total_attended}</p>
-            <p>Porcentaje de asistencia: " . ($total_classes > 0 ? round(($total_attended / $total_classes) * 100, 2) : 0) . "%</p>
+            <p>Porcentaje de asistencia: {$percentage}%</p>
           </div>";
 
+    // 🔹 Mostrar tabla de registros
     echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
             <table class='min-w-full border-collapse'>
             <thead class='text-white bg-gray-800'>
@@ -83,6 +97,7 @@ try {
               <th class='px-6 py-3 border-r border-gray-300 text-left'>Fecha</th>
               <th class='px-6 py-3 border-r border-gray-300 text-left'>Curso</th>
               <th class='px-6 py-3 border-r border-gray-300 text-left'>Materia</th>
+              <th class='px-6 py-3 border-r border-gray-300 text-left'>Turno</th>
               <th class='px-6 py-3 border-r border-gray-300 text-center'>Estado</th>
               <th class='px-6 py-3 border-r border-gray-300 text-center'>Justificación</th>
               <th class='px-6 py-3 text-center'>Archivo</th>
@@ -102,6 +117,7 @@ try {
                 <td class='px-6 py-4 border-r border-gray-300'>" . date('d/m/Y', strtotime($r['attendance_date'])) . "</td>
                 <td class='px-6 py-4 border-r border-gray-300'>{$r['course_name']}</td>
                 <td class='px-6 py-4 border-r border-gray-300'>{$r['subject_name']}</td>
+                <td class='px-6 py-4 border-r border-gray-300'>{$r['turno']}</td>
                 <td class='px-6 py-4 border-r border-gray-300 text-center {$statusColor}'>" . ($r['status'] === 'present' ? 'Presente' : 'Ausente') . "</td>
                 <td class='px-6 py-4 border-r border-gray-300 text-center'>{$justText}</td>
                 <td class='px-6 py-4 text-center'>{$fileLink}</td>
@@ -109,6 +125,7 @@ try {
     }
 
     echo "</tbody></table></div>";
+
 } catch (PDOException $e) {
     echo '<p class="p-4 text-red-500">Error al obtener los datos de asistencia.</p>';
 }
