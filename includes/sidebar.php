@@ -98,9 +98,17 @@
           </li>
         </ul>
       </li>
-
     </ul>
   </nav>
+
+  <li class="mt-6 mb-4 px-4">
+    <a href="logout.php" class="flex items-center p-3 rounded-lg hover:bg-red-600 transition-all relative">
+      <i class="fas fa-sign-out-alt mr-3 text-lg text-yellow-400"></i>
+      <span class="font-medium">Cerrar Sesión</span>
+      <span class="absolute left-0 top-0 h-full w-1 bg-yellow-400 rounded-r opacity-0 transition-opacity duration-300"></span>
+    </a>
+  </li>
+
 </aside>
 
 <!-- Overlay para móvil -->

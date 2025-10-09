@@ -1,8 +1,9 @@
 <?php
 // index.php
+include 'includes/session.php';
 include 'includes/header.php'; 
 include 'includes/sidebar.php'; 
-include 'includes/navbar.php'; 
+include 'includes/navbar.php';
 include 'includes/conn.php'; 
 
 date_default_timezone_set('America/Argentina/Salta');
@@ -41,13 +42,23 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <main class="pt-20 p-6">
+    
     <!-- Header -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3">
-      <h1 class="text-3xl font-bold text-gray-800">Notificaciones</h1>
-      <span class="px-4 py-2 text-sm font-semibold bg-blue-100 text-blue-800 rounded-full shadow">
-        <?php echo count($rows); ?> pendientes
-      </span>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Notificaciones</h1>
+            <p class="text-gray-600 mt-1">
+                Bienvenido, <strong><?= htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']) ?></strong>
+            </p>
+            <p class="text-gray-500 text-sm">
+                Rol: <strong><?= htmlspecialchars($_SESSION['role']) ?></strong>
+            </p>
+        </div>
+        <span class="px-4 py-2 text-sm font-semibold bg-blue-100 text-blue-800 rounded-full shadow">
+            <?= count($rows); ?> pendientes
+        </span>
     </div>
+
 
     <!-- Notificaciones -->
     <?php if (count($rows) > 0): ?>

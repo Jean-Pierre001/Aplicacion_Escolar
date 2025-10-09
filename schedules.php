@@ -1,5 +1,6 @@
 <?php
 // index_schedules.php
+include 'includes/session.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 include 'includes/navbar.php';
