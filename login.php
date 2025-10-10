@@ -4,8 +4,7 @@ ini_set('session.cookie_httponly', 1); // Bloquea acceso vía JS a la cookie de 
 ini_set('session.use_strict_mode', 1); // No permite reuse de IDs de sesión inválidos
 session_start();
 
-require 'includes/conn.php'; // Conexión PDO segura
-
+require 'includes/conn.php'; // Conexión PDO
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,17 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            // Seguridad: regenerar ID de sesión para prevenir session fixation
-            session_regenerate_id(true);
+            session_start(); // Inicia sesión si no estaba iniciada
+            session_regenerate_id(true); // Evita session fixation
 
-            // Guardar variables seguras en la sesión
+            // Guardar datos en la sesión
             $_SESSION['user_id']    = $user['user_id'];
             $_SESSION['first_name'] = $user['first_name'];
             $_SESSION['last_name']  = $user['last_name'];
             $_SESSION['email']      = $user['email'];
             $_SESSION['role']       = $user['role'];
 
-            // Redirigir al panel principal
             header("Location: index.php");
             exit();
         } else {
