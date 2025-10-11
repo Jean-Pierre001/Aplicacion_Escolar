@@ -12,6 +12,18 @@ $today = (new DateTime())->format('Y-m-d');
 $displayDate = (new DateTime())->format('d/m/Y');
 $weekday = strtolower((new DateTime())->format('l'));
 
+// --- Obtener nombre del rol ---
+$role_name = '';
+if (isset($role_id)) {
+    $stmtRole = $conn->prepare("SELECT name FROM roles WHERE role_id = ?");
+    $stmtRole->execute([$role_id]);
+    $role_row = $stmtRole->fetch(PDO::FETCH_ASSOC);
+    if ($role_row) {
+        $role_name = $role_row['name'];
+    }
+}
+
+// --- Consulta de asistencias pendientes ---
 $sql = "
     SELECT 
         c.course_id, c.name AS course_name,
@@ -51,14 +63,13 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 Bienvenido, <strong><?= htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']) ?></strong>
             </p>
             <p class="text-gray-500 text-sm">
-                Rol: <strong><?= htmlspecialchars($_SESSION['role']) ?></strong>
+                Rol: <strong><?= htmlspecialchars($role_name) ?></strong>
             </p>
         </div>
         <span class="px-4 py-2 text-sm font-semibold bg-blue-100 text-blue-800 rounded-full shadow">
             <?= count($rows); ?> pendientes
         </span>
     </div>
-
 
     <!-- Notificaciones -->
     <?php if (count($rows) > 0): ?>
