@@ -42,52 +42,109 @@
 </div>
 
 <!-- MODAL PERMISOS -->
-<div id="permissionsModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
-  <div class="bg-white rounded-lg w-2/3 max-w-4xl p-6 relative">
-    <h2 class="text-2xl font-bold mb-4">Permisos del Rol: <span id="roleNamePermissions"></span></h2>
-    <form id="permissionsForm" method="POST" action="roles_back/save_permissions.php">
-      <input type="hidden" name="role_id" id="permissionsRoleId">
+<div id="permissionsModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-60 z-50">
+  <div class="bg-white rounded-2xl w-11/12 max-w-6xl shadow-2xl overflow-hidden flex flex-col border border-gray-200">
+    
+    <!-- Encabezado -->
+    <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white px-6 py-4 flex justify-between items-center">
+      <h2 class="text-2xl font-semibold tracking-wide">
+        Permisos del Rol: <span id="roleNamePermissions" class="font-bold text-yellow-300"></span>
+      </h2>
+      <button onclick="closeModal('permissionsModal')" class="text-white hover:text-yellow-400 transition text-2xl">&times;</button>
+    </div>
 
-      <div class="max-h-96 overflow-y-auto border p-4 rounded space-y-4">
-        <!-- Dashboard -->
-        <div>
-          <label class="font-medium"><input type="checkbox" class="parent-checkbox" data-target="dashboard" /> Dashboard</label>
-          <div class="pl-6 mt-2 space-y-2">
-            <label><input type="checkbox" name="permissions[]" value="index.php:view" class="child-dashboard" /> Ver</label>
-          </div>
-        </div>
+    <!-- Cuerpo dividido -->
+    <div class="flex h-[600px]">
+      
+      <!-- Sidebar de Permisos -->
+      <div class="w-1/3 bg-gradient-to-b from-blue-800 to-blue-900 text-white p-5 overflow-y-auto">
+        <form id="permissionsForm" method="POST" action="roles_back/save_permissions.php" class="space-y-3">
+          <input type="hidden" name="role_id" id="permissionsRoleId">
 
-        <!-- Asistencias -->
-        <div>
-          <label class="font-medium"><input type="checkbox" class="parent-checkbox" data-target="attendance" /> Asistencias</label>
-          <div class="pl-6 mt-2 space-y-2">
-            <label><input type="checkbox" name="permissions[]" value="attendance.php:view" class="child-attendance" /> Toma de Asistencia</label><br>
-            <label><input type="checkbox" name="permissions[]" value="attendance_report.php:view" class="child-attendance" /> Consulta de Asistencia</label><br>
-            <label><input type="checkbox" name="permissions[]" value="student_attendance.php:view" class="child-attendance" /> Consulta Estudiante</label><br>
-            <label><input type="checkbox" name="permissions[]" value="teachers_attendance.php:view" class="child-attendance" /> Consulta Docentes</label>
+          <!-- Dashboard -->
+          <div>
+            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+              <div class="flex items-center">
+                <i class="fas fa-home mr-3 text-yellow-400"></i>
+                <span class="font-medium">Dashboard</span>
+              </div>
+              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="dashboard">
+            </label>
+            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" name="permissions[]" value="index.php:view" class="child-dashboard accent-yellow-400"> Ver
+              </label>
+            </div>
           </div>
-        </div>
 
-        <!-- Gestión -->
-        <div>
-          <label class="font-medium"><input type="checkbox" class="parent-checkbox" data-target="management" /> Gestión</label>
-          <div class="pl-6 mt-2 space-y-2">
-            <label><input type="checkbox" name="permissions[]" value="users.php:view" class="child-management" /> Usuarios</label><br>
-            <label><input type="checkbox" name="permissions[]" value="teachers.php:view" class="child-management" /> Docentes</label><br>
-            <label><input type="checkbox" name="permissions[]" value="students.php:view" class="child-management" /> Alumnos</label><br>
-            <label><input type="checkbox" name="permissions[]" value="courses.php:view" class="child-management" /> Cursos</label><br>
-            <label><input type="checkbox" name="permissions[]" value="subjects.php:view" class="child-management" /> Materias</label><br>
-            <label><input type="checkbox" name="permissions[]" value="schedules.php:view" class="child-management" /> Horarios</label><br>
-            <label><input type="checkbox" name="permissions[]" value="roles.php:view" class="child-management" /> Roles</label>
+          <!-- Asistencias -->
+          <div>
+            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+              <div class="flex items-center">
+                <i class="fas fa-clipboard-check mr-3 text-yellow-400"></i>
+                <span class="font-medium">Asistencias</span>
+              </div>
+              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="attendance">
+            </label>
+            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance.php:view" class="child-attendance accent-yellow-400"> Toma de Asistencia</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_report.php:view" class="child-attendance accent-yellow-400"> Consulta de Asistencia</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="student_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Estudiante</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Docentes</label>
+            </div>
           </div>
-        </div>
+
+          <!-- Gestión -->
+          <div>
+            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+              <div class="flex items-center">
+                <i class="fas fa-cogs mr-3 text-yellow-400"></i>
+                <span class="font-medium">Gestión</span>
+              </div>
+              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="management">
+            </label>
+            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers.php:view" class="child-management accent-yellow-400"> Docentes</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="students.php:view" class="child-management accent-yellow-400"> Alumnos</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="courses.php:view" class="child-management accent-yellow-400"> Cursos</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="subjects.php:view" class="child-management accent-yellow-400"> Materias</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="schedules.php:view" class="child-management accent-yellow-400"> Horarios</label>
+            </div>
+          </div>
+
+          <!-- Administrador -->
+          <div>
+            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+              <div class="flex items-center">
+                <i class="fas fa-user-shield mr-3 text-yellow-400"></i>
+                <span class="font-medium">Administrador</span>
+              </div>
+              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="admin">
+            </label>
+            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="users.php:view" class="child-admin accent-yellow-400"> Usuarios</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="roles.php:view" class="child-admin accent-yellow-400"> Roles</label>
+            </div>
+          </div>
+        </form>
       </div>
 
-      <div class="flex justify-end gap-2 mt-6">
-        <button type="button" onclick="closeModal('permissionsModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
-        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Guardar Permisos</button>
+      <!-- Panel derecho: vista previa / contenido futuro -->
+      <div class="flex-1 bg-gray-50 p-8 flex flex-col items-center justify-center text-gray-600 border-l border-gray-200">
+        <i class="fas fa-cogs text-6xl text-blue-700 mb-4"></i>
+        <h3 class="text-2xl font-semibold mb-2">Zona de Configuración</h3>
+        <p class="text-center max-w-md text-gray-500">
+          Aquí podrás agregar futuras acciones o vistas relacionadas con el rol seleccionado.  
+          De momento, seleccioná los permisos desde el panel izquierdo.
+        </p>
       </div>
-    </form>
+    </div>
+
+    <!-- Pie de acciones -->
+    <div class="bg-gray-100 border-t px-6 py-4 flex justify-end gap-3">
+      <button type="button" onclick="closeModal('permissionsModal')" class="px-5 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg hover:bg-gray-400 transition">Cancelar</button>
+      <button type="submit" form="permissionsForm" class="px-5 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition">Guardar Permisos</button>
+    </div>
   </div>
 </div>
 
@@ -119,7 +176,6 @@ function openPermissionsModal(roleId, roleName = '') {
     });
 }
 </script>
-
 
 <!-- SCRIPTS PARA MODALES -->
 <script>
