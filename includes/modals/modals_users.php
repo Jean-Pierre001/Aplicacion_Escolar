@@ -1,3 +1,13 @@
+<?php
+// Obtener roles de la base de datos
+try {
+    $roleStmt = $conn->query("SELECT role_id, name FROM roles ORDER BY name ASC");
+    $roles = $roleStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $roles = [];
+}
+?>
+
 <!-- Modal Agregar Usuario -->
 <div id="addUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
@@ -23,9 +33,9 @@
         <label class="block mb-1 font-medium">Rol</label>
         <select name="role" class="w-full border px-3 py-2 rounded" required>
           <option value="">Seleccione un rol</option>
-          <option value="admin">Admin</option>
-          <option value="teacher">Teacher</option>
-          <option value="student">Student</option>
+          <?php foreach ($roles as $role): ?>
+            <option value="<?= $role['role_id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       <div class="flex justify-end space-x-2 mt-4">
@@ -65,9 +75,9 @@
         <label class="block mb-1 font-medium">Rol</label>
         <select name="role" id="edit_role" class="w-full border px-3 py-2 rounded" required>
           <option value="">Seleccione un rol</option>
-          <option value="admin">Admin</option>
-          <option value="teacher">Teacher</option>
-          <option value="student">Student</option>
+          <?php foreach ($roles as $role): ?>
+            <option value="<?= $role['role_id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       <div class="flex justify-end space-x-2 mt-4">

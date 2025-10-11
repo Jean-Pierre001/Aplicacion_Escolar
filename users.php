@@ -23,14 +23,16 @@ include 'includes/conn.php'; // Conexión PDO
       <select id="filterRole" class="px-3 py-2 border rounded w-48">
         <option value="">Filtrar por Rol</option>
         <?php
-        // Traemos los roles únicos
+        // Traemos roles desde la tabla roles
         try {
-            $roleStmt = $conn->query("SELECT DISTINCT role FROM users ORDER BY role ASC");
-            $roles = $roleStmt->fetchAll(PDO::FETCH_COLUMN);
+            $roleStmt = $conn->query("SELECT role_id, name FROM roles ORDER BY name ASC");
+            $roles = $roleStmt->fetchAll();
             foreach ($roles as $role) {
-                echo "<option value='{$role}'>{$role}</option>";
+                echo "<option value='{$role['name']}'>{$role['name']}</option>";
             }
-        } catch (PDOException $e) {}
+        } catch (PDOException $e) {
+            // Opcional: manejar error
+        }
         ?>
       </select>
     </div>
@@ -49,7 +51,11 @@ include 'includes/conn.php'; // Conexión PDO
         <tbody>
           <?php
           try {
-              $sql = "SELECT user_id, first_name, last_name, email, role FROM users ORDER BY user_id ASC";
+              // Traemos usuarios con el nombre del rol usando role_id
+              $sql = "SELECT u.user_id, u.first_name, u.last_name, u.email, r.name AS role_name
+                      FROM users u
+                      LEFT JOIN roles r ON u.role_id = r.role_id
+                      ORDER BY u.user_id ASC";
               $stmt = $conn->query($sql);
               $users = $stmt->fetchAll();
 
@@ -60,7 +66,7 @@ include 'includes/conn.php'; // Conexión PDO
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['first_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['last_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['email']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['role']}</td>";
+                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$user['role_name']}</td>";
                       echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
                       echo "<a href='javascript:void(0)' onclick='openEditModalUser(".json_encode($user).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
                               <i class='fa-solid fa-pen mr-1'></i>Editar
