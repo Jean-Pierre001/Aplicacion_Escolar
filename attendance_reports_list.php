@@ -110,12 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const rows = table.querySelectorAll('tbody tr');
 
     function filterRows() {
-        const dateVal = filterDate.value; // YYYY-MM-DD
+        const dateVal = filterDate.value; 
         const courseVal = filterCourse.value;
         const subjectVal = filterSubject.value;
 
         rows.forEach(row => {
-            const rowDate = row.querySelector('td').getAttribute('data-raw'); // fecha en YYYY-MM-DD
+            const rowDate = row.querySelector('td').getAttribute('data-raw'); 
             const cursoId = row.getAttribute('data-course');
             const subjectId = row.getAttribute('data-subject');
 
