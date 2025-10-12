@@ -89,7 +89,7 @@
             <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
               <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance.php:view" class="child-attendance accent-yellow-400"> Toma de Asistencia</label>
               <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_report.php:view" class="child-attendance accent-yellow-400"> Consulta de Asistencia</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_reports_list.php:view" class="child-attendance accent-yellow-400"> Consultar lista de Reportes</label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_reports_list.php:view" class="child-attendance accent-yellow-400"> Lista de Reportes</label>
               <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="student_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Estudiante</label>
               <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Docentes</label>
             </div>

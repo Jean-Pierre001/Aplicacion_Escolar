@@ -33,7 +33,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Filtros dinámicos -->
     <div class="flex flex-wrap gap-3 mb-4">
-      <input type="text" id="filterDate" placeholder="Filtrar por Fecha (dd/mm/yyyy)" class="px-3 py-2 border rounded w-48">
+      <input type="date" id="filterDate" class="px-3 py-2 border rounded w-48">
 
       <select id="filterCourse" class="px-3 py-2 border rounded w-48">
         <option value="">Filtrar por Curso</option>
@@ -71,7 +71,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tr class="hover:bg-gray-100 transition <?php echo $rowClass; ?>" 
                 data-course="<?php echo $report['course_id']; ?>" 
                 data-subject="<?php echo $report['subject_id']; ?>">
-              <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo $fecha; ?></td>
+              <td class="px-4 md:px-6 py-4 border-r border-gray-200" 
+                  data-raw="<?php echo $report['attendance_date']; ?>">
+                  <?php echo $fecha; ?>
+              </td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo htmlspecialchars($report['course_name']); ?></td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo htmlspecialchars($report['subject_name']); ?></td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo $turno; ?></td>
@@ -107,17 +110,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const rows = table.querySelectorAll('tbody tr');
 
     function filterRows() {
-        const dateVal = filterDate.value.toLowerCase();
-        const courseVal = filterCourse.value;   // <- usamos value (ID)
-        const subjectVal = filterSubject.value; // <- usamos value (ID)
+        const dateVal = filterDate.value; // YYYY-MM-DD
+        const courseVal = filterCourse.value;
+        const subjectVal = filterSubject.value;
 
         rows.forEach(row => {
-            const fecha = row.cells[0].textContent.toLowerCase();
+            const rowDate = row.querySelector('td').getAttribute('data-raw'); // fecha en YYYY-MM-DD
             const cursoId = row.getAttribute('data-course');
             const subjectId = row.getAttribute('data-subject');
 
             if (
-                (fecha.includes(dateVal) || dateVal === '') &&
+                (rowDate === dateVal || dateVal === '') &&
                 (cursoId === courseVal || courseVal === '') &&
                 (subjectId === subjectVal || subjectVal === '')
             ) {
@@ -144,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 data.forEach(subj => {
                     const option = document.createElement('option');
-                    option.value = subj.subject_id; // <- valor es el ID
+                    option.value = subj.subject_id;
                     option.textContent = subj.name;
                     filterSubject.appendChild(option);
                 });
