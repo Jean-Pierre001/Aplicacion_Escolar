@@ -44,7 +44,7 @@ try {
 
       <!-- Asistencias -->
       <?php 
-      $attendance_pages = ['attendance.php','attendance_report.php','student_attendance.php','teachers_attendance.php'];
+      $attendance_pages = ['attendance.php','attendance_report.php','student_attendance.php','teachers_attendance.php','attendance_reports_list.php'];
       $has_attendance = false;
       foreach($attendance_pages as $page) {
           if(isset($permissions[$page]) && in_array('view', $permissions[$page])) { $has_attendance = true; break; }
@@ -66,6 +66,9 @@ try {
           <?php endif; ?>
           <?php if(isset($permissions['attendance_report.php']) && in_array('view', $permissions['attendance_report.php'])): ?>
           <li><a href="attendance_report.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-file-alt mr-2 text-yellow-400"></i> Consulta de Asistencia</a></li>
+          <?php endif; ?>
+          <?php if(isset($permissions['attendance_reports_list.php']) && in_array('view', $permissions['attendance_reports_list.php'])): ?>
+          <li><a href="attendance_reports_list.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-list mr-2 text-yellow-400"></i> Listado de Reportes</a></li>
           <?php endif; ?>
           <?php if(isset($permissions['student_attendance.php']) && in_array('view', $permissions['student_attendance.php'])): ?>
           <li><a href="student_attendance.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-user-graduate mr-2 text-yellow-400"></i> Consulta Estudiante</a></li>

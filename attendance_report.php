@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modalContent.innerHTML = '';
     });
 
-    // Adjuntar evento al botón "Guardar cambios"
+    // Guardar cambios
     function attachSaveHandler() {
         const saveBtn = document.getElementById('saveAttendanceBtn');
         if(!saveBtn) return;
@@ -205,6 +205,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }).catch(err => alert('Error en la solicitud: '+err));
         });
+    }
+
+    // --- 🔽 Integración: autocompletado desde URL ---
+    const params = new URLSearchParams(window.location.search);
+    const courseParam = params.get('course_id');
+    const subjectParam = params.get('subject_id');
+    const dateParam = params.get('date');
+
+    if (courseParam) selectCourse.value = courseParam;
+    if (dateParam) selectDate.value = dateParam;
+
+    if (courseParam && subjectParam) {
+        fetch(`api/get_subjects_report.php?course_id=${courseParam}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.subject_id;
+                    option.textContent = subject.name;
+                    selectSubject.appendChild(option);
+                });
+                selectSubject.value = subjectParam;
+                document.getElementById('loadReport').click();
+            });
     }
 });
 </script>

@@ -19,7 +19,7 @@ $last_name  = $_SESSION['last_name'];
 $email      = $_SESSION['email'];
 $role_id    = $_SESSION['role_id']; // role_id ya guardado en sesión
 
-// --- Verificar permisos de la página ---
+/* --- Verificar permisos de la página ---
 $page = basename($_SERVER['PHP_SELF']); // nombre del archivo actual
 
 try {
@@ -43,3 +43,5 @@ try {
     // Si hay error en la consulta, opcional mostrar mensaje o log
     die("Error al verificar permisos: " . $e->getMessage());
 }
+
+*/
