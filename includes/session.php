@@ -10,12 +10,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Definir variables locales para facilitar uso
 $user_id    = $_SESSION['user_id'];
 $first_name = $_SESSION['first_name'];
 $last_name  = $_SESSION['last_name'];
 $email      = $_SESSION['email'];
-$role_id    = $_SESSION['role_id']; // role_id ya guardado en sesión
+$role_id    = $_SESSION['role_id']; 
 
 //--- Verificar permisos de la página ---
 $page = basename($_SERVER['PHP_SELF']); 
