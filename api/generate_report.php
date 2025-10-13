@@ -24,7 +24,7 @@ try {
     foreach ($data as $index => $item) {
         $type = $item['type'];
         $id = $item['id'];
-        $status = $item['status'];
+        $status = $item['status']; // Tomamos directamente el estado del checkbox
         $justification = $item['justification'] ?? 0;
 
         $uploadPath = null;
@@ -41,12 +41,7 @@ try {
             $stmtInsert = $conn->prepare("INSERT INTO teacher_attendance (teacher_id, schedule_id, attendance_date, status, justification, justification_file) VALUES (?, ?, ?, ?, ?, ?)");
             $stmtInsert->execute([$id, $schedule_id, $attendance_date, $status, $justification, $uploadPath]);
         } else {
-            // Si el profesor está ausente, marcar los alumnos como "inactivos"
-            $stmtProf = $conn->prepare("SELECT status FROM teacher_attendance WHERE schedule_id=? AND attendance_date=? LIMIT 1");
-            $stmtProf->execute([$schedule_id, $attendance_date]);
-            $teacherStatus = $stmtProf->fetchColumn();
-            if ($teacherStatus === 'absent') $status = 'inactive';
-
+            // Guardar la asistencia de los alumnos tal como viene del checkbox, sin depender del profesor
             $stmtInsert = $conn->prepare("INSERT INTO student_attendance (student_id, schedule_id, attendance_date, status, justification, justification_file) VALUES (?, ?, ?, ?, ?, ?)");
             $stmtInsert->execute([$id, $schedule_id, $attendance_date, $status, $justification, $uploadPath]);
         }
