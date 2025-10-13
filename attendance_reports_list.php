@@ -5,7 +5,7 @@ include 'includes/sidebar.php';
 include 'includes/navbar.php';
 include 'includes/conn.php';
 
-// Traer todos los reportes únicos existentes
+// Traer todos los reportes únicos existentes según la nueva DB
 $stmt = $conn->prepare("
     SELECT 
         sa.attendance_date,
@@ -79,14 +79,14 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo htmlspecialchars($report['subject_name']); ?></td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo $turno; ?></td>
               <td class="px-4 md:px-6 py-4 flex flex-wrap gap-2">
-                <form method="GET" action="attendance_report.php" class="inline">
-                  <input type="hidden" name="course_id" value="<?php echo $report['course_id']; ?>">
-                  <input type="hidden" name="subject_id" value="<?php echo $report['subject_id']; ?>">
-                  <input type="hidden" name="date" value="<?php echo $report['attendance_date']; ?>">
-                  <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded flex items-center justify-center">
-                    <i class="fa-solid fa-eye mr-1"></i> Ver Reporte
-                  </button>
-                </form>
+                  <form method="GET" action="attendance_report.php" class="inline">
+                      <input type="hidden" name="course_id" value="<?php echo $report['course_id']; ?>">
+                      <input type="hidden" name="subject_id" value="<?php echo $report['subject_id']; ?>">
+                      <input type="hidden" name="date" value="<?php echo date('Y-m-d', strtotime($report['attendance_date'])); ?>">
+                      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded flex items-center justify-center">
+                          <i class="fa-solid fa-eye mr-1"></i> Ver Reporte
+                      </button>
+                  </form>
               </td>
             </tr>
             <?php endforeach; ?>

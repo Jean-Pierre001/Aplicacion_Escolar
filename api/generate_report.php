@@ -8,7 +8,7 @@ try {
 
     $course_id = $_POST['course_id'];
     $subject_id = $_POST['subject_id'];
-    $attendance_date = $_POST['attendance_date'];
+    $attendance_date = $_POST['attendance_date']; // Ahora puede ser DATETIME
     $data = $_POST['data'];
 
     // Buscar schedule correspondiente
@@ -22,7 +22,7 @@ try {
     $schedule_id = $schedule['schedule_id'];
 
     foreach ($data as $index => $item) {
-        $type = $item['type'];
+        $type = $item['type']; // teacher o student
         $id = $item['id'];
         $status = $item['status']; // Tomamos directamente el estado del checkbox
         $justification = $item['justification'] ?? 0;
@@ -38,11 +38,18 @@ try {
         }
 
         if ($type === 'teacher') {
-            $stmtInsert = $conn->prepare("INSERT INTO teacher_attendance (teacher_id, schedule_id, attendance_date, status, justification, justification_file) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmtInsert = $conn->prepare("
+                INSERT INTO teacher_attendance 
+                (teacher_id, schedule_id, attendance_date, status, justification, justification_file) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
             $stmtInsert->execute([$id, $schedule_id, $attendance_date, $status, $justification, $uploadPath]);
         } else {
-            // Guardar la asistencia de los alumnos tal como viene del checkbox, sin depender del profesor
-            $stmtInsert = $conn->prepare("INSERT INTO student_attendance (student_id, schedule_id, attendance_date, status, justification, justification_file) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmtInsert = $conn->prepare("
+                INSERT INTO student_attendance 
+                (student_id, schedule_id, attendance_date, status, justification, justification_file) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
             $stmtInsert->execute([$id, $schedule_id, $attendance_date, $status, $justification, $uploadPath]);
         }
     }
