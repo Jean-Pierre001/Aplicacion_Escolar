@@ -10,14 +10,15 @@ include 'includes/conn.php'; // Conexión PDO
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <br><br><br>
   <main class="pt-20 p-4 md:p-6">
+
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Horarios</h1>
-      <a href="javascript:void(0)" onclick="openModal('addScheduleModal')" class="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition w-full md:w-auto justify-center">
+      <a href="javascript:void(0)" onclick="openModal('addScheduleModal')" 
+         class="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded-md shadow hover:bg-blue-700 transition w-full md:w-auto justify-center">
         <i class="fa-solid fa-plus mr-2"></i> Agregar Horario
       </a>
     </div>
 
-    <!-- Filtros dinámicos -->
     <div class="flex flex-wrap gap-2 mb-4">
       <input type="text" id="filterSubject" placeholder="Filtrar por Materia" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterTeacher" placeholder="Filtrar por Docente" class="px-3 py-2 border rounded w-48">
@@ -67,10 +68,12 @@ include 'includes/conn.php'; // Conexión PDO
 
             foreach ($grouped as $course => $groups) {
                 echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
+
+                // Encabezado curso + Exportar Excel
                 echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
                 echo "<span>{$course}</span>";
                 echo "<a href='export_schedule.php?course_id={$groups[array_key_first($groups)][0]['course_id']}' 
-                        class='bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center'>
+                        class='bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-md flex items-center justify-center w-36 transition'>
                         <i class='fa-solid fa-file-excel mr-1'></i> Exportar Excel
                       </a>";
                 echo "</div>";
@@ -81,50 +84,52 @@ include 'includes/conn.php'; // Conexión PDO
                     }
 
                     echo "<div class='overflow-x-auto'>";
-                    echo "<table class='min-w-full border-collapse' id='schedulesTable'>";
-                    echo "<thead class='bg-gray-100'>
+                    echo "<table class='min-w-full text-sm text-gray-700 border-collapse'>";
+                    echo "<thead class='bg-gray-200 text-gray-800 uppercase text-xs font-semibold border-b border-gray-300'>
                             <tr>
-                              <th class='px-4 py-2 border'>Materia</th>
-                              <th class='px-4 py-2 border'>Turno</th>
-                              <th class='px-4 py-2 border'>Docente</th>
-                              <th class='px-4 py-2 border'>Docente Suplente</th>
-                              <th class='px-4 py-2 border'>Aula</th>
-                              <th class='px-4 py-2 border'>Día</th>
-                              <th class='px-4 py-2 border'>Hora Inicio</th>
-                              <th class='px-4 py-2 border'>Hora Fin</th>
-                              <th class='px-4 py-2 border'>Acciones</th>
+                              <th class='px-6 py-3 border'>Materia</th>
+                              <th class='px-6 py-3 border'>Turno</th>
+                              <th class='px-6 py-3 border'>Docente</th>
+                              <th class='px-6 py-3 border'>Docente Suplente</th>
+                              <th class='px-6 py-3 border'>Aula</th>
+                              <th class='px-6 py-3 border'>Día</th>
+                              <th class='px-6 py-3 border'>Hora Inicio</th>
+                              <th class='px-6 py-3 border'>Hora Fin</th>
+                              <th class='px-6 py-3 border text-center'>Acciones</th>
                             </tr>
                           </thead>";
                     echo "<tbody>";
+
                     foreach ($courseSchedules as $i => $sch) {
-                        $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                        $rowClass = $i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
                         $weekday_es = $weekdays_es[strtolower($sch['weekday'])] ?? ucfirst($sch['weekday']);
                         $sub_teacher_name = $sch['sub_teacher_id'] ? "{$sch['sub_teacher_last']} {$sch['sub_teacher_first']}" : '-';
                         $classroom_name = $sch['classroom_name'] ?? '-';
 
-                        echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                        echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sch['subject_shift']}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sch['teacher_last']} {$sch['teacher_first']}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sub_teacher_name}</td>";
-                        echo "<td class='px-4 py-2 border'>{$classroom_name}</td>";
-                        echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sch['end_time']}</td>";
-                        echo "<td class='px-4 py-2 border flex flex-wrap gap-2'>
+                        echo "<tr class='hover:bg-gray-50 {$rowClass}'>";
+                        echo "<td class='px-6 py-3 border'>{$sch['subject_name']}</td>";
+                        echo "<td class='px-6 py-3 border'>{$sch['subject_shift']}</td>";
+                        echo "<td class='px-6 py-3 border'>{$sch['teacher_last']} {$sch['teacher_first']}</td>";
+                        echo "<td class='px-6 py-3 border'>{$sub_teacher_name}</td>";
+                        echo "<td class='px-6 py-3 border'>{$classroom_name}</td>";
+                        echo "<td class='px-6 py-3 border'>{$weekday_es}</td>";
+                        echo "<td class='px-6 py-3 border'>{$sch['start_time']}</td>";
+                        echo "<td class='px-6 py-3 border'>{$sch['end_time']}</td>";
+                        echo "<td class='px-6 py-3 border text-center flex justify-center gap-2'>
                                 <a href='javascript:void(0)' 
                                    onclick='openEditModalSchedule(".json_encode($sch).")' 
-                                   class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
+                                   class='flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md w-24 transition'>
                                    <i class='fa-solid fa-pen mr-1'></i>Editar
                                 </a>
                                 <a href='schedules_back/delete_schedule.php?id={$sch['schedule_id']}' 
-                                   class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24' 
+                                   class='flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md w-24 transition' 
                                    onclick=\"return confirm('¿Estás seguro de eliminar este horario?')\">
                                    <i class='fa-solid fa-trash mr-1'></i>Eliminar
                                 </a>
                               </td>";
                         echo "</tr>";
                     }
+
                     echo "</tbody></table></div>";
                 }
 

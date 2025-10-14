@@ -9,20 +9,22 @@ include 'includes/conn.php';
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <br><br><br>
   <main class="pt-20 p-4 md:p-6">
+
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Roles</h1>
-      <a href="javascript:void(0)" onclick="openModal('addRoleModal')" class="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition w-full md:w-auto justify-center">
+      <a href="javascript:void(0)" onclick="openModal('addRoleModal')" 
+         class="inline-flex items-center bg-purple-700 text-white px-5 py-2 rounded-md shadow hover:bg-purple-800 transition w-full md:w-auto justify-center">
         <i class="fa-solid fa-plus mr-2"></i> Agregar Rol
       </a>
     </div>
 
-    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full border-collapse" id="rolesTable">
-        <thead class="bg-gradient-to-r from-purple-500 to-purple-700 text-white">
+    <div class="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
+      <table class="min-w-full text-sm text-gray-700 border-collapse" id="rolesTable">
+        <thead class="bg-gray-200 text-gray-800 uppercase text-xs font-semibold border-b border-gray-300">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Nombre</th>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase">Descripción</th>
-            <th class="px-4 md:px-6 py-3 text-left font-medium uppercase">Acciones</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left">Nombre</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left">Descripción</th>
+            <th class="px-6 py-3 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -34,28 +36,36 @@ include 'includes/conn.php';
 
               if ($roles) {
                   foreach ($roles as $i => $role) {
-                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$role['name']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$role['description']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
-                      echo "<a href='javascript:void(0)' onclick='openEditModalRole(".json_encode($role).")' class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24'>
-                              <i class='fa-solid fa-pen mr-1'></i>Editar
-                            </a>";
-                      echo "<a href='roles_back/delete_role.php?id={$role['role_id']}' class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24' onclick=\"return confirm('¿Estás seguro de eliminar este rol?')\">
-                              <i class='fa-solid fa-trash mr-1'></i>Eliminar
-                            </a>";
-                      echo "<a href='javascript:void(0)' onclick='openPermissionsModal({$role['role_id']}, \"{$role['name']}\")' class='text-green-600 hover:text-green-800 bg-green-100 px-3 py-1 rounded flex items-center justify-center w-28'>
-                              <i class='fa-solid fa-key mr-1'></i>Permisos
-                            </a>";
+                      $rowClass = $i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                      echo "<tr class='hover:bg-gray-50 {$rowClass} border-b border-gray-200'>";
+                      echo "<td class='px-6 py-3 border-r border-gray-300 font-medium'>{$role['name']}</td>";
+                      echo "<td class='px-6 py-3 border-r border-gray-300'>{$role['description']}</td>";
+                      echo "<td class='px-6 py-3 flex gap-2 justify-center'>";
+
+                      echo "<a href='javascript:void(0)' onclick='openEditModalRole(".json_encode($role).")' 
+                                 class='flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md transition w-24'>
+                                 <i class='fa-solid fa-pen mr-1'></i>Editar
+                              </a>";
+
+                      echo "<a href='roles_back/delete_role.php?id={$role['role_id']}' 
+                                 class='flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md transition w-24' 
+                                 onclick=\"return confirm('¿Estás seguro de eliminar este rol?')\">
+                                 <i class='fa-solid fa-trash mr-1'></i>Eliminar
+                              </a>";
+
+                      echo "<a href='javascript:void(0)' onclick='openPermissionsModal({$role['role_id']}, \"{$role['name']}\")' 
+                                 class='flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md transition w-28'>
+                                 <i class='fa-solid fa-key mr-1'></i>Permisos
+                              </a>";
+
                       echo "</td>";
                       echo "</tr>";
                   }
               } else {
-                  echo "<tr><td colspan='3' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay roles registrados</td></tr>";
+                  echo "<tr><td colspan='3' class='px-6 py-3 text-center text-gray-500'>No hay roles registrados</td></tr>";
               }
           } catch (PDOException $e) {
-              echo "<tr><td colspan='3' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
+              echo "<tr><td colspan='3' class='px-6 py-3 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
           }
           ?>
         </tbody>
@@ -63,6 +73,7 @@ include 'includes/conn.php';
     </div>
   </main>
 </div>
+
 
 <!-- Modales -->
 <?php include 'includes/modals/modals_roles.php'; ?>

@@ -10,9 +10,12 @@ include 'includes/conn.php'; // Conexión PDO
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <br><br><br>
   <main class="pt-20 p-4 md:p-6">
+
+    <!-- Encabezado y botón principal -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Estudiantes</h1>
-      <a href="javascript:void(0)" onclick="openModal('addStudentModal')" class="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition w-full md:w-auto justify-center">
+      <a href="javascript:void(0)" onclick="openModal('addStudentModal')" 
+         class="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded-md shadow hover:bg-blue-700 transition w-full md:w-auto justify-center">
         <i class="fa-solid fa-plus mr-2"></i> Agregar Estudiante
       </a>
     </div>
@@ -27,7 +30,6 @@ include 'includes/conn.php'; // Conexión PDO
 
     <?php
     try {
-        // Traemos todos los estudiantes con el nombre y ID del curso y grupo
         $sql = "SELECT s.student_id, s.last_name, s.first_name, s.DNI, c.course_id, c.name AS course_name, g.group_id, g.name AS group_name
                 FROM students s
                 LEFT JOIN courses c ON s.course_id = c.course_id
@@ -37,7 +39,6 @@ include 'includes/conn.php'; // Conexión PDO
         $students = $stmt->fetchAll();
 
         if ($students) {
-            // Agrupar por curso
             $grouped = [];
             foreach ($students as $student) {
                 $grouped[$student['course_name']][] = $student;
@@ -51,40 +52,40 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "<span>{$course}</span>";
                 echo "<a href='javascript:void(0)' 
                         onclick=\"openModalMoveStudents({$courseStudents[0]['course_id']}, '{$course}')\" 
-                        class='bg-purple-500 hover:bg-purple-700 text-white px-3 py-1 rounded flex items-center'>
+                        class='bg-purple-500 hover:bg-purple-700 text-white px-3 py-1 rounded-md flex items-center justify-center transition w-36'>
                         <i class='fa-solid fa-arrows-right-left mr-1'></i> Mover Estudiantes
                       </a>";
                 echo "</div>";
 
                 echo "<div class='overflow-x-auto'>";
-                echo "<table class='min-w-full border-collapse' id='studentsTable'>";
-                echo "<thead class='bg-gray-100'>
+                echo "<table class='min-w-full text-sm text-gray-700 border-collapse'>";
+                echo "<thead class='bg-gray-200 text-gray-800 uppercase text-xs font-semibold border-b border-gray-300'>
                         <tr>
-                          <th class='px-4 py-2 border'>Apellido</th>
-                          <th class='px-4 py-2 border'>Nombre</th>
-                          <th class='px-4 py-2 border'>DNI</th>
-                          <th class='px-4 py-2 border'>Grupo</th>
-                          <th class='px-4 py-2 border'>Acciones</th>
+                          <th class='px-6 py-3 border'>Apellido</th>
+                          <th class='px-6 py-3 border'>Nombre</th>
+                          <th class='px-6 py-3 border'>DNI</th>
+                          <th class='px-6 py-3 border'>Grupo</th>
+                          <th class='px-6 py-3 border text-center'>Acciones</th>
                         </tr>
                       </thead>";
                 echo "<tbody>";
 
                 foreach ($courseStudents as $i => $student) {
-                    $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                    $rowClass = $i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
                     $groupDisplay = $student['group_name'] ?? '-';
-                    echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                    echo "<td class='px-4 py-2 border'>{$student['last_name']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$student['first_name']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$student['DNI']}</td>";
-                    echo "<td class='px-4 py-2 border'>{$groupDisplay}</td>";
-                    echo "<td class='px-4 py-2 border flex gap-2 justify-start'>
+                    echo "<tr class='hover:bg-gray-50 {$rowClass}'>";
+                    echo "<td class='px-6 py-3 border'>{$student['last_name']}</td>";
+                    echo "<td class='px-6 py-3 border'>{$student['first_name']}</td>";
+                    echo "<td class='px-6 py-3 border'>{$student['DNI']}</td>";
+                    echo "<td class='px-6 py-3 border'>{$groupDisplay}</td>";
+                    echo "<td class='px-6 py-3 border text-center flex justify-center gap-2'>
                             <a href='javascript:void(0)' 
                                onclick='openEditModal(".json_encode($student).")' 
-                               class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center'>
+                               class='flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md w-24 transition'>
                                <i class='fa-solid fa-pen mr-1'></i>Editar
                             </a>
                             <a href='students_back/delete_student.php?id={$student['student_id']}' 
-                               class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center'
+                               class='flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md w-24 transition'
                                onclick=\"return confirm('¿Estás seguro de eliminar este estudiante?')\">
                                <i class='fa-solid fa-trash mr-1'></i>Eliminar
                             </a>
@@ -104,6 +105,7 @@ include 'includes/conn.php'; // Conexión PDO
     ?>
   </main>
 </div>
+
 
 <?php include 'includes/modals/modals_students.php' ?>
 

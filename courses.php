@@ -10,9 +10,11 @@ include 'includes/conn.php'; // Conexión PDO
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <br><br><br>
   <main class="pt-20 p-4 md:p-6">
+
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
       <h1 class="text-3xl font-bold text-gray-800">Lista de Cursos</h1>
-      <a href="javascript:void(0)" onclick="openModal('addCourseModal')" class="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex-shrink-0">
+      <a href="javascript:void(0)" onclick="openModal('addCourseModal')" 
+         class="inline-flex items-center bg-blue-700 text-white px-5 py-2 rounded-md shadow hover:bg-blue-800 transition flex-shrink-0">
         <i class="fa-solid fa-plus mr-2"></i> Agregar Curso
       </a>
     </div>
@@ -24,14 +26,14 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterDegree" placeholder="Filtrar por Tecnicatura" class="px-3 py-2 border rounded w-48">
     </div>
 
-    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
-      <table class="min-w-full border-collapse" id="coursesTable">
-        <thead class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
+    <div class="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
+      <table class="min-w-full text-sm text-gray-700 border-collapse" id="coursesTable">
+        <thead class="bg-gray-200 text-gray-800 uppercase text-xs font-semibold border-b border-gray-300">
           <tr>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Nombre</th>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Descripción</th>
-            <th class="px-4 md:px-6 py-3 border-r border-gray-300 text-left font-medium uppercase text-sm md:text-base">Tecnicatura</th>
-            <th class="px-4 md:px-6 py-3 text-left font-medium uppercase text-sm md:text-base">Acciones</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left">Nombre</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left">Descripción</th>
+            <th class="px-6 py-3 border-r border-gray-300 text-left">Tecnicatura</th>
+            <th class="px-6 py-3 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -43,35 +45,39 @@ include 'includes/conn.php'; // Conexión PDO
 
               if ($courses) {
                   foreach ($courses as $i => $course) {
-                      $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-                      echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['name']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['description']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 border-r border-gray-300'>{$course['technical_degree']}</td>";
-                      echo "<td class='px-4 md:px-6 py-4 flex flex-wrap gap-2'>";
+                      $rowClass = $i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                      echo "<tr class='hover:bg-gray-50 {$rowClass} border-b border-gray-200'>";
+                      echo "<td class='px-6 py-3 border-r border-gray-300 font-medium'>{$course['name']}</td>";
+                      echo "<td class='px-6 py-3 border-r border-gray-300'>{$course['description']}</td>";
+                      echo "<td class='px-6 py-3 border-r border-gray-300'>{$course['technical_degree']}</td>";
+                      echo "<td class='px-6 py-3 flex gap-2 justify-center'>";
+
                       echo "<a href='javascript:void(0)' 
-                              onclick='openEditModalCourse(".json_encode($course).")' 
-                              class='text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center w-24 text-sm md:text-base'>
-                              <i class='fa-solid fa-pen mr-1'></i>Editar
-                            </a>";
+                                 onclick='openEditModalCourse(".json_encode($course).")' 
+                                 class='flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md transition w-24'>
+                                 <i class='fa-solid fa-pen mr-1'></i>Editar
+                              </a>";
+
                       echo "<a href='courses_back/delete_course.php?id={$course['course_id']}' 
-                              class='text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center w-24 text-sm md:text-base' 
-                              onclick=\"return confirm('¿Estás seguro de eliminar este curso?')\">
-                              <i class='fa-solid fa-trash mr-1'></i>Eliminar
-                            </a>";
+                                 class='flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md transition w-24' 
+                                 onclick=\"return confirm('¿Estás seguro de eliminar este curso?')\">
+                                 <i class='fa-solid fa-trash mr-1'></i>Eliminar
+                              </a>";
+
                       echo "<a href='javascript:void(0)' 
-                              onclick='openManageGroupsModal({$course['course_id']}, \"{$course['name']}\")' 
-                              class='text-blue-500 hover:text-blue-700 bg-blue-100 px-3 py-1 rounded flex items-center justify-center w-32 text-sm md:text-base'>
-                              <i class='fa-solid fa-layer-group mr-1'></i>Grupos
-                            </a>";      
+                                 onclick='openManageGroupsModal({$course['course_id']}, \"{$course['name']}\")' 
+                                 class='flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md transition w-32'>
+                                 <i class='fa-solid fa-layer-group mr-1'></i>Grupos
+                              </a>";      
+
                       echo "</td>";
                       echo "</tr>";
                   }
               } else {
-                  echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-gray-500'>No hay cursos registrados</td></tr>";
+                  echo "<tr><td colspan='4' class='px-6 py-3 text-center text-gray-500'>No hay cursos registrados</td></tr>";
               }
           } catch (PDOException $e) {
-              echo "<tr><td colspan='5' class='px-4 md:px-6 py-4 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
+              echo "<tr><td colspan='4' class='px-6 py-3 text-center text-red-600'>Error: {$e->getMessage()}</td></tr>";
           }
           ?>
         </tbody>
@@ -79,6 +85,7 @@ include 'includes/conn.php'; // Conexión PDO
     </div>
   </main>
 </div>
+
 
 <?php include 'includes/modals/modals_courses.php'; ?>
 
