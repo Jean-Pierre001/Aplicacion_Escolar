@@ -3,15 +3,17 @@ include '../includes/conn.php';
 date_default_timezone_set('America/Argentina/Salta');
 
 $course_id = $_GET['course_id'] ?? null;
+$group_id = $_GET['group_id'] ?? null;
+
 if (!$course_id) {
-  echo json_encode([]);
-  exit;
+    echo json_encode([]);
+    exit;
 }
 
 $today = (new DateTime())->format('Y-m-d');
 $weekday = strtolower((new DateTime())->format('l'));
 
-// Traemos las materias del curso que tengan clase hoy
+// Traemos las materias del curso (y grupo si aplica) que tengan clase hoy
 $sql = "
     SELECT 
         s.subject_id,
@@ -33,6 +35,16 @@ $sql = "
         AND sa.attendance_date = :today
     WHERE sch.course_id = :course_id
       AND sch.weekday = :weekday
+";
+
+// Filtrado por grupo
+if ($group_id) {
+    $sql .= " AND sch.group_id = :group_id";
+} else {
+    $sql .= " AND sch.group_id IS NULL";
+}
+
+$sql .= "
     GROUP BY s.subject_id
     ORDER BY s.name
 ";
@@ -41,6 +53,7 @@ $stmt = $conn->prepare($sql);
 $stmt->bindValue(':today', $today);
 $stmt->bindValue(':weekday', $weekday);
 $stmt->bindValue(':course_id', $course_id);
+if ($group_id) $stmt->bindValue(':group_id', $group_id);
 $stmt->execute();
 
 $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);

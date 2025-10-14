@@ -4,13 +4,14 @@ include '../includes/conn.php';
 $course_id = $_GET['course_id'] ?? null;
 $subject_id = $_GET['subject_id'] ?? null;
 $attendance_date = $_GET['attendance_date'] ?? date('Y-m-d');
+$group_id = $_GET['group_id'] ?? null;
 
 if (!$course_id || !$subject_id) {
   echo '<p class="p-4 text-gray-500">Faltan parámetros.</p>';
   exit;
 }
 
-// Verificar si ya se tomó asistencia para alumnos o profesor
+// Verificar si ya se tomó asistencia
 $stmtCheck = $conn->prepare("
   SELECT 
     (SELECT COUNT(*) FROM student_attendance sa 
@@ -57,7 +58,7 @@ echo "<div class='overflow-x-auto rounded-lg shadow-lg border border-gray-200'>
       <tbody>";
 
 /* Profesor */
-$stmtTeacher = $conn->prepare("SELECT t.teacher_id, t.first_name, t.last_name FROM teachers t WHERE t.teacher_id = ?");
+$stmtTeacher = $conn->prepare("SELECT teacher_id, first_name, last_name FROM teachers WHERE teacher_id = ?");
 $stmtTeacher->execute([$schedule['teacher_id']]);
 $teacher = $stmtTeacher->fetch();
 if ($teacher) {
@@ -71,9 +72,17 @@ if ($teacher) {
         </tr>";
 }
 
-/* Alumnos */
-$stmtStudents = $conn->prepare("SELECT student_id, first_name, last_name FROM students WHERE course_id = ?");
-$stmtStudents->execute([$course_id]);
+/* Alumnos (filtrado por grupo si aplica) */
+$sqlStudents = "SELECT student_id, first_name, last_name FROM students WHERE course_id = ?";
+$params = [$course_id];
+
+if ($group_id) {
+    $sqlStudents .= " AND group_id = ?";
+    $params[] = $group_id;
+}
+
+$stmtStudents = $conn->prepare($sqlStudents);
+$stmtStudents->execute($params);
 $students = $stmtStudents->fetchAll();
 
 foreach ($students as $i => $student) {

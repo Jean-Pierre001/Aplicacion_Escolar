@@ -9,13 +9,12 @@ include 'includes/conn.php';
 <div class="flex-1 md:ml-64 transition-all duration-300">
   <main class="pt-20 p-4 md:p-6">
 
-    <br>
-    <br>
-    <br>
+    <br><br><br>
 
     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Asistencia de Clase</h1>
 
     <div class="mb-6 flex flex-col md:flex-row flex-wrap items-start md:items-center gap-3 md:gap-4">
+      
       <select id="selectCourse" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
         <option value="">Seleccionar Curso</option>
         <?php
@@ -24,6 +23,10 @@ include 'includes/conn.php';
             echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
         }
         ?>
+      </select>
+
+      <select id="selectGroup" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-auto">
+        <option value="">Seleccionar Grupo</option>
       </select>
 
       <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-auto">
@@ -43,6 +46,7 @@ include 'includes/conn.php';
 
 <script>
 const selectCourse = document.getElementById('selectCourse');
+const selectGroup = document.getElementById('selectGroup');
 const selectSubject = document.getElementById('selectSubject');
 const attendanceDateInput = document.getElementById('attendanceDate');
 const tableContainer = document.getElementById('attendanceTableContainer');
@@ -57,8 +61,59 @@ function setGenerateReportDisabled(disabled) {
   }
 }
 
+function loadGroups() {
+  const courseId = selectCourse.value;
+  selectGroup.innerHTML = '<option value="">Seleccionar Grupo</option>';
+  if (!courseId) return;
+
+  fetch(`api/get_groups.php?course_id=${courseId}`)
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(group => {
+        const opt = document.createElement('option');
+        opt.value = group.group_id;
+        opt.textContent = group.name;
+        selectGroup.appendChild(opt);
+      });
+    })
+    .catch(err => console.error('Error cargando grupos:', err));
+}
+
+function loadSubjects() {
+  const courseId = selectCourse.value;
+  const groupId = selectGroup.value;
+  selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
+  if (!courseId) return;
+
+  fetch(`api/get_subjects.php?course_id=${courseId}&group_id=${groupId}`)
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(subject => {
+        const opt = document.createElement('option');
+        opt.value = subject.subject_id;
+        opt.textContent = subject.subject_name;
+
+        // Colores según estado
+        if (subject.status === 'done') {
+          opt.style.backgroundColor = '#d1fae5';
+          opt.style.color = '#065f46';
+        } else if (subject.status === 'pending') {
+          opt.style.backgroundColor = '#fee2e2';
+          opt.style.color = '#991b1b';
+        } else if (subject.status === 'no_class') {
+          opt.style.backgroundColor = '#f3f4f6';
+          opt.style.color = '#374151';
+        }
+
+        selectSubject.appendChild(opt);
+      });
+    })
+    .catch(err => console.error('Error cargando materias:', err));
+}
+
 function loadAttendance() {
   const courseId = selectCourse.value;
+  const groupId = selectGroup.value;
   const subjectId = selectSubject.value;
   const attendanceDate = attendanceDateInput.value;
 
@@ -68,7 +123,7 @@ function loadAttendance() {
     return;
   }
 
-  fetch(`api/get_attendance.php?course_id=${courseId}&subject_id=${subjectId}&attendance_date=${attendanceDate}`)
+  fetch(`api/get_attendance.php?course_id=${courseId}&group_id=${groupId}&subject_id=${subjectId}&attendance_date=${attendanceDate}`)
     .then(res => res.text())
     .then(html => {
       tableContainer.innerHTML = html;
@@ -95,37 +150,14 @@ function loadAttendance() {
     });
 }
 
-// Cuando cambia el curso, cargar materias y asistencia
 selectCourse.addEventListener('change', () => {
-  const courseId = selectCourse.value;
-  selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
-  if (!courseId) return;
+  loadGroups();
+  loadSubjects();
+  loadAttendance();
+});
 
-  fetch(`api/get_subjects.php?course_id=${courseId}`)
-    .then(res => res.json())
-    .then(data => {
-      data.forEach(subject => {
-        const opt = document.createElement('option');
-        opt.value = subject.subject_id;
-        opt.textContent = subject.subject_name;
-
-        // Colores según estado
-        if (subject.status === 'done') {
-          opt.style.backgroundColor = '#d1fae5';
-          opt.style.color = '#065f46';
-        } else if (subject.status === 'pending') {
-          opt.style.backgroundColor = '#fee2e2';
-          opt.style.color = '#991b1b';
-        } else if (subject.status === 'no_class') {
-          opt.style.backgroundColor = '#f3f4f6';
-          opt.style.color = '#374151';
-        }
-
-        selectSubject.appendChild(opt);
-      });
-    })
-    .catch(err => console.error('Error cargando materias:', err));
-
+selectGroup.addEventListener('change', () => {
+  loadSubjects();
   loadAttendance();
 });
 
@@ -136,12 +168,14 @@ generateReportBtn.addEventListener('click', () => {
   if (generateReportBtn.disabled) return;
 
   const courseId = selectCourse.value;
+  const groupId = selectGroup.value;
   const subjectId = selectSubject.value;
   const attendanceDate = attendanceDateInput.value;
   const rows = document.querySelectorAll('#attendanceTableContainer tbody tr');
 
   let formData = new FormData();
   formData.append('course_id', courseId);
+  formData.append('group_id', groupId);
   formData.append('subject_id', subjectId);
   formData.append('attendance_date', attendanceDate);
 
