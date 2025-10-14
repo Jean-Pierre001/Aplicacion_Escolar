@@ -110,45 +110,61 @@ document.addEventListener('DOMContentLoaded', function() {
     selectGroup.addEventListener('change', loadSubjects);
 
     function loadReport() {
-        const courseId = selectCourse.value;
-        const groupId = selectGroup.value || '';
-        const subjectId = selectSubject.value;
-        const date = selectDate.value;
+      const courseId = selectCourse.value;
+      const groupId = selectGroup.value || '';
+      const subjectId = selectSubject.value;
+      const date = selectDate.value;
 
-        if (!courseId || !subjectId || !date) return;
+      if (!courseId || !subjectId || !date) return;
 
-        fetch(`api/get_report.php?course_id=${courseId}&group_id=${groupId}&subject_id=${subjectId}&date=${date}`)
-            .then(res => res.text())
-            .then(html => {
-                tableContainer.innerHTML = html;
+      fetch(`api/get_report.php?course_id=${courseId}&group_id=${groupId}&subject_id=${subjectId}&date=${date}`)
+          .then(res => res.text())
+          .then(html => {
+              tableContainer.innerHTML = html;
 
-                // 🔹 Agregamos el evento al botón Guardar una vez que se carga el reporte
-                const saveBtn = document.getElementById('saveAttendanceBtn');
-                if (saveBtn) {
-                    saveBtn.addEventListener('click', function() {
-                        const form = document.getElementById('attendanceForm');
-                        const formData = new FormData(form);
+              const saveBtn = document.getElementById('saveAttendanceBtn');
 
-                        fetch('attendance_back/update_attendance_bulk.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('✅ Cambios guardados correctamente');
-                                loadReport(); // recarga el reporte actualizado
-                            } else {
-                                alert('❌ Error: ' + (data.error || 'No se pudieron guardar los cambios'));
-                            }
-                        })
-                        .catch(err => {
-                            alert('⚠️ Error en la conexión con el servidor');
-                            console.error(err);
-                        });
-                    });
-                }
-            });
+              if (saveBtn) {
+                  // 🔹 Comparamos la fecha seleccionada con la fecha actual
+                  const selectedDate = new Date(date);
+                  const today = new Date();
+                  today.setHours(0,0,0,0); // ignorar horas, minutos y segundos
+                  if (selectedDate < today) {
+                      saveBtn.disabled = true;
+                      saveBtn.classList.add('opacity-50', 'cursor-not-allowed'); // opcional: efecto visual
+                      saveBtn.title = "No se puede modificar asistencias de días anteriores";
+                      return; // no agregamos el evento
+                  }
+
+                  // Si la fecha es hoy o futura, habilitamos
+                  saveBtn.disabled = false;
+                  saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                  saveBtn.title = "";
+
+                  saveBtn.addEventListener('click', function() {
+                      const form = document.getElementById('attendanceForm');
+                      const formData = new FormData(form);
+
+                      fetch('attendance_back/update_attendance_bulk.php', {
+                          method: 'POST',
+                          body: formData
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                          if (data.success) {
+                              alert('✅ Cambios guardados correctamente');
+                              loadReport(); // recarga el reporte actualizado
+                          } else {
+                              alert('❌ Error: ' + (data.error || 'No se pudieron guardar los cambios'));
+                          }
+                      })
+                      .catch(err => {
+                          alert('⚠️ Error en la conexión con el servidor');
+                          console.error(err);
+                      });
+                  });
+              }
+          });
     }
 
     loadReportBtn.addEventListener('click', loadReport);

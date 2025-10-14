@@ -44,7 +44,7 @@
 <!-- MODAL PERMISOS -->
 <div id="permissionsModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-60 z-50">
   <div class="bg-white rounded-2xl w-11/12 max-w-6xl shadow-2xl overflow-hidden flex flex-col border border-gray-200">
-    
+
     <!-- Encabezado -->
     <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white px-6 py-4 flex justify-between items-center">
       <h2 class="text-2xl font-semibold tracking-wide">
@@ -53,88 +53,78 @@
       <button onclick="closeModal('permissionsModal')" class="text-white hover:text-yellow-400 transition text-2xl">&times;</button>
     </div>
 
-    <!-- Cuerpo dividido -->
-    <div class="flex h-[600px]">
-      
-      <!-- Sidebar de Permisos -->
-      <div class="w-1/3 bg-gradient-to-b from-blue-800 to-blue-900 text-white p-5 overflow-y-auto">
-        <form id="permissionsForm" method="POST" action="roles_back/save_permissions.php" class="space-y-3">
-          <input type="hidden" name="role_id" id="permissionsRoleId">
+    <!-- Cuerpo -->
+    <div class="flex flex-col h-[600px] bg-gradient-to-b from-blue-800 to-blue-900 text-white overflow-y-auto p-5">
+      <form id="permissionsForm" method="POST" action="roles_back/save_permissions.php" class="space-y-4">
+        <input type="hidden" name="role_id" id="permissionsRoleId">
 
-          <!-- Dashboard -->
-          <div>
-            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
-              <div class="flex items-center">
-                <i class="fas fa-home mr-3 text-yellow-400"></i>
-                <span class="font-medium">Dashboard</span>
-              </div>
-              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="dashboard">
-            </label>
-            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
-              <label class="flex items-center gap-2">
-                <input type="checkbox" name="permissions[]" value="index.php:view" class="child-dashboard accent-yellow-400"> Ver
-              </label>
+        <!-- Dashboard -->
+        <div>
+          <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+            <div class="flex items-center">
+              <i class="fas fa-home mr-3 text-yellow-400"></i>
+              <span class="font-medium">Dashboard</span>
             </div>
-          </div>
-
-          <!-- Asistencias -->
-          <div>
-            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
-              <div class="flex items-center">
-                <i class="fas fa-clipboard-check mr-3 text-yellow-400"></i>
-                <span class="font-medium">Asistencias</span>
-              </div>
-              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="attendance">
+            <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="dashboard">
+          </label>
+          <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" name="permissions[]" value="index.php:view" class="child-dashboard accent-yellow-400"> Ver
             </label>
-            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance.php:view" class="child-attendance accent-yellow-400"> Toma de Asistencia</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_report.php:view" class="child-attendance accent-yellow-400"> Consulta de Asistencia</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_reports_list.php:view" class="child-attendance accent-yellow-400"> Lista de Reportes</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="student_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Estudiante</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Docentes</label>
-            </div>
           </div>
+        </div>
 
-          <!-- Gestión -->
-          <div>
-            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
-              <div class="flex items-center">
-                <i class="fas fa-cogs mr-3 text-yellow-400"></i>
-                <span class="font-medium">Gestión</span>
-              </div>
-              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="management">
-            </label>
-            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers.php:view" class="child-management accent-yellow-400"> Docentes</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="students.php:view" class="child-management accent-yellow-400"> Alumnos</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="courses.php:view" class="child-management accent-yellow-400"> Cursos</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="subjects.php:view" class="child-management accent-yellow-400"> Materias</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="schedules.php:view" class="child-management accent-yellow-400"> Horarios</label>
+        <!-- Asistencias -->
+        <div>
+          <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+            <div class="flex items-center">
+              <i class="fas fa-clipboard-check mr-3 text-yellow-400"></i>
+              <span class="font-medium">Asistencias</span>
             </div>
+            <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="attendance">
+          </label>
+          <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance.php:view" class="child-attendance accent-yellow-400"> Toma de Asistencia</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_report.php:view" class="child-attendance accent-yellow-400"> Consulta de Asistencia</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_reports_list.php:view" class="child-attendance accent-yellow-400"> Lista de Reportes</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="student_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Estudiante</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers_attendance.php:view" class="child-attendance accent-yellow-400"> Consulta Docentes</label>
           </div>
+        </div>
 
-          <!-- Administrador -->
-          <div>
-            <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
-              <div class="flex items-center">
-                <i class="fas fa-user-shield mr-3 text-yellow-400"></i>
-                <span class="font-medium">Administrador</span>
-              </div>
-              <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="admin">
-            </label>
-            <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="users.php:view" class="child-admin accent-yellow-400"> Usuarios</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="roles.php:view" class="child-admin accent-yellow-400"> Roles</label>
+        <!-- Gestión -->
+        <div>
+          <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+            <div class="flex items-center">
+              <i class="fas fa-cogs mr-3 text-yellow-400"></i>
+              <span class="font-medium">Gestión</span>
             </div>
+            <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="management">
+          </label>
+          <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="teachers.php:view" class="child-management accent-yellow-400"> Docentes</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="students.php:view" class="child-management accent-yellow-400"> Alumnos</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="courses.php:view" class="child-management accent-yellow-400"> Cursos</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="subjects.php:view" class="child-management accent-yellow-400"> Materias</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="schedules.php:view" class="child-management accent-yellow-400"> Horarios</label>
           </div>
-        </form>
-      </div>
+        </div>
 
-      <!-- Panel derecho: vista previa / contenido futuro si lo aceptan -->
-      <div class="flex-1 bg-gray-50 p-8 flex flex-col items-center justify-center text-gray-600 border-l border-gray-200">
-        <i class="fas fa-cogs text-6xl text-blue-700 mb-4"></i>
-        <h3 class="text-2xl font-semibold mb-2">Zona de Configuración</h3>
-      </div>
+        <!-- Administrador -->
+        <div>
+          <label class="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-blue-700 transition">
+            <div class="flex items-center">
+              <i class="fas fa-user-shield mr-3 text-yellow-400"></i>
+              <span class="font-medium">Administrador</span>
+            </div>
+            <input type="checkbox" class="accent-yellow-400 parent-checkbox" data-target="admin">
+          </label>
+          <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="users.php:view" class="child-admin accent-yellow-400"> Usuarios</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="roles.php:view" class="child-admin accent-yellow-400"> Roles</label>
+          </div>
+        </div>
+      </form>
     </div>
 
     <!-- Pie de acciones -->
