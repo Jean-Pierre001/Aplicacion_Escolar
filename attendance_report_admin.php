@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = selectDate.value;
 
         if (!courseId || !subjectId || !date) return;
-
+ 
         fetch(`api/get_report.php?course_id=${courseId}&group_id=${groupId}&subject_id=${subjectId}&date=${date}`)
             .then(res => res.text())
             .then(html => {
