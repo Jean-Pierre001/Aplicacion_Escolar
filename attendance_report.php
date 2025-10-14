@@ -79,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectSubject.appendChild(option);
                 });
 
-                // Si venimos de la URL, seleccionar la materia automáticamente
                 if (window.subjectParam) {
                     selectSubject.value = window.subjectParam;
                     loadReport();
@@ -103,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectGroup.appendChild(option);
                 });
 
-                // Si venimos de la URL, seleccionar el grupo automáticamente
                 if (window.groupParam) selectGroup.value = window.groupParam;
                 loadSubjects();
             });
@@ -121,12 +119,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch(`api/get_report.php?course_id=${courseId}&group_id=${groupId}&subject_id=${subjectId}&date=${date}`)
             .then(res => res.text())
-            .then(html => tableContainer.innerHTML = html);
+            .then(html => {
+                tableContainer.innerHTML = html;
+
+                // 🔹 Agregamos el evento al botón Guardar una vez que se carga el reporte
+                const saveBtn = document.getElementById('saveAttendanceBtn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function() {
+                        const form = document.getElementById('attendanceForm');
+                        const formData = new FormData(form);
+
+                        fetch('attendance_back/update_attendance_bulk.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('✅ Cambios guardados correctamente');
+                                loadReport(); // recarga el reporte actualizado
+                            } else {
+                                alert('❌ Error: ' + (data.error || 'No se pudieron guardar los cambios'));
+                            }
+                        })
+                        .catch(err => {
+                            alert('⚠️ Error en la conexión con el servidor');
+                            console.error(err);
+                        });
+                    });
+                }
+            });
     }
 
     loadReportBtn.addEventListener('click', loadReport);
 
-    // --- 🔽 Inicialización desde URL ---
+    // --- Inicialización desde URL ---
     const params = new URLSearchParams(window.location.search);
     const courseParam = params.get('course_id');
     const groupParam = params.get('group_id');
@@ -140,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dateParam) selectDate.value = dateParam;
 
     if (courseParam) {
-        // Esto activará el fetch de grupos y materias
         const event = new Event('change');
         selectCourse.dispatchEvent(event);
     }
