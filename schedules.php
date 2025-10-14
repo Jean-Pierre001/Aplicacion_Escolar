@@ -23,22 +23,26 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterTeacher" placeholder="Filtrar por Docente" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterWeekday" placeholder="Filtrar por Día" class="px-3 py-2 border rounded w-48">
       <input type="text" id="filterShift" placeholder="Filtrar por Turno" class="px-3 py-2 border rounded w-48">
+      <input type="text" id="filterClassroom" placeholder="Filtrar por Aula" class="px-3 py-2 border rounded w-48">
     </div>
 
     <?php
     try {
-        // Consulta incluyendo turno
         $sql = "SELECT sch.schedule_id, 
                        c.course_id, c.name AS course_name, 
                        g.group_id, g.name AS group_name,
                        sub.subject_id, sub.name AS subject_name, sub.turno AS subject_shift,
                        t.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last,
+                       tsub.teacher_id AS sub_teacher_id, tsub.first_name AS sub_teacher_first, tsub.last_name AS sub_teacher_last,
+                       cl.classroom_id, cl.name AS classroom_name,
                        sch.weekday, sch.start_time, sch.end_time
                 FROM schedules sch
                 LEFT JOIN courses c ON sch.course_id = c.course_id
                 LEFT JOIN groups g ON sch.group_id = g.group_id
                 LEFT JOIN subjects sub ON sch.subject_id = sub.subject_id
                 LEFT JOIN teachers t ON sch.teacher_id = t.teacher_id
+                LEFT JOIN teachers tsub ON sch.substitute_teacher_id = tsub.teacher_id
+                LEFT JOIN classrooms cl ON sch.classroom_id = cl.classroom_id
                 WHERE sch.weekday != 'Saturday'
                 ORDER BY c.course_id, g.group_id, sch.weekday, sch.start_time";
 
@@ -46,7 +50,6 @@ include 'includes/conn.php'; // Conexión PDO
         $schedules = $stmt->fetchAll();
 
         if ($schedules) {
-            // Agrupar por curso y grupo
             $grouped = [];
             foreach ($schedules as $sch) {
                 $course = $sch['course_name'];
@@ -54,7 +57,6 @@ include 'includes/conn.php'; // Conexión PDO
                 $grouped[$course][$group][] = $sch;
             }
 
-            // Array para traducir días
             $weekdays_es = [
                 'monday'    => 'Lunes',
                 'tuesday'   => 'Martes',
@@ -85,6 +87,8 @@ include 'includes/conn.php'; // Conexión PDO
                               <th class='px-4 py-2 border'>Materia</th>
                               <th class='px-4 py-2 border'>Turno</th>
                               <th class='px-4 py-2 border'>Docente</th>
+                              <th class='px-4 py-2 border'>Docente Suplente</th>
+                              <th class='px-4 py-2 border'>Aula</th>
                               <th class='px-4 py-2 border'>Día</th>
                               <th class='px-4 py-2 border'>Hora Inicio</th>
                               <th class='px-4 py-2 border'>Hora Fin</th>
@@ -95,11 +99,15 @@ include 'includes/conn.php'; // Conexión PDO
                     foreach ($courseSchedules as $i => $sch) {
                         $rowClass = $i % 2 === 0 ? 'bg-gray-50' : 'bg-white';
                         $weekday_es = $weekdays_es[strtolower($sch['weekday'])] ?? ucfirst($sch['weekday']);
+                        $sub_teacher_name = $sch['sub_teacher_id'] ? "{$sch['sub_teacher_last']} {$sch['sub_teacher_first']}" : '-';
+                        $classroom_name = $sch['classroom_name'] ?? '-';
 
                         echo "<tr class='hover:bg-gray-100 {$rowClass}'>";
                         echo "<td class='px-4 py-2 border'>{$sch['subject_name']}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['subject_shift']}</td>";
-                        echo "<td class='px-4 py-2 border'>{$sch['teacher_last']}  {$sch['teacher_first']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sch['teacher_last']} {$sch['teacher_first']}</td>";
+                        echo "<td class='px-4 py-2 border'>{$sub_teacher_name}</td>";
+                        echo "<td class='px-4 py-2 border'>{$classroom_name}</td>";
                         echo "<td class='px-4 py-2 border'>{$weekday_es}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['start_time']}</td>";
                         echo "<td class='px-4 py-2 border'>{$sch['end_time']}</td>";
@@ -142,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterTeacher = document.getElementById('filterTeacher');
     const filterWeekday = document.getElementById('filterWeekday');
     const filterShift = document.getElementById('filterShift');
+    const filterClassroom = document.getElementById('filterClassroom');
     const tables = document.querySelectorAll('#schedulesTable');
 
     function filterRows() {
@@ -149,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const teacherVal = filterTeacher.value.toLowerCase();
         const weekdayVal = filterWeekday.value.toLowerCase();
         const shiftVal = filterShift.value.toLowerCase();
+        const classroomVal = filterClassroom.value.toLowerCase();
 
         tables.forEach(table => {
             const rows = table.querySelectorAll('tbody tr');
@@ -157,13 +167,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const subject = cells[0].textContent.toLowerCase();
                 const shift = cells[1].textContent.toLowerCase();
                 const teacher = cells[2].textContent.toLowerCase();
-                const weekday = cells[3].textContent.toLowerCase();
+                const weekday = cells[5].textContent.toLowerCase();
+                const classroom = cells[4].textContent.toLowerCase();
 
                 if (
                     subject.includes(subjectVal) &&
                     teacher.includes(teacherVal) &&
                     weekday.includes(weekdayVal) &&
-                    shift.includes(shiftVal)
+                    shift.includes(shiftVal) &&
+                    classroom.includes(classroomVal)
                 ) {
                     row.style.display = '';
                 } else {
@@ -177,5 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
     filterTeacher.addEventListener('input', filterRows);
     filterWeekday.addEventListener('input', filterRows);
     filterShift.addEventListener('input', filterRows);
+    filterClassroom.addEventListener('input', filterRows);
 });
 </script>

@@ -10,9 +10,7 @@
             <option value="">Seleccionar curso</option>
             <?php
             $courses = $conn->query("SELECT course_id, name FROM courses")->fetchAll();
-            foreach ($courses as $c) {
-                echo "<option value='{$c['course_id']}'>{$c['name']}</option>";
-            }
+            foreach ($courses as $c) echo "<option value='{$c['course_id']}'>{$c['name']}</option>";
             ?>
           </select>
         </div>
@@ -32,13 +30,12 @@
           </select>
         </div>
 
-        <!-- Campo Docente con búsqueda -->
         <div class="flex-1">
           <label class="block text-gray-700 mb-1">Docente</label>
           <div class="flex gap-2">
-            <input type="hidden" name="teacher_id" id="selected_teacher_id">
-            <input type="text" id="selected_teacher_name" class="w-full border px-2 py-1 rounded bg-gray-100" placeholder="Seleccionar docente" readonly>
-            <button type="button" onclick="openModal('teacherSearchModal')" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <input type="hidden" name="teacher_id" id="add_selected_teacher_id">
+            <input type="text" id="add_selected_teacher_name" class="w-full border px-2 py-1 rounded bg-gray-100" placeholder="Seleccionar docente" readonly>
+            <button type="button" onclick="openTeacherModal('add')" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
               Buscar
             </button>
           </div>
@@ -46,6 +43,29 @@
       </div>
 
       <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block text-gray-700 mb-1">Docente Suplente (Opcional)</label>
+          <div class="flex gap-2">
+            <input type="hidden" name="substitute_teacher_id" id="add_selected_substitute_id">
+            <input type="text" id="add_selected_substitute_name" class="w-full border px-2 py-1 rounded bg-gray-100" placeholder="Seleccionar suplente" readonly>
+            <button type="button" onclick="openTeacherModal('add_sub')" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Buscar
+            </button>
+          </div>
+        </div>
+        <div class="flex-1">
+          <label class="block text-gray-700 mb-1">Aula (Opcional)</label>
+          <select name="classroom_id" id="add_classroom_id" class="w-full border px-2 py-1 rounded">
+            <option value="">Seleccionar aula</option>
+            <?php
+            $classrooms = $conn->query("SELECT classroom_id, name FROM classrooms")->fetchAll();
+            foreach ($classrooms as $cl) echo "<option value='{$cl['classroom_id']}'>{$cl['name']}</option>";
+            ?>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex space-x-4 mt-2">
         <div class="flex-1">
           <label class="block text-gray-700 mb-1">Día</label>
           <select name="weekday" class="w-full border px-2 py-1 rounded" required>
@@ -87,9 +107,7 @@
         <div class="flex-1">
           <label class="block text-gray-700 mb-1">Curso</label>
           <select name="course_id" id="edit_course_id" class="w-full border px-2 py-1 rounded" required>
-            <?php foreach ($courses as $c) {
-                echo "<option value='{$c['course_id']}'>{$c['name']}</option>";
-            } ?>
+            <?php foreach ($courses as $c) echo "<option value='{$c['course_id']}'>{$c['name']}</option>"; ?>
           </select>
         </div>
         <div class="flex-1">
@@ -108,23 +126,39 @@
           </select>
         </div>
 
-        <!-- Campo Docente con búsqueda -->
         <div class="flex-1">
           <label class="block text-gray-700 mb-1">Docente</label>
           <div class="flex gap-2">
             <input type="hidden" name="teacher_id" id="edit_selected_teacher_id">
             <input type="text" id="edit_selected_teacher_name" class="w-full border px-2 py-1 rounded bg-gray-100" placeholder="Seleccionar docente" readonly>
-            <button type="button" onclick="openModal('teacherSearchModal')" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Buscar
-            </button>
+            <button type="button" onclick="openTeacherModal('edit')" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Buscar</button>
           </div>
         </div>
       </div>
 
       <div class="flex space-x-4">
         <div class="flex-1">
+          <label class="block text-gray-700 mb-1">Docente Suplente (Opcional)</label>
+          <div class="flex gap-2">
+            <input type="hidden" name="substitute_teacher_id" id="edit_selected_substitute_id">
+            <input type="text" id="edit_selected_substitute_name" class="w-full border px-2 py-1 rounded bg-gray-100" placeholder="Seleccionar suplente" readonly>
+            <button type="button" onclick="openTeacherModal('edit_sub')" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Buscar</button>
+          </div>
+        </div>
+        <div class="flex-1">
+          <label class="block text-gray-700 mb-1">Aula (Opcional)</label>
+          <select name="classroom_id" id="edit_classroom_id" class="w-full border px-2 py-1 rounded">
+            <option value="">Seleccionar aula</option>
+            <?php foreach ($classrooms as $cl) echo "<option value='{$cl['classroom_id']}'>{$cl['name']}</option>"; ?>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex space-x-4 mt-2">
+        <div class="flex-1">
           <label class="block text-gray-700 mb-1">Día</label>
           <select name="weekday" id="edit_weekday" class="w-full border px-2 py-1 rounded" required>
+            <option value="">Seleccionar día</option>
             <option value="monday">Lunes</option>
             <option value="tuesday">Martes</option>
             <option value="wednesday">Miércoles</option>
@@ -145,7 +179,7 @@
 
       <div class="flex justify-end space-x-2 mt-4">
         <button type="button" onclick="closeModal('editScheduleModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
-        <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Actualizar</button>
+        <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Guardar Cambios</button>
       </div>
     </form>
   </div>
@@ -184,31 +218,51 @@
 </div>
 
 <script>
-    // Abrir / cerrar modals
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    // Modal edición con datos cargados
-    function openEditModalSchedule(schedule) {
-    document.getElementById('edit_schedule_id').value = schedule.schedule_id;
-    document.getElementById('edit_course_id').value = schedule.course_id;
-    document.getElementById('edit_weekday').value = schedule.weekday;
-    document.getElementById('edit_start_time').value = schedule.start_time;
-    document.getElementById('edit_end_time').value = schedule.end_time;
-    document.getElementById('edit_selected_teacher_id').value = schedule.teacher_id;
-    document.getElementById('edit_selected_teacher_name').value = schedule.teacher_first + ' ' + schedule.teacher_last;
-
-    // Cargar grupos y materias y luego seleccionar los correctos
-    loadGroupsAndSubjects(schedule.course_id, 'edit_group_id', 'edit_subject_id', schedule.group_id, schedule.subject_id);
-
-    openModal('editScheduleModal');
+  // -------------------------
+  // Abrir / cerrar modales
+  // -------------------------
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if(modal) modal.classList.remove('hidden');
+  }
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if(modal) modal.classList.add('hidden');
   }
 
-  // Función para cargar grupos y materias según curso
+  // -------------------------
+  // Variables globales
+  // -------------------------
+  let currentTeacherField = null; // Para docente/suplente
+
+  // -------------------------
+  // Modal de búsqueda de docentes
+  // -------------------------
+  function openTeacherModal(type) {
+    currentTeacherField = type; // 'add', 'edit', 'add_sub', 'edit_sub'
+    openModal('teacherSearchModal');
+  }
+
+  function selectTeacher(id, name) {
+    if(currentTeacherField === 'add'){
+      document.getElementById('add_selected_teacher_id').value = id;
+      document.getElementById('add_selected_teacher_name').value = name;
+    } else if(currentTeacherField === 'edit'){
+      document.getElementById('edit_selected_teacher_id').value = id;
+      document.getElementById('edit_selected_teacher_name').value = name;
+    } else if(currentTeacherField === 'add_sub'){
+      document.getElementById('add_selected_substitute_id').value = id;
+      document.getElementById('add_selected_substitute_name').value = name;
+    } else if(currentTeacherField === 'edit_sub'){
+      document.getElementById('edit_selected_substitute_id').value = id;
+      document.getElementById('edit_selected_substitute_name').value = name;
+    }
+    closeModal('teacherSearchModal');
+  }
+
+  // -------------------------
+  // Cargar grupos y materias según curso
+  // -------------------------
   function loadGroupsAndSubjects(courseId, groupSelectId, subjectSelectId, selectedGroupId = null, selectedSubjectId = null) {
     // Grupos
     fetch('schedules_back/get_groups.php?course_id=' + courseId)
@@ -219,7 +273,8 @@
           let selected = selectedGroupId && selectedGroupId == g.group_id ? 'selected' : '';
           options += `<option value="${g.group_id}" ${selected}>${g.name}</option>`;
         });
-        document.getElementById(groupSelectId).innerHTML = options;
+        const groupSelect = document.getElementById(groupSelectId);
+        if(groupSelect) groupSelect.innerHTML = options;
       });
 
     // Materias
@@ -231,56 +286,102 @@
           let selected = selectedSubjectId && selectedSubjectId == s.subject_id ? 'selected' : '';
           options += `<option value="${s.subject_id}" ${selected}>${s.name}</option>`;
         });
-        document.getElementById(subjectSelectId).innerHTML = options;
+        const subjectSelect = document.getElementById(subjectSelectId);
+        if(subjectSelect) subjectSelect.innerHTML = options;
       });
   }
 
-  // Eventos para selects de curso
-  document.getElementById('add_course_id').addEventListener('change', function() {
-    loadGroupsAndSubjects(this.value, 'add_group_id', 'add_subject_id');
-  });
+  // -------------------------
+  // Abrir modal de edición con datos
+  // -------------------------
+  function openEditModalSchedule(schedule) {
+      // Campos básicos
+      document.getElementById('edit_schedule_id').value = schedule.schedule_id;
+      document.getElementById('edit_course_id').value = schedule.course_id;
+      document.getElementById('edit_weekday').value = schedule.weekday;
+      document.getElementById('edit_start_time').value = schedule.start_time;
+      document.getElementById('edit_end_time').value = schedule.end_time;
 
-  document.getElementById('edit_course_id').addEventListener('change', function() {
-    loadGroupsAndSubjects(this.value, 'edit_group_id', 'edit_subject_id');
-  });
+      // Docente titular
+      document.getElementById('edit_selected_teacher_id').value = schedule.teacher_id;
+      document.getElementById('edit_selected_teacher_name').value = schedule.teacher_first + ' ' + schedule.teacher_last;
 
+      // Docente suplente
+      document.getElementById('edit_selected_substitute_id').value = schedule.sub_teacher_id || '';
+      document.getElementById('edit_selected_substitute_name').value =
+          schedule.sub_teacher_last && schedule.sub_teacher_first
+          ? schedule.sub_teacher_last + ' ' + schedule.sub_teacher_first
+          : '';
+
+      // Aula
+      document.getElementById('edit_classroom_id').value = schedule.classroom_id || '';
+
+      // Cargar grupos y materias y seleccionar los correctos
+      loadGroupsAndSubjects(
+          schedule.course_id,
+          'edit_group_id',
+          'edit_subject_id',
+          schedule.group_id,
+          schedule.subject_id
+      );
+
+      // Abrir modal
+      openModal('editScheduleModal');
+  }
+
+  // -------------------------
+  // Eventos de selects de curso
+  // -------------------------
+  const addCourseSelect = document.getElementById('add_course_id');
+  if(addCourseSelect){
+    addCourseSelect.addEventListener('change', function() {
+      loadGroupsAndSubjects(this.value, 'add_group_id', 'add_subject_id');
+    });
+  }
+
+  const editCourseSelect = document.getElementById('edit_course_id');
+  if(editCourseSelect){
+    editCourseSelect.addEventListener('change', function() {
+      loadGroupsAndSubjects(this.value, 'edit_group_id', 'edit_subject_id');
+    });
+  }
+
+  // -------------------------
   // Búsqueda dinámica de docentes
-  document.getElementById('btnSearchTeacher').addEventListener('click', function() {
-    const last = document.getElementById('searchTeacherLast').value;
-    const first = document.getElementById('searchTeacherFirst').value;
+  // -------------------------
+  const btnSearchTeacher = document.getElementById('btnSearchTeacher');
+  if(btnSearchTeacher){
+    btnSearchTeacher.addEventListener('click', function() {
+      const last = document.getElementById('searchTeacherLast').value;
+      const first = document.getElementById('searchTeacherFirst').value;
 
-    fetch(`schedules_back/search_teachers.php?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`)
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.getElementById('teacherResults');
-        tbody.innerHTML = '';
+      fetch(`schedules_back/search_teachers.php?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('teacherResults');
+          tbody.innerHTML = '';
 
-        if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="3" class="text-center text-gray-500 py-3">No se encontraron docentes</td></tr>`;
-          return;
-        }
+          if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-gray-500 py-3">No se encontraron docentes</td></tr>`;
+            return;
+          }
 
-        data.forEach(t => {
-          const row = document.createElement('tr');
-          row.classList.add('hover:bg-gray-50');
-          row.innerHTML = `
-            <td class="px-4 py-2 border">${t.last_name}</td>
-            <td class="px-4 py-2 border">${t.first_name}</td>
-            <td class="px-4 py-2 border text-center">
-              <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-                onclick="selectTeacher(${t.teacher_id}, '${t.last_name} ${t.first_name}')">
-                Seleccionar
-              </button>
-            </td>`;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(err => console.error(err));
-  });
-
-  function selectTeacher(id, name) {
-    document.getElementById('selected_teacher_id').value = id;
-    document.getElementById('selected_teacher_name').value = name;
-    closeModal('teacherSearchModal');
+          data.forEach(t => {
+            const row = document.createElement('tr');
+            row.classList.add('hover:bg-gray-50');
+            row.innerHTML = `
+              <td class="px-4 py-2 border">${t.last_name}</td>
+              <td class="px-4 py-2 border">${t.first_name}</td>
+              <td class="px-4 py-2 border text-center">
+                <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                  onclick="selectTeacher(${t.teacher_id}, '${t.last_name} ${t.first_name}')">
+                  Seleccionar
+                </button>
+              </td>`;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(err => console.error(err));
+    });
   }
 </script>
