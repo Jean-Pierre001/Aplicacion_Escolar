@@ -122,6 +122,7 @@
           <div class="ml-8 mt-2 space-y-2 text-sm text-gray-200">
             <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="users.php:view" class="child-admin accent-yellow-400"> Usuarios</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="roles.php:view" class="child-admin accent-yellow-400"> Roles</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="attendance_report_admin.php:view" class="child-admin accent-yellow-400"> Consulta Admin</label> 
           </div>
         </div>
       </form>

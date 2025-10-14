@@ -143,6 +143,9 @@ try {
           <?php if(isset($permissions['roles.php']) && in_array('view', $permissions['roles.php'])): ?>
           <li><a href="roles.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-id-badge mr-2 text-yellow-400"></i> Roles</a></li>
           <?php endif; ?>
+          <?php if(isset($permissions['attendance_report_admin.php']) && in_array('view', $permissions['attendance_report_admin.php'])): ?>
+          <li><a href="attendance_report_admin.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-list mr-2 text-yellow-400"></i> Consulta Admin</a></li>
+          <?php endif; ?>
         </ul>
       </li>
       <?php endif; ?>
