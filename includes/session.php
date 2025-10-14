@@ -16,7 +16,7 @@ $last_name  = $_SESSION['last_name'];
 $email      = $_SESSION['email'];
 $role_id    = $_SESSION['role_id']; 
 
-//--- Verificar permisos de la página ---
+/*--- Verificar permisos de la página ---
 $page = basename($_SERVER['PHP_SELF']); 
 
 try {
@@ -39,3 +39,4 @@ try {
     die("Error al verificar permisos: " . $e->getMessage());
 }
 
+*/

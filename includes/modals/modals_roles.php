@@ -106,6 +106,7 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="students.php:view" class="child-management accent-yellow-400"> Alumnos</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="courses.php:view" class="child-management accent-yellow-400"> Cursos</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="subjects.php:view" class="child-management accent-yellow-400"> Materias</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="classrooms.php:view" class="child-management accent-yellow-400"> Espacios</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="permissions[]" value="schedules.php:view" class="child-management accent-yellow-400"> Horarios</label>
           </div>
         </div>

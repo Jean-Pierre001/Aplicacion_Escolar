@@ -111,6 +111,9 @@ try {
           <?php if(isset($permissions['students.php']) && in_array('view', $permissions['students.php'])): ?>
           <li><a href="students.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-user-graduate mr-2 text-yellow-400"></i> Alumnos</a></li>
           <?php endif; ?>
+          <?php if(isset($permissions['classrooms.php']) && in_array('view', $permissions['classrooms.php'])): ?>
+          <li><a href="classrooms.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-calendar-alt mr-2 text-yellow-400"></i> Espacios</a></li>
+          <?php endif; ?>
           <?php if(isset($permissions['schedules.php']) && in_array('view', $permissions['schedules.php'])): ?>
           <li><a href="schedules.php" class="flex items-center p-2 rounded hover:bg-blue-700 transition-all"><i class="fas fa-calendar-alt mr-2 text-yellow-400"></i> Horarios</a></li>
           <?php endif; ?>
