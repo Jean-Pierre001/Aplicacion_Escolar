@@ -126,15 +126,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
               if (saveBtn) {
                   // 🔹 Comparamos la fecha seleccionada con la fecha actual
-                  const selectedDate = new Date(date);
+                  const [y, m, d] = date.split('-').map(Number);
+                  const selectedDate = new Date(y, m-1, d); // crear fecha local
                   const today = new Date();
-                  today.setHours(0,0,0,0); // ignorar horas, minutos y segundos
+                  today.setHours(0,0,0,0);
+
                   if (selectedDate < today) {
                       saveBtn.disabled = true;
-                      saveBtn.classList.add('opacity-50', 'cursor-not-allowed'); // opcional: efecto visual
+                      saveBtn.classList.add('opacity-50', 'cursor-not-allowed'); 
                       saveBtn.title = "No se puede modificar asistencias de días anteriores";
-                      return; // no agregamos el evento
+                      return;
                   }
+
+                  // habilitar si es hoy o futura
+                  saveBtn.disabled = false;
+                  saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                  saveBtn.title = "";
 
                   // Si la fecha es hoy o futura, habilitamos
                   saveBtn.disabled = false;
