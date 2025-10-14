@@ -23,6 +23,10 @@ include 'includes/conn.php';
         ?>
       </select>
 
+      <select id="selectGroup" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-auto">
+        <option value="">Seleccionar Grupo (opcional)</option>
+      </select>
+
       <select id="selectSubject" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-auto">
         <option value="">Seleccionar Materia</option>
       </select>
@@ -50,32 +54,22 @@ include 'includes/conn.php';
   </main>
 </div>
 
-<!-- Modal de vista previa -->
-<div id="fileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white rounded-lg w-11/12 md:w-4/5 h-4/5 p-4 relative">
-      <button id="closeModal" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Cerrar</button>
-      <div id="modalContent" class="w-full h-full flex items-center justify-center"></div>
-  </div>
-</div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const selectCourse = document.getElementById('selectCourse');
+    const selectGroup = document.getElementById('selectGroup');
     const selectSubject = document.getElementById('selectSubject');
     const selectDate = document.getElementById('selectDate');
     const loadReportBtn = document.getElementById('loadReport');
     const tableContainer = document.getElementById('reportTableContainer');
-    const modal = document.getElementById('fileModal');
-    const modalContent = document.getElementById('modalContent');
-    const closeModal = document.getElementById('closeModal');
 
-    // Cargar materias por curso
-    selectCourse.addEventListener('change', () => {
+    function loadSubjects() {
         const courseId = selectCourse.value;
+        const groupId = selectGroup.value || '';
         selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
         if (!courseId) return;
 
-        fetch(`api/get_subjects_report.php?course_id=${courseId}`)
+        fetch(`api/get_subjects_report.php?course_id=${courseId}&group_id=${groupId}`)
             .then(res => res.json())
             .then(data => {
                 data.forEach(subject => {
@@ -84,151 +78,71 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.textContent = subject.name;
                     selectSubject.appendChild(option);
                 });
+
+                // Si venimos de la URL, seleccionar la materia automáticamente
+                if (window.subjectParam) {
+                    selectSubject.value = window.subjectParam;
+                    loadReport();
+                }
+            });
+    }
+
+    selectCourse.addEventListener('change', () => {
+        const courseId = selectCourse.value;
+        selectGroup.innerHTML = '<option value="">Seleccionar Grupo (opcional)</option>';
+        selectSubject.innerHTML = '<option value="">Seleccionar Materia</option>';
+        if (!courseId) return;
+
+        fetch(`api/get_groups.php?course_id=${courseId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group.group_id;
+                    option.textContent = group.name;
+                    selectGroup.appendChild(option);
+                });
+
+                // Si venimos de la URL, seleccionar el grupo automáticamente
+                if (window.groupParam) selectGroup.value = window.groupParam;
+                loadSubjects();
             });
     });
 
-    // Cargar reporte
+    selectGroup.addEventListener('change', loadSubjects);
+
     function loadReport() {
         const courseId = selectCourse.value;
+        const groupId = selectGroup.value || '';
         const subjectId = selectSubject.value;
         const date = selectDate.value;
 
-        if (!courseId || !subjectId || !date) {
-            alert('Seleccione curso, materia y fecha.');
-            return;
-        }
+        if (!courseId || !subjectId || !date) return;
 
-        fetch(`api/get_report.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`)
+        fetch(`api/get_report.php?course_id=${courseId}&group_id=${groupId}&subject_id=${subjectId}&date=${date}`)
             .then(res => res.text())
-            .then(html => tableContainer.innerHTML = html)
-            .then(() => attachSaveHandler());
+            .then(html => tableContainer.innerHTML = html);
     }
+
     loadReportBtn.addEventListener('click', loadReport);
 
-    // Exportar PDF
-    document.getElementById('exportPDF').addEventListener('click', () => {
-        const courseId = selectCourse.value;
-        const subjectId = selectSubject.value;
-        const date = selectDate.value;
-        if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
-        window.open(`attendance_back/export_pdf.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
-    });
-
-    // Exportar Excel
-    document.getElementById('exportExcel').addEventListener('click', () => {
-        const courseId = selectCourse.value;
-        const subjectId = selectSubject.value;
-        const date = selectDate.value;
-        if (!courseId || !subjectId || !date) { alert('Seleccione curso, materia y fecha.'); return; }
-        window.open(`attendance_back/export_excel.php?course_id=${courseId}&subject_id=${subjectId}&date=${date}`, '_blank');
-    });
-
-    // Delegación de eventos para vista previa y eliminar archivo
-    tableContainer.addEventListener('click', function(e) {
-        // Vista previa
-        if(e.target && e.target.classList.contains('previewBtn')){
-            const file = e.target.getAttribute('data-file');
-            const ext = file.split('.').pop().toLowerCase();
-            modalContent.innerHTML = '';
-
-            if(ext === 'pdf'){
-                const iframe = document.createElement('iframe');
-                iframe.src = file;
-                iframe.className = 'w-full h-full';
-                modalContent.appendChild(iframe);
-            } else if(['jpg','jpeg','png','gif','webp'].includes(ext)){
-                const img = document.createElement('img');
-                img.src = file;
-                img.className = 'max-w-full max-h-full object-contain';
-                modalContent.appendChild(img);
-            } else {
-                modalContent.innerHTML = "<p class='text-center text-red-600'>Archivo no visualizable</p>";
-            }
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        // Eliminar archivo
-        if(e.target && (e.target.classList.contains('deleteFileBtn') || e.target.closest('.deleteFileBtn'))){
-            const btn = e.target.closest('.deleteFileBtn');
-            const attendance_id = btn.getAttribute('data-id');
-            const justification_file = btn.getAttribute('data-file');
-
-            if(!confirm('¿Desea eliminar este archivo?')) return;
-
-            fetch('attendance_back/delete_file.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `attendance_id=${attendance_id}&justification_file=${encodeURIComponent(justification_file)}`
-            })
-            .then(res => res.json())
-            .then(resp => {
-                if(resp.success){
-                    alert('Archivo eliminado correctamente');
-                    const td = btn.closest('td');
-                    td.innerHTML = `<input type="file" name="file[${attendance_id}]" />`;
-                } else {
-                    alert('Error: ' + resp.error);
-                }
-            })
-            .catch(err => alert('Error de conexión'));
-        }
-    });
-
-    closeModal.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        modalContent.innerHTML = '';
-    });
-
-    // Guardar cambios
-    function attachSaveHandler() {
-        const saveBtn = document.getElementById('saveAttendanceBtn');
-        if(!saveBtn) return;
-
-        saveBtn.addEventListener('click', () => {
-            const form = document.getElementById('attendanceForm');
-            const formData = new FormData(form);
-
-            fetch('attendance_back/update_attendance_bulk.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(response => {
-                if(response.success) {
-                    alert('Cambios guardados correctamente.');
-                    loadReport();
-                } else {
-                    alert('Error: ' + response.error);
-                }
-            }).catch(err => alert('Error en la solicitud: '+err));
-        });
-    }
-
-    // --- 🔽 Integración: autocompletado desde URL ---
+    // --- 🔽 Inicialización desde URL ---
     const params = new URLSearchParams(window.location.search);
     const courseParam = params.get('course_id');
+    const groupParam = params.get('group_id');
     const subjectParam = params.get('subject_id');
     const dateParam = params.get('date');
+
+    window.groupParam = groupParam;
+    window.subjectParam = subjectParam;
 
     if (courseParam) selectCourse.value = courseParam;
     if (dateParam) selectDate.value = dateParam;
 
-    if (courseParam && subjectParam) {
-        fetch(`api/get_subjects_report.php?course_id=${courseParam}`)
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(subject => {
-                    const option = document.createElement('option');
-                    option.value = subject.subject_id;
-                    option.textContent = subject.name;
-                    selectSubject.appendChild(option);
-                });
-                selectSubject.value = subjectParam;
-                document.getElementById('loadReport').click();
-            });
+    if (courseParam) {
+        // Esto activará el fetch de grupos y materias
+        const event = new Event('change');
+        selectCourse.dispatchEvent(event);
     }
 });
 </script>

@@ -14,12 +14,15 @@ $stmt = $conn->prepare("
         s.subject_id,
         s.name AS subject_name,
         sch.start_time,
-        sch.end_time
+        sch.end_time,
+        g.group_id,
+        g.name AS group_name
     FROM student_attendance sa
     JOIN schedules sch ON sa.schedule_id = sch.schedule_id
     JOIN courses c ON sch.course_id = c.course_id
     JOIN subjects s ON sch.subject_id = s.subject_id
-    GROUP BY sa.attendance_date, c.course_id, s.subject_id, sch.start_time, sch.end_time
+    LEFT JOIN groups g ON sch.group_id = g.group_id
+    GROUP BY sa.attendance_date, c.course_id, s.subject_id, sch.start_time, sch.end_time, g.group_id
     ORDER BY sa.attendance_date DESC
 ");
 $stmt->execute();
@@ -48,6 +51,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <select id="filterSubject" class="px-3 py-2 border rounded w-48">
         <option value="">Filtrar por Materia</option>
       </select>
+
+      <select id="filterGroup" class="px-3 py-2 border rounded w-48">
+        <option value="">Filtrar por Grupo</option>
+      </select>
     </div>
 
     <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200 bg-white">
@@ -57,6 +64,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th class="px-4 md:px-6 py-3 border-r border-blue-500 text-left font-medium uppercase">Fecha</th>
             <th class="px-4 md:px-6 py-3 border-r border-blue-500 text-left font-medium uppercase">Curso</th>
             <th class="px-4 md:px-6 py-3 border-r border-blue-500 text-left font-medium uppercase">Materia</th>
+            <th class="px-4 md:px-6 py-3 border-r border-blue-500 text-left font-medium uppercase">Grupo</th>
             <th class="px-4 md:px-6 py-3 border-r border-blue-500 text-left font-medium uppercase">Turno</th>
             <th class="px-4 md:px-6 py-3 text-left font-medium uppercase">Acciones</th>
           </tr>
@@ -70,19 +78,22 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             ?>
             <tr class="hover:bg-gray-100 transition <?php echo $rowClass; ?>" 
                 data-course="<?php echo $report['course_id']; ?>" 
-                data-subject="<?php echo $report['subject_id']; ?>">
+                data-subject="<?php echo $report['subject_id']; ?>"
+                data-group="<?php echo $report['group_id'] ?? ''; ?>">
               <td class="px-4 md:px-6 py-4 border-r border-gray-200" 
                   data-raw="<?php echo $report['attendance_date']; ?>">
                   <?php echo $fecha; ?>
               </td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo htmlspecialchars($report['course_name']); ?></td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo htmlspecialchars($report['subject_name']); ?></td>
+              <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo htmlspecialchars($report['group_name'] ?? '-'); ?></td>
               <td class="px-4 md:px-6 py-4 border-r border-gray-200"><?php echo $turno; ?></td>
               <td class="px-4 md:px-6 py-4 flex flex-wrap gap-2">
                   <form method="GET" action="attendance_report.php" class="inline">
                       <input type="hidden" name="course_id" value="<?php echo $report['course_id']; ?>">
                       <input type="hidden" name="subject_id" value="<?php echo $report['subject_id']; ?>">
                       <input type="hidden" name="date" value="<?php echo date('Y-m-d', strtotime($report['attendance_date'])); ?>">
+                      <input type="hidden" name="group_id" value="<?php echo $report['group_id'] ?? ''; ?>">
                       <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded flex items-center justify-center">
                           <i class="fa-solid fa-eye mr-1"></i> Ver Reporte
                       </button>
@@ -92,7 +103,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
           <?php else: ?>
             <tr>
-              <td colspan="5" class="text-center text-gray-500 py-4">No hay reportes registrados aún.</td>
+              <td colspan="6" class="text-center text-gray-500 py-4">No hay reportes registrados aún.</td>
             </tr>
           <?php endif; ?>
         </tbody>
@@ -106,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterDate = document.getElementById('filterDate');
     const filterCourse = document.getElementById('filterCourse');
     const filterSubject = document.getElementById('filterSubject');
+    const filterGroup = document.getElementById('filterGroup');
     const table = document.getElementById('reportsTable');
     const rows = table.querySelectorAll('tbody tr');
 
@@ -113,16 +125,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const dateVal = filterDate.value; 
         const courseVal = filterCourse.value;
         const subjectVal = filterSubject.value;
+        const groupVal = filterGroup.value;
 
         rows.forEach(row => {
             const rowDate = row.querySelector('td').getAttribute('data-raw'); 
             const cursoId = row.getAttribute('data-course');
             const subjectId = row.getAttribute('data-subject');
+            const groupId = row.getAttribute('data-group') || '';
 
             if (
                 (rowDate === dateVal || dateVal === '') &&
                 (cursoId === courseVal || courseVal === '') &&
-                (subjectId === subjectVal || subjectVal === '')
+                (subjectId === subjectVal || subjectVal === '') &&
+                (groupId === groupVal || groupVal === '')
             ) {
                 row.style.display = '';
             } else {
@@ -132,15 +147,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     filterDate.addEventListener('input', filterRows);
-
     filterCourse.addEventListener('change', function() {
         const courseId = this.value;
         filterSubject.innerHTML = '<option value="">Filtrar por Materia</option>';
+        filterGroup.innerHTML = '<option value="">Filtrar por Grupo</option>';
 
-        if (!courseId) {
-            filterRows();
-            return;
-        }
+        if (!courseId) { filterRows(); return; }
 
         fetch(`api/get_subjects.php?course_id=${courseId}`)
             .then(res => res.json())
@@ -153,9 +165,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 filterRows();
             });
+
+        fetch(`api/get_groups.php?course_id=${courseId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(grp => {
+                    const option = document.createElement('option');
+                    option.value = grp.group_id;
+                    option.textContent = grp.name;
+                    filterGroup.appendChild(option);
+                });
+                filterRows();
+            });
+
         filterRows();
     });
 
     filterSubject.addEventListener('change', filterRows);
+    filterGroup.addEventListener('change', filterRows);
 });
 </script>
