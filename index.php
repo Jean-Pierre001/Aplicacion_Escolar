@@ -23,27 +23,29 @@ if (isset($role_id)) {
     }
 }
 
-// --- Consulta de asistencias pendientes ---
+// --- Consulta de asistencias pendientes, considerando grupos ---
 $sql = "
     SELECT 
         c.course_id, c.name AS course_name,
         s.subject_id, s.name AS subject_name,
-        t.teacher_id, t.first_name AS teacher_fname, t.last_name AS teacher_lname
+        t.teacher_id, t.first_name AS teacher_fname, t.last_name AS teacher_lname,
+        sch.group_id,
+        g.name AS group_name
     FROM courses c
     JOIN schedules sch 
         ON sch.course_id = c.course_id
         AND sch.weekday = :weekday
-    JOIN subjects s
-        ON s.subject_id = sch.subject_id
-    JOIN teachers t
-        ON t.teacher_id = sch.teacher_id
-    LEFT JOIN student_attendance sa
+    LEFT JOIN groups g ON g.group_id = sch.group_id
+    JOIN subjects s ON s.subject_id = sch.subject_id
+    JOIN teachers t ON t.teacher_id = sch.teacher_id
+    LEFT JOIN student_attendance sa 
         ON sa.schedule_id = sch.schedule_id
         AND sa.attendance_date = :today
     WHERE sa.id IS NULL
-    GROUP BY c.course_id, s.subject_id
+    GROUP BY c.course_id, s.subject_id, sch.group_id
     ORDER BY c.name, s.name
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(':today', $today);
@@ -82,10 +84,13 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 Falta de asistencia registrada
               </p>
               <p class="text-gray-700 mt-2 leading-relaxed">
-                Hoy <strong><?php echo $displayDate; ?></strong> no se registró asistencia 
-                para <strong><?php echo htmlspecialchars($row['course_name']); ?></strong> — 
-                <strong><?php echo htmlspecialchars($row['subject_name']); ?></strong>, 
-                a cargo de <strong><?php echo htmlspecialchars($row['teacher_fname'].' '.$row['teacher_lname']); ?></strong>.
+                Hoy <strong><?= $displayDate ?></strong> no se registró asistencia 
+                para <strong><?= htmlspecialchars($row['course_name']) ?></strong>
+                <?php if ($row['group_name']): ?>
+                    (Grupo: <strong><?= htmlspecialchars($row['group_name']) ?></strong>)
+                <?php endif; ?>
+                 — <strong><?= htmlspecialchars($row['subject_name']) ?></strong>, 
+                a cargo de <strong><?= htmlspecialchars($row['teacher_fname'].' '.$row['teacher_lname']) ?></strong>.
               </p>
             </div>
           </div>
@@ -96,7 +101,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <i class="fa-solid fa-circle-check text-green-600 text-3xl mr-4"></i>
         <p class="text-green-800 text-lg leading-relaxed">
           ✅ Todas las materias y cursos tienen asistencia registrada hoy 
-          (<strong><?php echo $displayDate; ?></strong>).
+          (<strong><?= $displayDate ?></strong>).
         </p>
       </div>
     <?php endif; ?>
