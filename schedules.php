@@ -27,6 +27,46 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterClassroom" placeholder="Filtrar por Aula" class="px-3 py-2 border rounded w-48">
     </div>
 
+<!-- Botón Exportar Horarios -->
+<button onclick="openExportModal()" 
+        class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2">
+    <i class="fa-solid fa-file-excel"></i> Exportar Horarios
+</button>
+
+<!-- Modal Exportar Horarios -->
+<div id="exportScheduleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Exportar Horarios</h2>
+    <label for="exportDay" class="block mb-2 font-semibold">Seleccionar Día:</label>
+    <select id="exportDay" class="w-full border px-3 py-2 rounded mb-4">
+      <option value="monday">Lunes</option>
+      <option value="tuesday">Martes</option>
+      <option value="wednesday">Miércoles</option>
+      <option value="thursday">Jueves</option>
+      <option value="friday">Viernes</option>
+    </select>
+    <div class="flex justify-end gap-2">
+      <button onclick="closeExportModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
+      <button onclick="exportDaySchedule()" class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-1">
+        <i class="fa-solid fa-file-excel"></i> Exportar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openExportModal() {
+    document.getElementById('exportScheduleModal').classList.remove('hidden');
+}
+function closeExportModal() {
+    document.getElementById('exportScheduleModal').classList.add('hidden');
+}
+function exportDaySchedule() {
+    const day = document.getElementById('exportDay').value;
+    window.location.href = 'export_schedule_day.php?day=' + day;
+}
+</script>
+
     <?php
     try {
         $sql = "SELECT sch.schedule_id, 
