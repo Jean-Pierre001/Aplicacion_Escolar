@@ -33,7 +33,10 @@ include 'includes/conn.php';
         <option value="">Seleccionar Materia</option>
       </select>
 
-      <input type="date" id="attendanceDate" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-auto" />
+      <?php $today = date('Y-m-d'); ?>
+        <input type="hidden" id="attendanceDate" value="<?php echo $today; ?>" />
+      <p class="text-gray-600">Fecha: <?php echo date('d/m/Y'); ?></p>
+
 
       <button id="generateReport" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center ml-0 md:ml-auto w-full md:w-auto justify-center" disabled>
         <i class="fa-solid fa-file-lines mr-2"></i> Registrar Asistencia
