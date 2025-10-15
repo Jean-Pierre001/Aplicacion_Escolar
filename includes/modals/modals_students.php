@@ -185,4 +185,42 @@ $courses = $conn->query("SELECT course_id, name FROM courses")->fetchAll();
         select.innerHTML = '<option value="">Error al cargar grupos</option>';
       });
   }
+
+  // --- Validación DNI único con SweetAlert ---
+  document.getElementById('addStudentForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const DNI = e.target.DNI.value.trim();
+    if(!DNI) return e.target.submit();
+
+    const fd = new FormData();
+    fd.append('DNI', DNI);
+
+    const res = await fetch('api/validations/check_duplicate_student.php', { method:'POST', body: fd });
+    const data = await res.json();
+
+    if(data.exists) {
+        return Swal.fire('Duplicado', 'Ya existe un estudiante con este DNI.', 'error');
+    }
+
+    e.target.submit();
+  });
+
+  document.getElementById('editStudentForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const DNI = e.target.DNI.value.trim();
+    if(!DNI) return e.target.submit();
+
+    const fd = new FormData();
+    fd.append('DNI', DNI);
+    fd.append('student_id', e.target.student_id.value);
+
+    const res = await fetch('api/validations/check_duplicate_student.php', { method:'POST', body: fd });
+    const data = await res.json();
+
+    if(data.exists) {
+        return Swal.fire('Duplicado', 'Ya existe otro estudiante con este DNI.', 'error');
+    }
+
+    e.target.submit();
+  });
 </script>

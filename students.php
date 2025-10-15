@@ -58,7 +58,7 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "</div>";
 
                 echo "<div class='overflow-x-auto'>";
-                echo "<table class='min-w-full text-sm text-gray-700 border-collapse'>";
+                echo "<table class='min-w-full text-sm text-gray-700 border-collapse studentsTable'>";
                 echo "<thead class='bg-gray-200 text-gray-800 uppercase text-xs font-semibold border-b border-gray-300'>
                         <tr>
                           <th class='px-6 py-3 border'>Apellido</th>
@@ -116,7 +116,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterFirstName = document.getElementById('filterFirstName');
     const filterDNI = document.getElementById('filterDNI');
     const filterGroup = document.getElementById('filterGroup');
-    const tables = document.querySelectorAll('#studentsTable');
+
+    // Seleccionamos todas las tablas de estudiantes por su clase
+    const tables = document.querySelectorAll('.studentsTable');
 
     function filterRows() {
         const lastNameVal = filterLastName.value.toLowerCase();
@@ -133,7 +135,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dni = cells[2].textContent.toLowerCase();
                 const group = cells[3].textContent.toLowerCase();
 
-                if (lastName.includes(lastNameVal) && firstName.includes(firstNameVal) && dni.includes(dniVal) && group.includes(groupVal)) {
+                // Mostramos u ocultamos la fila según el filtro
+                if (lastName.includes(lastNameVal) &&
+                    firstName.includes(firstNameVal) &&
+                    dni.includes(dniVal) &&
+                    group.includes(groupVal)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -142,9 +148,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    filterLastName.addEventListener('input', filterRows);
-    filterFirstName.addEventListener('input', filterRows);
-    filterDNI.addEventListener('input', filterRows);
-    filterGroup.addEventListener('input', filterRows);
+    // Asignamos el evento input a todos los filtros
+    [filterLastName, filterFirstName, filterDNI, filterGroup].forEach(input => {
+        input.addEventListener('input', filterRows);
+    });
 });
 </script>
+
