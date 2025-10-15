@@ -6,10 +6,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $permissions = $_POST['permissions'] ?? [];
 
     if (!$role_id) {
-        die("Rol inválido.");
+        header("Location: ../roles.php?error=Rol inválido");
+        exit();
     }
 
     try {
+        // --- Verificar si es Administrador ---
+        $stmtRole = $conn->prepare("SELECT name FROM roles WHERE role_id = :role_id");
+        $stmtRole->execute([':role_id' => $role_id]);
+        $roleName = $stmtRole->fetchColumn();
+
+        if (strtolower($roleName) === 'administrador') {
+            // Si no tiene el permiso "roles.php:view", bloquear
+            $hasRolesPermission = in_array('roles.php:view', $permissions);
+            if (!$hasRolesPermission) {
+                // Redirigir con error
+                header("Location: ../roles.php?error=No se puede quitar el permiso 'Roles' del Administrador");
+                exit();
+            }
+        }
+
         $conn->beginTransaction();
 
         // 1. Borrar permisos existentes
@@ -20,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtInsert = $conn->prepare("INSERT INTO role_permissions (role_id, page, action) VALUES (:role_id, :page, :action)");
 
         foreach ($permissions as $perm) {
-            // Cada permiso viene en formato page:action (ej: users.php:view)
             list($page, $action) = explode(':', $perm);
             $stmtInsert->execute([
                 ':role_id' => $role_id,
@@ -34,7 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     } catch (PDOException $e) {
         $conn->rollBack();
-        die("Error al guardar permisos: " . $e->getMessage());
+        header("Location: ../roles.php?error=Error al guardar permisos: " . urlencode($e->getMessage()));
+        exit();
     }
 }
 ?>

@@ -97,6 +97,24 @@ include 'includes/conn.php'; // Conexión PDO
 
 <?php include 'includes/modals/modals_users.php'; ?>
 
+    <script>
+      <?php if(isset($_GET['error'])): ?>
+        Swal.fire({
+          icon: 'warning',
+          title: 'Atención',
+          text: "<?php echo addslashes($_GET['error']); ?>"
+        });
+      <?php endif; ?>
+
+      <?php if(isset($_GET['msg'])): ?>
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: "<?php echo addslashes($_GET['msg']); ?>"
+        });
+      <?php endif; ?>
+    </script>
+
 <!-- Script de filtros dinámicos -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {

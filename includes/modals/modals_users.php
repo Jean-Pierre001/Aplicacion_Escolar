@@ -15,23 +15,23 @@ try {
     <form id="addUserForm" action="users_back/add_user.php" method="POST" class="space-y-4">
       <div>
         <label class="block mb-1 font-medium">Nombre</label>
-        <input type="text" name="first_name" class="w-full border px-3 py-2 rounded" required>
+        <input type="text" name="first_name" id="add_first_name" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Apellido</label>
-        <input type="text" name="last_name" class="w-full border px-3 py-2 rounded" required>
+        <input type="text" name="last_name" id="add_last_name" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Email</label>
-        <input type="email" name="email" class="w-full border px-3 py-2 rounded" required>
+        <input type="email" name="email" id="add_email" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Contraseña</label>
-        <input type="password" name="password" class="w-full border px-3 py-2 rounded" required>
+        <input type="password" name="password" id="add_password" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Rol</label>
-        <select name="role" class="w-full border px-3 py-2 rounded" required>
+        <select name="role" id="add_role" class="w-full border px-3 py-2 rounded" required>
           <option value="">Seleccione un rol</option>
           <?php foreach ($roles as $role): ?>
             <option value="<?= $role['role_id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
@@ -92,25 +92,54 @@ try {
 </div>
 
 <script>
-  // Abrir modal
-  function openModal(modalId){
-    document.getElementById(modalId).classList.remove('hidden');
-  }
+  function openModal(modalId){ document.getElementById(modalId).classList.remove('hidden'); }
+  function closeModal(modalId){ document.getElementById(modalId).classList.add('hidden'); }
 
-  // Cerrar modal
-  function closeModal(modalId){
-    document.getElementById(modalId).classList.add('hidden');
-  }
-
-  // Abrir modal Editar con datos
   function openEditModalUser(user){
     document.getElementById('edit_user_id').value = user.user_id;
     document.getElementById('edit_first_name').value = user.first_name;
     document.getElementById('edit_last_name').value = user.last_name;
     document.getElementById('edit_email').value = user.email;
-    document.getElementById('edit_password').value = ''; // dejar vacío
+    document.getElementById('edit_password').value = '';
     document.getElementById('edit_role').value = user.role;
-
     openModal('editUserModal');
+  }
+
+  // Validación duplicados emails
+  async function checkDuplicateEmail(email, excludeId = null){
+    const formData = new FormData();
+    formData.append('email', email);
+    if(excludeId) formData.append('user_id', excludeId);
+
+    const res = await fetch('api/validations/check_duplicate_email.php', { method:'POST', body: formData });
+    const data = await res.json();
+    return data.exists;
+  }
+
+  const addUserForm = document.getElementById('addUserForm');
+  if(addUserForm){
+    addUserForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('add_email').value.trim();
+      if(await checkDuplicateEmail(email)){
+        Swal.fire({icon:'error', title:'Email duplicado', text:'Ya existe un usuario con ese email.'});
+        return;
+      }
+      e.target.submit();
+    });
+  }
+
+  const editUserForm = document.getElementById('editUserForm');
+  if(editUserForm){
+    editUserForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('edit_email').value.trim();
+      const userId = document.getElementById('edit_user_id').value;
+      if(await checkDuplicateEmail(email, userId)){
+        Swal.fire({icon:'error', title:'Email duplicado', text:'Ya existe otro usuario con ese email.'});
+        return;
+      }
+      e.target.submit();
+    });
   }
 </script>

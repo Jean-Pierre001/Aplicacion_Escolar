@@ -86,13 +86,9 @@
 </div>
 
 <script>
-function openModal(modalId){
-  document.getElementById(modalId).classList.remove('hidden');
-}
-
-function closeModal(modalId){
-  document.getElementById(modalId).classList.add('hidden');
-}
+// Abrir / cerrar modal
+function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
+function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
 function openEditModalSubject(subject){
   document.getElementById('edit_subject_id').value = subject.subject_id;
@@ -102,4 +98,46 @@ function openEditModalSubject(subject){
   document.getElementById('edit_course_id').value = subject.course_id;
   openModal('editSubjectModal');
 }
+
+// Validación duplicados vía AJAX
+async function checkDuplicateSubject(name, course_id, subject_id = null){
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('course_id', course_id);
+    if(subject_id) fd.append('subject_id', subject_id);
+
+    const res = await fetch('api/validations/check_duplicate_subject.php', { method:'POST', body: fd });
+    const data = await res.json();
+    return data.exists;
+}
+
+// --- Formulario Agregar Materia ---
+document.getElementById('addSubjectForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = e.target.name.value.trim();
+    const course_id = e.target.course_id.value;
+
+    if(!name) return Swal.fire('Error', 'Debe ingresar un nombre de materia.', 'warning');
+
+    const exists = await checkDuplicateSubject(name, course_id);
+    if(exists) return Swal.fire('Duplicado', 'Ya existe una materia con este nombre en el curso seleccionado.', 'error');
+
+    e.target.submit();
+});
+
+// --- Formulario Editar Materia ---
+document.getElementById('editSubjectForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = e.target.name.value.trim();
+    const course_id = e.target.course_id.value;
+    const subject_id = e.target.subject_id.value;
+
+    if(!name) return Swal.fire('Error', 'Debe ingresar un nombre de materia.', 'warning');
+
+    const exists = await checkDuplicateSubject(name, course_id, subject_id);
+    if(exists) return Swal.fire('Duplicado', 'Ya existe otra materia con este nombre en el curso seleccionado.', 'error');
+
+    e.target.submit();
+});
 </script>
+

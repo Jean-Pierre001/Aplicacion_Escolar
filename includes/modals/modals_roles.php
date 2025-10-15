@@ -2,10 +2,10 @@
 <div id="addRoleModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
   <div class="bg-white rounded-lg w-96 p-6 relative">
     <h2 class="text-2xl font-bold mb-4">Agregar Rol</h2>
-    <form action="roles_back/add_role.php" method="POST">
+    <form id="addRoleForm" action="roles_back/add_role.php" method="POST">
       <div class="mb-4">
         <label class="block mb-1 font-medium">Nombre</label>
-        <input type="text" name="name" class="w-full px-3 py-2 border rounded" required>
+        <input type="text" name="name" id="addRoleName" class="w-full px-3 py-2 border rounded" required>
       </div>
       <div class="mb-4">
         <label class="block mb-1 font-medium">Descripción</label>
@@ -23,7 +23,7 @@
 <div id="editRoleModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
   <div class="bg-white rounded-lg w-96 p-6 relative">
     <h2 class="text-2xl font-bold mb-4">Editar Rol</h2>
-    <form action="roles_back/edit_role.php" method="POST">
+    <form id="editRoleForm" action="roles_back/edit_role.php" method="POST">
       <input type="hidden" name="role_id" id="editRoleId">
       <div class="mb-4">
         <label class="block mb-1 font-medium">Nombre</label>
@@ -138,56 +138,109 @@
 </div>
 
 <script>
-// Abrir modal de permisos
-function openPermissionsModal(roleId, roleName = '') {
-  document.getElementById('permissionsRoleId').value = roleId;
-  document.getElementById('roleNamePermissions').innerText = roleName;
-  openModal('permissionsModal');
+  // --- Funciones genéricas de modal ---
+  function openModal(modalId){
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
 
-  // Limpiar checkboxes
-  document.querySelectorAll('#permissionsModal input[type=checkbox]').forEach(cb => cb.checked = false);
+  function closeModal(modalId){
+    const modal = document.getElementById(modalId);
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
 
-  // Cargar permisos existentes desde BD
-  fetch(`roles_back/get_permissions.php?role_id=${roleId}`)
-    .then(res => res.json())
-    .then(data => {
-      data.forEach(perm => {
-        const checkbox = document.querySelector(`#permissionsModal input[value="${perm.page}:${perm.action}"]`);
-        if (checkbox) checkbox.checked = true;
+  // --- Abrir modal de edición ---
+  function openEditModalRole(role){
+    document.getElementById('editRoleId').value = role.role_id;
+    document.getElementById('editRoleName').value = role.name;
+    document.getElementById('editRoleDescription').value = role.description;
+    openModal('editRoleModal');
+  }
+
+  // --- Abrir modal permisos ---
+  function openPermissionsModal(roleId, roleName = ''){
+    document.getElementById('permissionsRoleId').value = roleId;
+    document.getElementById('roleNamePermissions').innerText = roleName;
+    openModal('permissionsModal');
+
+    // Limpiar checkboxes
+    document.querySelectorAll('#permissionsModal input[type=checkbox]').forEach(cb => cb.checked = false);
+
+    // Cargar permisos existentes desde BD
+    fetch(`roles_back/get_permissions.php?role_id=${roleId}`)
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(perm => {
+          const checkbox = document.querySelector(`#permissionsModal input[value="${perm.page}:${perm.action}"]`);
+          if (checkbox) checkbox.checked = true;
+        });
+
+        // Ajustar padres según hijos
+        document.querySelectorAll('.parent-checkbox').forEach(parent => {
+          const target = parent.dataset.target;
+          const children = document.querySelectorAll('.child-' + target);
+          parent.checked = Array.from(children).every(child => child.checked);
+        });
       });
+  }
 
-      // Ajustar padres según hijos
-      document.querySelectorAll('.parent-checkbox').forEach(parent => {
-        const target = parent.dataset.target;
-        const children = document.querySelectorAll('.child-' + target);
-        parent.checked = Array.from(children).every(child => child.checked);
-      });
+  // --- Validación duplicados roles ---
+  async function checkDuplicateRole(name, excludeId = null){
+    const formData = new FormData();
+    formData.append('name', name);
+    if(excludeId) formData.append('role_id', excludeId);
+
+    const res = await fetch('api/validations/check_duplicate_role.php', {
+      method: 'POST',
+      body: formData
     });
-}
-</script>
 
-<!-- SCRIPTS PARA MODALES -->
-<script>
-function openModal(modalId) {
-  document.getElementById(modalId).classList.remove('hidden');
-  document.getElementById(modalId).classList.add('flex');
-}
+    const data = await res.json();
+    return data.exists;
+  }
 
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.add('hidden');
-  document.getElementById(modalId).classList.remove('flex');
-}
+  // --- Validación Agregar ---
+  const addRoleForm = document.getElementById('addRoleForm');
+  if(addRoleForm){
+    addRoleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('addRoleName').value.trim();
 
-// Llenar modal de edición con los datos del rol
-function openEditModalRole(role) {
-  document.getElementById('editRoleId').value = role.role_id;
-  document.getElementById('editRoleName').value = role.name;
-  document.getElementById('editRoleDescription').value = role.description;
-  openModal('editRoleModal');
-}
+      if(name === ''){
+        Swal.fire({icon:'warning', title:'Campo vacío', text:'Ingrese el nombre del rol.'});
+        return;
+      }
 
-// Placeholder para abrir modal de permisos (después lo implementamos)
-function openPermissionsModal(roleId) {
-  alert("Aquí se abrirá el modal dinámico de permisos para el rol ID: " + roleId);
-}
+      const exists = await checkDuplicateRole(name);
+      if(exists){
+        Swal.fire({icon:'error', title:'Rol duplicado', text:'Ya existe un rol con ese nombre.'});
+      } else {
+        e.target.submit();
+      }
+    });
+  }
+
+  // --- Validación Editar ---
+  const editRoleForm = document.getElementById('editRoleForm');
+  if(editRoleForm){
+    editRoleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('editRoleName').value.trim();
+      const id = document.getElementById('editRoleId').value;
+
+      if(name === ''){
+        Swal.fire({icon:'warning', title:'Campo vacío', text:'Ingrese el nombre del rol.'});
+        return;
+      }
+
+      const exists = await checkDuplicateRole(name, id);
+      if(exists){
+        Swal.fire({icon:'error', title:'Rol duplicado', text:'Ya existe otro rol con ese nombre.'});
+      } else {
+        e.target.submit();
+      }
+    });
+  }
 </script>

@@ -2,7 +2,7 @@
 <div id="addCourseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
     <h2 class="text-xl font-semibold mb-4 text-gray-800 text-center">Agregar Curso</h2>
-    <form action="courses_back/add_course.php" method="POST">
+    <form id="addCourseForm" action="courses_back/add_course.php" method="POST">
       <div class="mb-4">
         <label for="courseName" class="block text-gray-700">Nombre</label>
         <input type="text" name="name" id="courseName" class="w-full px-3 py-2 border rounded" required>
@@ -27,7 +27,7 @@
 <div id="editCourseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
     <h2 class="text-xl font-semibold mb-4 text-gray-800 text-center">Editar Curso</h2>
-    <form action="courses_back/edit_course.php" method="POST">
+    <form id="editCourseForm" action="courses_back/edit_course.php" method="POST">
       <input type="hidden" name="course_id" id="editCourseId">
       <div class="mb-4">
         <label for="editCourseName" class="block text-gray-700">Nombre</label>
@@ -58,8 +58,8 @@
     <form id="addGroupForm" action="courses_back/add_group.php" method="POST" class="mb-6">
       <input type="hidden" name="course_id" id="groupCourseId">
       <div class="flex flex-col md:flex-row gap-3 mb-3">
-        <input type="text" name="name" placeholder="Nombre del grupo" class="flex-1 px-3 py-2 border rounded" required>
-        <input type="text" name="description" placeholder="Descripción (opcional)" class="flex-1 px-3 py-2 border rounded">
+        <input type="text" name="name" id="groupName" placeholder="Nombre del grupo" class="flex-1 px-3 py-2 border rounded" required>
+        <input type="text" name="description" id="groupDescription" placeholder="Descripción (opcional)" class="flex-1 px-3 py-2 border rounded">
         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Agregar Grupo</button>
       </div>
     </form>
@@ -74,9 +74,7 @@
             <th class="px-4 py-3 text-left font-medium uppercase text-sm md:text-base">Acciones</th>
           </tr>
         </thead>
-        <tbody id="groupsTableBody">
-          <!-- Contenido dinámico desde PHP -->
-        </tbody>
+        <tbody id="groupsTableBody"></tbody>
       </table>
     </div>
 
@@ -90,7 +88,7 @@
 <div id="editGroupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
     <h2 class="text-xl font-semibold mb-4 text-gray-800 text-center">Editar Grupo</h2>
-    <form action="courses_back/edit_group.php" method="POST">
+    <form id="editGroupForm" action="courses_back/edit_group.php" method="POST">
       <input type="hidden" name="group_id" id="editGroupId">
       <div class="mb-4">
         <label for="editGroupName" class="block text-gray-700">Nombre</label>
@@ -115,19 +113,12 @@ function openEditGroupModal(groupId, name, description){
     document.getElementById('editGroupDescription').value = description;
     openModal('editGroupModal');
 }
-</script>
-
-
-<script>
 
 function openManageGroupsModal(courseId, courseName) {
     document.getElementById('groupCourseId').value = courseId;
     document.getElementById('manageGroupsTitle').innerText = "Gestionar Grupos del curso: " + courseName;
 
-    // Abrir modal
     openModal('manageGroupsModal');
-
-    // Cargar grupos por AJAX
     fetch('api/get_groups.php?course_id=' + courseId)
       .then(response => response.json())
       .then(data => {
@@ -137,14 +128,13 @@ function openManageGroupsModal(courseId, courseName) {
               data.forEach(group => {
                   tbody.innerHTML += `
                     <tr class="hover:bg-gray-100">
-                      <td class="px-4 py-2 border-r border-gray-300">${group.name}</td>
-                      <td class="px-4 py-2 border-r border-gray-300">${group.description ?? ''}</td>
+                      <td class="px-4 py-2 border-r">${group.name}</td>
+                      <td class="px-4 py-2 border-r">${group.description ?? ''}</td>
                       <td class="px-4 py-2 flex gap-2">
-                        <a href="javascript:void(0)" onclick="openEditGroupModal(${group.group_id}, '${group.name}', '${group.description}')" class="text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded flex items-center justify-center text-sm">Editar</a>
-                        <a href="courses_back/delete_group.php?id=${group.group_id}" onclick="return confirm('¿Seguro de eliminar este grupo?')" class="text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded flex items-center justify-center text-sm">Eliminar</a>
+                        <a href="javascript:void(0)" onclick="openEditGroupModal(${group.group_id}, '${group.name}', '${group.description}')" class="text-yellow-500 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded text-sm">Editar</a>
+                        <a href="courses_back/delete_group.php?id=${group.group_id}" onclick="return confirm('¿Seguro de eliminar este grupo?')" class="text-red-600 hover:text-red-800 bg-red-100 px-3 py-1 rounded text-sm">Eliminar</a>
                       </td>
-                    </tr>
-                  `;
+                    </tr>`;
               });
           } else {
               tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-2 text-center text-gray-500">No hay grupos registrados</td></tr>`;
@@ -152,19 +142,76 @@ function openManageGroupsModal(courseId, courseName) {
       });
 }
 
-  function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-  }
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-  function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-  }
-
-  function openEditModalCourse(course) {
+function openEditModalCourse(course) {
     document.getElementById('editCourseId').value = course.course_id;
     document.getElementById('editCourseName').value = course.name;
     document.getElementById('editCourseDescription').value = course.description;
     document.getElementById('editCourseTechDegree').value = course.technical_degree;
     openModal('editCourseModal');
-  }
+}
+
+// 🔍 Verificación de duplicados AJAX
+async function checkDuplicateCourse(name, excludeId = null) {
+    const fd = new FormData();
+    fd.append('name', name);
+    if (excludeId) fd.append('course_id', excludeId);
+    const res = await fetch('api/validations/check_duplicate_course.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    return data.exists;
+}
+
+async function checkDuplicateGroup(name, courseId, excludeId = null) {
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('course_id', courseId);
+    if (excludeId) fd.append('group_id', excludeId);
+    const res = await fetch('api/validations/check_duplicate_group.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    return data.exists;
+}
+
+// --- Validación CURSO ---
+document.getElementById('addCourseForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById('courseName').value.trim();
+    if (!name) return Swal.fire('Error', 'Debe ingresar un nombre de curso.', 'warning');
+    const exists = await checkDuplicateCourse(name);
+    if (exists) return Swal.fire('Duplicado', 'Ya existe un curso con ese nombre.', 'error');
+    e.target.submit();
+});
+
+document.getElementById('editCourseForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById('editCourseName').value.trim();
+    const id = document.getElementById('editCourseId').value;
+    if (!name) return Swal.fire('Error', 'Debe ingresar un nombre de curso.', 'warning');
+    const exists = await checkDuplicateCourse(name, id);
+    if (exists) return Swal.fire('Duplicado', 'Ya existe otro curso con ese nombre.', 'error');
+    e.target.submit();
+});
+
+// --- Validación GRUPO ---
+document.getElementById('addGroupForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById('groupName').value.trim();
+    const courseId = document.getElementById('groupCourseId').value;
+    if (!name) return Swal.fire('Error', 'Debe ingresar un nombre de grupo.', 'warning');
+    const exists = await checkDuplicateGroup(name, courseId);
+    if (exists) return Swal.fire('Duplicado', 'Ya existe un grupo con ese nombre en este curso.', 'error');
+    e.target.submit();
+});
+
+document.getElementById('editGroupForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById('editGroupName').value.trim();
+    const id = document.getElementById('editGroupId').value;
+    const courseId = document.getElementById('groupCourseId').value;
+    if (!name) return Swal.fire('Error', 'Debe ingresar un nombre de grupo.', 'warning');
+    const exists = await checkDuplicateGroup(name, courseId, id);
+    if (exists) return Swal.fire('Duplicado', 'Ya existe otro grupo con ese nombre en este curso.', 'error');
+    e.target.submit();
+});
 </script>

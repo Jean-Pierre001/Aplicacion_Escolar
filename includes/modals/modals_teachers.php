@@ -5,11 +5,11 @@
     <form id="addTeacherForm" action="teachers_back/add_teacher.php" method="POST" class="space-y-4">
       <div>
         <label class="block mb-1 font-medium">Apellido</label>
-        <input type="text" name="last_name" class="w-full border px-3 py-2 rounded" required>
+        <input type="text" id="add_last_name" name="last_name" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Nombre</label>
-        <input type="text" name="first_name" class="w-full border px-3 py-2 rounded" required>
+        <input type="text" id="add_first_name" name="first_name" class="w-full border px-3 py-2 rounded" required>
       </div>
       <div>
         <label class="block mb-1 font-medium">Usuario (Opcional)</label>
@@ -71,7 +71,6 @@
 </div>
 
 <script>
-
   function openModal(modalId){
     document.getElementById(modalId).classList.remove('hidden');
   }
@@ -87,4 +86,79 @@
     document.getElementById('edit_user_id').value = teacher.user_id;
     openModal('editTeacherModal');
   }
+
+  // Verificación AJAX de duplicados
+  async function checkDuplicate(first, last, excludeId = null) {
+    const formData = new FormData();
+    formData.append('first_name', first);
+    formData.append('last_name', last);
+    if (excludeId) formData.append('teacher_id', excludeId);
+
+    const response = await fetch('api/validations/check_duplicate_teacher.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+    return data.exists;
+  }
+
+  // --- Validación Agregar ---
+  document.getElementById('addTeacherForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const first = document.getElementById('add_first_name').value.trim();
+    const last = document.getElementById('add_last_name').value.trim();
+
+    if (first === '' || last === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor complete nombre y apellido.',
+      });
+      return;
+    }
+
+    const exists = await checkDuplicate(first, last);
+
+    if (exists) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Docente duplicado',
+        text: 'Ya existe un docente con ese nombre y apellido.',
+      });
+    } else {
+      e.target.submit();
+    }
+  });
+
+  // --- Validación Editar ---
+  document.getElementById('editTeacherForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const first = document.getElementById('edit_first_name').value.trim();
+    const last = document.getElementById('edit_last_name').value.trim();
+    const id = document.getElementById('edit_teacher_id').value;
+
+    if (first === '' || last === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor complete nombre y apellido.',
+      });
+      return;
+    }
+
+    const exists = await checkDuplicate(first, last, id);
+
+    if (exists) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Docente duplicado',
+        text: 'Ya existe otro docente con ese nombre y apellido.',
+      });
+    } else {
+      e.target.submit();
+    }
+  });
 </script>

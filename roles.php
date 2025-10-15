@@ -78,6 +78,24 @@ include 'includes/conn.php';
 <!-- Modales -->
 <?php include 'includes/modals/modals_roles.php'; ?>
 
+    <script>
+      <?php if(isset($_GET['error'])): ?>
+        Swal.fire({
+          icon: 'warning',
+          title: 'Atención',
+          text: "<?php echo addslashes($_GET['error']); ?>"
+        });
+      <?php endif; ?>
+
+      <?php if(isset($_GET['msg'])): ?>
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: "<?php echo addslashes($_GET['msg']); ?>"
+        });
+      <?php endif; ?>
+    </script>
+
 <!-- Scripts -->
 <script>
 // Modal permisos
