@@ -27,32 +27,43 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterClassroom" placeholder="Filtrar por Aula" class="px-3 py-2 border rounded w-48">
     </div>
 
-<!-- Botón Exportar Horarios -->
-<button onclick="openExportModal()" 
-        class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2">
-    <i class="fa-solid fa-file-excel"></i> Exportar Horarios
-</button>
+<!-- Modal y botón en el frontend -->
+<div class="p-4 bg-white shadow-md rounded-lg mb-4">
+  <h2 class="text-2xl font-bold text-gray-700 mb-3">Exportar Horarios</h2>
+  <button onclick="document.getElementById('modalExportar').classList.remove('hidden')" 
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+    Exportar horarios
+  </button>
+</div>
 
-<!-- Modal Exportar Horarios -->
-<div id="exportScheduleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
-    <h2 class="text-xl font-bold mb-4">Exportar Horarios</h2>
-    <label for="exportDay" class="block mb-2 font-semibold">Seleccionar Día:</label>
-    <select id="exportDay" class="w-full border px-3 py-2 rounded mb-4">
-      <option value="monday">Lunes</option>
-      <option value="tuesday">Martes</option>
-      <option value="wednesday">Miércoles</option>
-      <option value="thursday">Jueves</option>
-      <option value="friday">Viernes</option>
-    </select>
-    <div class="flex justify-end gap-2">
-      <button onclick="closeExportModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
-      <button onclick="exportDaySchedule()" class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-1">
-        <i class="fa-solid fa-file-excel"></i> Exportar
-      </button>
-    </div>
+<div id="modalExportar" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-96">
+    <h3 class="text-xl font-semibold mb-4 text-gray-800">Exportar horarios del día</h3>
+    
+    <!-- Cambié a method GET para que el PHP lo reciba correctamente -->
+    <form method="GET" action="export_schedule_day.php">
+      <label class="block mb-2 text-sm font-medium text-gray-700">Seleccione el día:</label>
+      <select name="weekday" required class="w-full border rounded-lg px-3 py-2 mb-4">
+        <option value="">-- Seleccionar --</option>
+        <option value="monday">Lunes</option>
+        <option value="tuesday">Martes</option>
+        <option value="wednesday">Miércoles</option>
+        <option value="thursday">Jueves</option>
+        <option value="friday">Viernes</option>
+        <option value="saturday">Sábado</option>
+      </select>
+      
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="document.getElementById('modalExportar').classList.add('hidden')" 
+                class="bg-gray-500 text-white px-3 py-2 rounded-lg">Cancelar</button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+          Exportar
+        </button>
+      </div>
+    </form>
   </div>
 </div>
+
 
 <script>
 function openExportModal() {
