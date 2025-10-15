@@ -33,7 +33,7 @@ try {
     $classrooms = $stmt->fetchAll();
     if (empty($classrooms)) die("No hay aulas registradas.");
 
-    // Traer horarios tarde
+    // 🔹 Traer horarios de la mañana
     $sql = "SELECT s.schedule_id, s.start_time, s.end_time,
                    c.name AS course_name, g.name AS group_name,
                    sub.name AS subject_name,
@@ -45,7 +45,7 @@ try {
             JOIN subjects sub ON sub.subject_id = s.subject_id
             LEFT JOIN teachers t ON s.teacher_id = t.teacher_id
             LEFT JOIN classrooms cl ON s.classroom_id = cl.classroom_id
-            WHERE s.weekday = :weekday AND s.start_time >= '12:00:00'
+            WHERE s.weekday = :weekday AND s.start_time < '12:00:00'
             ORDER BY s.start_time, cl.name";
 
     $stmt = $conn->prepare($sql);
@@ -62,7 +62,7 @@ try {
     // Encabezados principales
     // --------------------
     $sheet->mergeCells("A1:{$ultimaCol}1");
-    $sheet->setCellValue("A1", "TALLER 2025 – DISTRIBUCIÓN DE ESPACIOS POR DÍA");
+    $sheet->setCellValue("A1", "TALLER 2025 – DISTRIBUCIÓN DE ESPACIOS POR DÍA TURNO MAÑANA");
     $sheet->getStyle("A1")->getFont()->setBold(true)->setSize(16)->getColor()->setRGB("FFFFFF");
     $sheet->getStyle("A1")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle("A1")->getFill()->setFillType(Fill::FILL_SOLID)
@@ -104,16 +104,17 @@ try {
     }
 
     // --------------------
-    // Bloques horarios + recreo + encabezado repetido + fila Curso/Grupo
+    // Bloques horarios (mañana)
     // --------------------
     $bloques = [
-        "13:20 - 15:20",
+        "07:30 - 09:30",
         "RECREO",
-        "15:30 - 17:30"
+        "09:40 - 11:40"
     ];
 
-    $fila = 6; // fila inicial
+    $fila = 6;
     $contadorBloque = 1;
+
     foreach ($bloques as $bloque) {
         if ($bloque === "RECREO") {
             // Recreo ocupa todas las columnas
@@ -125,10 +126,9 @@ try {
             $sheet->getStyle("A{$fila}")->getFill()->setFillType(Fill::FILL_SOLID)
                   ->getStartColor()->setRGB("FFFFFF");
             $sheet->getRowDimension($fila)->setRowHeight(30);
-
             $fila++;
 
-            // Volver a poner HORARIOS y aulas debajo del recreo
+            // Repetir encabezado
             $sheet->setCellValue("A{$fila}", "HORARIOS");
             $sheet->getStyle("A{$fila}")->getFont()->setBold(true)->getColor()->setRGB("FFFFFF");
             $sheet->getStyle("A{$fila}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -145,7 +145,6 @@ try {
                       ->getStartColor()->setRGB("305496");
                 $col++;
             }
-
             $fila++;
         } else {
             // Fila Curso/Grupo
@@ -161,27 +160,22 @@ try {
             foreach ($classrooms as $aula) {
                 $cursoGrupo = "";
                 foreach ($horarios as $h) {
-                    $rango = substr($h['start_time'],0,5)." - ".substr($h['end_time'],0,5);
+                    $rango = substr($h['start_time'], 0, 5) . " - " . substr($h['end_time'], 0, 5);
                     if ($rango == $bloque && $h['classroom_name'] == $aula['name']) {
-                        $cursoGrupo = trim($h['course_name']." ".($h['group_name'] ?? ""));
+                        $cursoGrupo = trim($h['course_name'] . " " . ($h['group_name'] ?? ""));
                     }
                 }
-                $sheet->setCellValue($col.$fila, $cursoGrupo);
-                $sheet->getStyle($col.$fila)->getAlignment()->setWrapText(true)
+                $sheet->setCellValue($col . $fila, $cursoGrupo);
+                $sheet->getStyle($col . $fila)->getAlignment()->setWrapText(true)
                       ->setHorizontal(Alignment::HORIZONTAL_CENTER)
                       ->setVertical(Alignment::VERTICAL_CENTER);
-                $sheet->getStyle($col.$fila)->getFont()->setSize(11);
+                $sheet->getStyle($col . $fila)->getFont()->setSize(11);
                 $col++;
             }
-
             $fila++;
 
-            // Fila según bloque con descripción de horario
-            $textoBloque = "{$bloques[0]}";
-            if ($contadorBloque === 2) {
-                $textoBloque = "{$bloques[2]}";
-            }
-            $sheet->setCellValue("A{$fila}", $textoBloque);
+            // Fila materias y profesores
+            $sheet->setCellValue("A{$fila}", $bloque);
             $sheet->getStyle("A{$fila}")->getFont()->setBold(true)->getColor()->setRGB("FFFFFF");
             $sheet->getStyle("A{$fila}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
                   ->setVertical(Alignment::VERTICAL_CENTER);
@@ -193,37 +187,36 @@ try {
             foreach ($classrooms as $aula) {
                 $contenido = "";
                 foreach ($horarios as $h) {
-                    $rango = substr($h['start_time'],0,5)." - ".substr($h['end_time'],0,5);
+                    $rango = substr($h['start_time'], 0, 5) . " - " . substr($h['end_time'], 0, 5);
                     if ($rango == $bloque && $h['classroom_name'] == $aula['name']) {
                         $materia = $h['subject_name'] ?? "";
-                        $profesor = trim($h['first_name']." ".$h['last_name']);
+                        $profesor = trim($h['first_name'] . " " . $h['last_name']);
                         $contenido .= "{$materia}\n{$profesor}";
                     }
                 }
-                $sheet->setCellValue($col.$fila, $contenido);
-                $sheet->getStyle($col.$fila)->getAlignment()->setWrapText(true)
+                $sheet->setCellValue($col . $fila, $contenido);
+                $sheet->getStyle($col . $fila)->getAlignment()->setWrapText(true)
                       ->setHorizontal(Alignment::HORIZONTAL_CENTER)
                       ->setVertical(Alignment::VERTICAL_CENTER);
-                $sheet->getStyle($col.$fila)->getFont()->setSize(11);
+                $sheet->getStyle($col . $fila)->getFont()->setSize(11);
                 $col++;
             }
-
             $fila++;
             $contadorBloque++;
         }
     }
 
-    // Ajustar ancho de columnas
+    // Ajustar ancho
     foreach (range('A', $ultimaCol) as $col) {
         $sheet->getColumnDimension($col)->setWidth(25);
     }
 
     // Bordes
-    $sheet->getStyle("A5:{$ultimaCol}".($fila-1))
+    $sheet->getStyle("A5:{$ultimaCol}" . ($fila - 1))
           ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
     // Descargar Excel
-    $filename = "Distribucion_{$nombreDia}.xlsx";
+    $filename = "Distribucion_{$nombreDia}_Maniana.xlsx";
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header("Content-Disposition: attachment; filename=\"$filename\"");
     $writer = new Xlsx($spreadsheet);
@@ -231,6 +224,6 @@ try {
     exit;
 
 } catch (PDOException $e) {
-    echo "Error: ".$e->getMessage();
+    echo "Error: " . $e->getMessage();
 }
 ?>
