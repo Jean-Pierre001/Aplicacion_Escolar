@@ -217,7 +217,85 @@
   </div>
 </div>
 
+<!-- 🔹 Modal Exportar Horarios de la Mañana -->
+<div id="modalExportarManiana" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-96">
+    <h3 class="text-xl font-semibold mb-4 text-gray-800">Exportar horarios del día (Turno Mañana)</h3>
+    
+    <form method="GET" action="export_scheduling_day_morning.php">
+      <label class="block mb-2 text-sm font-medium text-gray-700">Seleccione el día:</label>
+      <select name="weekday" required class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        <option value="">-- Seleccionar --</option>
+        <option value="monday">Lunes</option>
+        <option value="tuesday">Martes</option>
+        <option value="wednesday">Miércoles</option>
+        <option value="thursday">Jueves</option>
+        <option value="friday">Viernes</option>
+        <option value="saturday">Sábado</option>
+      </select>
+
+      <div class="flex justify-end gap-2">
+        <button 
+          type="button" 
+          onclick="document.getElementById('modalExportarManiana').classList.add('hidden')" 
+          class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+          Exportar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 🔹 Modal Exportar Horarios -->
+<div id="modalExportar" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-96">
+    <h3 class="text-xl font-semibold mb-4 text-gray-800">Exportar horarios del día (Turno Tarde)</h3>
+    
+    <form method="GET" action="export_scheduling_day_afternoon.php">
+      <label class="block mb-2 text-sm font-medium text-gray-700">Seleccione el día:</label>
+      <select name="weekday" required class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        <option value="">-- Seleccionar --</option>
+        <option value="monday">Lunes</option>
+        <option value="tuesday">Martes</option>
+        <option value="wednesday">Miércoles</option>
+        <option value="thursday">Jueves</option>
+        <option value="friday">Viernes</option>
+        <option value="saturday">Sábado</option>
+      </select>
+
+      <div class="flex justify-end gap-2">
+        <button 
+          type="button" 
+          onclick="document.getElementById('modalExportar').classList.add('hidden')" 
+          class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+          Exportar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
+function openExportModal() {
+    document.getElementById('exportScheduleModal').classList.remove('hidden');
+}
+function closeExportModal() {
+    document.getElementById('exportScheduleModal').classList.add('hidden');
+}
+function exportDaySchedule() {
+    const day = document.getElementById('exportDay').value;
+    window.location.href = 'export_schedule_day.php?day=' + day;
+}
   // -------------------------
   // Abrir / cerrar modales
   // -------------------------
