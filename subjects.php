@@ -123,4 +123,59 @@ document.addEventListener('DOMContentLoaded', function() {
     filterCourse.addEventListener('input', filterRows);
     filterTurno.addEventListener('input', filterRows);
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // === Datos de materias existentes ===
+    const subjects = [
+        <?php
+        foreach ($subjects as $s) {
+            echo "{ name: '".addslashes(strtolower($s['name']))."', course_id: '".addslashes($s['course_name'])."' },";
+        }
+        ?>
+    ];
+
+    // === Formulario de agregar materia ===
+    const addForm = document.getElementById('addSubjectForm');
+    const addName = addForm.querySelector('input[name="name"]');
+    const addCourse = addForm.querySelector('select[name="course_id"]');
+    const addWarning = document.createElement('p');
+    addWarning.classList.add('text-red-600', 'mt-2', 'text-sm');
+    addForm.insertBefore(addWarning, addForm.querySelector('button[type="submit"]'));
+
+    addForm.addEventListener('submit', function(e) {
+        const nameVal = addName.value.trim().toLowerCase();
+        const courseVal = addCourse.options[addCourse.selectedIndex].text.toLowerCase();
+
+        const exists = subjects.some(s => s.name === nameVal && s.course_id === courseVal);
+        if (exists) {
+            e.preventDefault();
+            addWarning.textContent = "⚠️ Ya existe una materia con ese nombre en el mismo curso.";
+            return;
+        }
+        addWarning.textContent = ""; // Limpia si no hay error
+    });
+
+    // === Formulario de editar materia ===
+    const editForm = document.getElementById('editSubjectForm');
+    if (editForm) {
+        const editName = editForm.querySelector('input[name="name"]');
+        const editCourse = editForm.querySelector('select[name="course_id"]');
+        const editWarning = document.createElement('p');
+        editWarning.classList.add('text-red-600', 'mt-2', 'text-sm');
+        editForm.insertBefore(editWarning, editForm.querySelector('button[type="submit"]'));
+
+        editForm.addEventListener('submit', function(e) {
+            const nameVal = editName.value.trim().toLowerCase();
+            const courseVal = editCourse.options[editCourse.selectedIndex].text.toLowerCase();
+
+            const exists = subjects.some(s => s.name === nameVal && s.course_id === courseVal);
+            if (exists) {
+                e.preventDefault();
+                editWarning.textContent = "⚠️ Ya existe otra materia con ese nombre en el mismo curso.";
+                return;
+            }
+            editWarning.textContent = "";
+        });
+    }
+});
 </script>
