@@ -53,7 +53,7 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "<a href='javascript:void(0)' 
                         onclick=\"openModalMoveStudents({$courseStudents[0]['course_id']}, '{$course}')\" 
                         class='bg-purple-500 hover:bg-purple-700 text-white px-3 py-1 rounded-md flex items-center justify-center transition w-36'>
-                        <i class='fa-solid fa-arrows-right-left mr-1'></i> Promoveer
+                        <i class='fas fa-level-up-alt mr-1'></i> Promoveer
                       </a>";
                 echo "</div>";
 
