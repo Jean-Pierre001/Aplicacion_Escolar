@@ -3,9 +3,11 @@
   <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
     <h2 class="text-xl font-semibold mb-4">Agregar Materia</h2>
     <form id="addSubjectForm" action="subjects_back/add_subject.php" method="POST" class="space-y-4">
+      
       <div>
         <label class="block mb-1 font-medium">Nombre</label>
         <input type="text" name="name" class="w-full border px-3 py-2 rounded" required>
+        <p id="addSubjectError" class="text-red-600 text-sm mt-1 hidden"></p>
       </div>
 
       <div>
@@ -59,6 +61,7 @@
       <div>
         <label class="block mb-1 font-medium">Nombre</label>
         <input type="text" name="name" id="edit_name" class="w-full border px-3 py-2 rounded" required>
+        <p id="editSubjectError" class="text-red-600 text-sm mt-1 hidden"></p>
       </div>
 
       <div>
@@ -101,13 +104,12 @@
   </div>
 </div>
 
-
 <script>
-// --- Abrir / cerrar modal ---
+// === Abrir / cerrar modal ===
 function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
 function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
-// --- Llenar modal editar ---
+// === Llenar modal Editar ===
 function openEditModalSubject(subject){
   document.getElementById('edit_subject_id').value = subject.subject_id;
   document.getElementById('edit_name').value = subject.name;
@@ -129,46 +131,99 @@ function openEditModalSubject(subject){
   openModal('editSubjectModal');
 }
 
-// --- Validación duplicados vía AJAX ---
+// === Función AJAX para verificar duplicados ===
 async function checkDuplicateSubject(name, course_ids, subject_id = null){
-    const fd = new FormData();
-    fd.append('name', name);
-    fd.append('course_ids', JSON.stringify(course_ids));
-    if(subject_id) fd.append('subject_id', subject_id);
+  const fd = new FormData();
+  fd.append('name', name);
+  fd.append('course_ids', JSON.stringify(course_ids));
+  if(subject_id) fd.append('subject_id', subject_id);
 
-    const res = await fetch('api/validations/check_duplicate_subject.php', { method:'POST', body: fd });
-    const data = await res.json();
-    return data.exists;
+  const res = await fetch('api/validations/check_duplicate_subject.php', { method: 'POST', body: fd });
+  const data = await res.json();
+  return data.exists;
 }
 
-// --- Formulario Agregar Materia ---
+// === Validación con SweetAlert (AGREGAR) ===
 document.getElementById('addSubjectForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const name = e.target.name.value.trim();
-    const course_ids = Array.from(e.target.querySelectorAll('input[name="course_id[]"]:checked')).map(c => c.value);
+  e.preventDefault();
 
-    if(!name) return Swal.fire('Error', 'Debe ingresar un nombre de materia.', 'warning');
-    if(course_ids.length === 0) return Swal.fire('Error', 'Debe seleccionar al menos un curso.', 'warning');
+  const name = e.target.name.value.trim();
+  const course_ids = Array.from(e.target.querySelectorAll('input[name="course_id[]"]:checked')).map(c => c.value);
 
-    const exists = await checkDuplicateSubject(name, course_ids);
-    if(exists) return Swal.fire('Duplicado', 'Ya existe una materia con este nombre en alguno de los cursos seleccionados.', 'error');
+  if(!name){
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campo obligatorio',
+      text: 'Debe ingresar un nombre de materia.',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
 
-    e.target.submit();
+  if(course_ids.length === 0){
+    Swal.fire({
+      icon: 'warning',
+      title: 'Curso no seleccionado',
+      text: 'Debe seleccionar al menos un curso.',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
+
+  const exists = await checkDuplicateSubject(name, course_ids);
+  if(exists){
+    Swal.fire({
+      icon: 'error',
+      title: 'Duplicado',
+      text: 'Ya existe una materia con este nombre en alguno de los cursos seleccionados.',
+      confirmButtonColor: '#d33'
+    });
+    return;
+  }
+
+  e.target.submit();
 });
 
-// --- Formulario Editar Materia ---
+// === Validación con SweetAlert (EDITAR) ===
 document.getElementById('editSubjectForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const name = e.target.name.value.trim();
-    const subject_id = e.target.subject_id.value;
-    const course_ids = Array.from(e.target.querySelectorAll('input[name="course_id[]"]:checked')).map(c => c.value);
+  e.preventDefault();
 
-    if(!name) return Swal.fire('Error', 'Debe ingresar un nombre de materia.', 'warning');
-    if(course_ids.length === 0) return Swal.fire('Error', 'Debe seleccionar al menos un curso.', 'warning');
+  const name = e.target.name.value.trim();
+  const subject_id = e.target.subject_id.value;
+  const course_ids = Array.from(e.target.querySelectorAll('input[name="course_id[]"]:checked')).map(c => c.value);
 
-    const exists = await checkDuplicateSubject(name, course_ids, subject_id);
-    if(exists) return Swal.fire('Duplicado', 'Ya existe otra materia con este nombre en alguno de los cursos seleccionados.', 'error');
+  if(!name){
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campo obligatorio',
+      text: 'Debe ingresar un nombre de materia.',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
 
-    e.target.submit();
+  if(course_ids.length === 0){
+    Swal.fire({
+      icon: 'warning',
+      title: 'Curso no seleccionado',
+      text: 'Debe seleccionar al menos un curso.',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
+
+  const exists = await checkDuplicateSubject(name, course_ids, subject_id);
+  if(exists){
+    Swal.fire({
+      icon: 'error',
+      title: 'Duplicado',
+      text: 'Ya existe otra materia con este nombre en alguno de los cursos seleccionados.',
+      confirmButtonColor: '#d33'
+    });
+    return;
+  }
+
+  e.target.submit();
 });
 </script>
+
