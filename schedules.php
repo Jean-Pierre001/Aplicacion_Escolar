@@ -27,25 +27,25 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterClassroom" placeholder="Filtrar por Aula" class="px-3 py-2 border rounded w-48">
     </div>
 
-<!-- 🔹 Sección de Exportación de Horarios - Turno Mañana -->
-<div class="p-4 bg-white shadow-md rounded-lg mb-4">
-  <h2 class="text-2xl font-bold text-gray-700 mb-3">📅 Exportar Horarios (Turno Mañana)</h2>
-  <button 
-    onclick="document.getElementById('modalExportarManiana').classList.remove('hidden')" 
-    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-    Exportar Distribucion del Día
-  </button>
-</div>
+    <!-- Sección de Exportación de Horarios - Turno Mañana -->
+    <div class="p-4 bg-white shadow-md rounded-lg mb-4">
+      <h2 class="text-2xl font-bold text-gray-700 mb-3">📅 Exportar Horarios (Turno Mañana)</h2>
+      <button 
+        onclick="document.getElementById('modalExportarManiana').classList.remove('hidden')" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+        Exportar Distribucion del Día
+      </button>
+    </div>
 
-<!-- 🔹 Sección de Exportación de Horarios -->
-<div class="p-4 bg-white shadow-md rounded-lg mb-4">
-  <h2 class="text-2xl font-bold text-gray-700 mb-3">📅 Exportar Horarios del Día (Turno Tarde)</h2>
-  <button 
-    onclick="document.getElementById('modalExportar').classList.remove('hidden')" 
-    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-    Exportar Distribucion del Día
-  </button>
-</div>
+    <!-- 🔹 Sección de Exportación de Horarios -->
+    <div class="p-4 bg-white shadow-md rounded-lg mb-4">
+      <h2 class="text-2xl font-bold text-gray-700 mb-3">📅 Exportar Horarios del Día (Turno Tarde)</h2>
+      <button 
+        onclick="document.getElementById('modalExportar').classList.remove('hidden')" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+        Exportar Distribucion del Día
+      </button>
+    </div>
 
     <?php
     try {
@@ -94,7 +94,7 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "<span>{$course}</span>";
                 echo "<a href='export_schedule.php?course_id={$groups[array_key_first($groups)][0]['course_id']}' 
                         class='bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-md flex items-center justify-center w-36 transition'>
-                        <i class='fa-solid fa-file-excel mr-1'></i> Exportar Excel
+                        <i class='fa-solid fa-file-excel mr-1'></i> Exportar
                       </a>";
                 echo "</div>";
 
@@ -104,7 +104,7 @@ include 'includes/conn.php'; // Conexión PDO
                     }
 
                     echo "<div class='overflow-x-auto'>";
-                    echo "<table class='min-w-full text-sm text-gray-700 border-collapse'>";
+                    echo "<table class='min-w-full text-sm text-gray-700 border-collapse schedulesTable'>";
                     echo "<thead class='bg-gray-200 text-gray-800 uppercase text-xs font-semibold border-b border-gray-300'>
                             <tr>
                               <th class='px-6 py-3 border'>Materia</th>
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterWeekday = document.getElementById('filterWeekday');
     const filterShift = document.getElementById('filterShift');
     const filterClassroom = document.getElementById('filterClassroom');
-    const tables = document.querySelectorAll('#schedulesTable');
+    const tables = document.querySelectorAll('.schedulesTable');
 
     function filterRows() {
         const subjectVal = filterSubject.value.toLowerCase();
