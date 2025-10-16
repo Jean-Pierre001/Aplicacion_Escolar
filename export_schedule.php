@@ -123,7 +123,7 @@ try {
         $sheet->getColumnDimension($col)->setWidth(25);
     }
     for ($i = 2; $i < $row; $i++) {
-        $sheet->getRowDimension($i)->setRowHeight(50);
+        $sheet->getRowDimension($i)->setRowHeight(60);
     }
 
     // Bordes
