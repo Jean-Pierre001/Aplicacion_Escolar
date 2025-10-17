@@ -7,8 +7,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description']);
     $turno = $_POST['turno'] ?? '';
     $course_id = $_POST['course_id'] ?? '';
+    $cupof = trim($_POST['cupof'] ?? ''); // nuevo campo
 
-    if (!$subject_id || !$name || !$turno || !$course_id) {
+    if (!$subject_id || !$name || !$turno || !$course_id || !$cupof) {
         die('Datos incompletos para actualizar la materia.');
     }
 
@@ -18,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SET name = :name,
                 description = :description,
                 turno = :turno,
-                course_id = :course_id
+                course_id = :course_id,
+                CUPOF = :cupof
             WHERE subject_id = :subject_id
         ");
 
@@ -27,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':description' => $description,
             ':turno' => $turno,
             ':course_id' => $course_id,
+            ':cupof' => $cupof,
             ':subject_id' => $subject_id
         ]);
 

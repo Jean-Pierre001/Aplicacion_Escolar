@@ -4,32 +4,40 @@
     <h2 class="text-xl font-semibold mb-4">Agregar Materia</h2>
     <form id="addSubjectForm" action="subjects_back/add_subject.php" method="POST" class="space-y-4">
       
+      <!-- Nombre -->
       <div>
         <label class="block mb-1 font-medium">Nombre</label>
         <input type="text" name="name" class="w-full border px-3 py-2 rounded" required>
-        <p id="addSubjectError" class="text-red-600 text-sm mt-1 hidden"></p>
       </div>
 
+      <!-- Descripción -->
       <div>
         <label class="block mb-1 font-medium">Descripción</label>
         <textarea name="description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
 
-      <!-- ✅ Selección múltiple moderna con checkboxes -->
+      <!-- Curso (único) -->
       <div>
-        <label class="block mb-2 font-semibold">Cursos</label>
-        <div class="flex flex-wrap gap-2">
+        <label class="block mb-1 font-medium">Curso</label>
+        <select name="course_id" class="w-full border px-3 py-2 rounded" required>
+          <option value="">Seleccione un curso</option>
           <?php
           $stmt = $conn->query("SELECT course_id, name FROM courses ORDER BY name ASC");
           while ($row = $stmt->fetch(PDO::FETCH_ASSOC)): ?>
-            <label class="flex items-center gap-2 px-3 py-1 border rounded-full cursor-pointer hover:bg-blue-100">
-              <input type="checkbox" name="course_id[]" value="<?= htmlspecialchars($row['course_id']) ?>" class="accent-blue-600">
-              <span><?= htmlspecialchars($row['name']) ?></span>
-            </label>
+            <option value="<?= htmlspecialchars($row['course_id']) ?>">
+              <?= htmlspecialchars($row['name']) ?>
+            </option>
           <?php endwhile; ?>
-        </div>
+        </select>
       </div>
 
+      <!-- CUPOF -->
+      <div>
+        <label class="block mb-1 font-medium">CUPOF</label>
+        <input type="number" name="cupof" class="w-full border px-3 py-2 rounded" required>
+      </div>
+
+      <!-- Turno -->
       <div>
         <label class="block mb-1 font-medium">Turno</label>
         <select name="turno" class="w-full border px-3 py-2 rounded" required>
@@ -38,6 +46,7 @@
         </select>
       </div>
 
+      <!-- Botones -->
       <div class="flex justify-end space-x-2 mt-4">
         <button type="button" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onclick="closeModal('addSubjectModal')">Cancelar</button>
         <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Agregar</button>
@@ -58,30 +67,40 @@
     <form id="editSubjectForm" action="subjects_back/edit_subject.php" method="POST" class="space-y-4">
       <input type="hidden" name="subject_id" id="edit_subject_id">
 
+      <!-- Nombre -->
       <div>
         <label class="block mb-1 font-medium">Nombre</label>
         <input type="text" name="name" id="edit_name" class="w-full border px-3 py-2 rounded" required>
-        <p id="editSubjectError" class="text-red-600 text-sm mt-1 hidden"></p>
       </div>
 
+      <!-- Descripción -->
       <div>
         <label class="block mb-1 font-medium">Descripción</label>
         <textarea name="description" id="edit_description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
 
-      <!-- ✅ Selección de curso único -->
+      <!-- Curso -->
       <div>
-        <label class="block mb-2 font-semibold">Curso</label>
+        <label class="block mb-1 font-medium">Curso</label>
         <select name="course_id" id="edit_course_id" class="w-full border px-3 py-2 rounded" required>
           <option value="">Seleccione un curso</option>
           <?php
           $stmt = $conn->query("SELECT course_id, name FROM courses ORDER BY name ASC");
           while ($row = $stmt->fetch(PDO::FETCH_ASSOC)): ?>
-            <option value="<?= htmlspecialchars($row['course_id']) ?>"><?= htmlspecialchars($row['name']) ?></option>
+            <option value="<?= htmlspecialchars($row['course_id']) ?>">
+              <?= htmlspecialchars($row['name']) ?>
+            </option>
           <?php endwhile; ?>
         </select>
       </div>
 
+      <!-- CUPOF -->
+      <div>
+        <label class="block mb-1 font-medium">CUPOF</label>
+        <input type="number" name="cupof" id="edit_cupof" class="w-full border px-3 py-2 rounded" required>
+      </div>
+
+      <!-- Turno -->
       <div>
         <label class="block mb-1 font-medium">Turno</label>
         <select name="turno" id="edit_turno" class="w-full border px-3 py-2 rounded" required>
@@ -90,6 +109,7 @@
         </select>
       </div>
 
+      <!-- Botones -->
       <div class="flex justify-end space-x-2 mt-4">
         <button type="button" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onclick="closeModal('editSubjectModal')">Cancelar</button>
         <button type="submit" class="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600">Guardar</button>
@@ -101,6 +121,7 @@
     </button>
   </div>
 </div>
+
 
 <script>
 // === Abrir / cerrar modal ===
@@ -114,15 +135,15 @@ function openEditModalSubject(subject){
   document.getElementById('edit_description').value = subject.description;
   document.getElementById('edit_turno').value = subject.turno;
   document.getElementById('edit_course_id').value = subject.course_id || '';
-
+  document.getElementById('edit_cupof').value = subject.CUPOF || '';
   openModal('editSubjectModal');
 }
 
-// === Función AJAX para verificar duplicados ===
-async function checkDuplicateSubject(name, course_ids, subject_id = null){
+// === Verificación AJAX duplicados ===
+async function checkDuplicateSubject(name, course_id, subject_id = null){
   const fd = new FormData();
   fd.append('name', name);
-  fd.append('course_ids', JSON.stringify(course_ids));
+  fd.append('course_ids', JSON.stringify([course_id]));
   if(subject_id) fd.append('subject_id', subject_id);
 
   const res = await fetch('api/validations/check_duplicate_subject.php', { method: 'POST', body: fd });
@@ -130,86 +151,65 @@ async function checkDuplicateSubject(name, course_ids, subject_id = null){
   return data.exists;
 }
 
-// === Validación con SweetAlert (AGREGAR) ===
+// === Verificación AJAX CUPOF ===
+async function checkDuplicateCUPOF(cupof, subject_id = null){
+  const fd = new FormData();
+  fd.append('cupof', cupof);
+  if(subject_id) fd.append('subject_id', subject_id);
+
+  const res = await fetch('api/validations/check_duplicate_cupof.php', { method: 'POST', body: fd });
+  const data = await res.json();
+  return data.exists;
+}
+
+// === Validación AGREGAR ===
 document.getElementById('addSubjectForm').addEventListener('submit', async e => {
   e.preventDefault();
-
   const name = e.target.name.value.trim();
-  const course_ids = Array.from(e.target.querySelectorAll('input[name="course_id[]"]:checked')).map(c => c.value);
+  const course_id = e.target.course_id.value;
+  const cupof = e.target.cupof.value.trim();
 
-  if(!name){
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campo obligatorio',
-      text: 'Debe ingresar un nombre de materia.',
-      confirmButtonColor: '#3085d6'
-    });
+  if(!name || !course_id || !cupof){
+    Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Complete todos los campos.', confirmButtonColor: '#3085d6' });
     return;
   }
 
-  if(course_ids.length === 0){
-    Swal.fire({
-      icon: 'warning',
-      title: 'Curso no seleccionado',
-      text: 'Debe seleccionar al menos un curso.',
-      confirmButtonColor: '#3085d6'
-    });
+  const duplicateName = await checkDuplicateSubject(name, course_id);
+  const duplicateCUPOF = await checkDuplicateCUPOF(cupof);
+  if(duplicateName){
+    Swal.fire({ icon: 'error', title: 'Duplicado', text: 'Ya existe una materia con este nombre en ese curso.', confirmButtonColor: '#d33' });
     return;
   }
-
-  const exists = await checkDuplicateSubject(name, course_ids);
-  if(exists){
-    Swal.fire({
-      icon: 'error',
-      title: 'Duplicado',
-      text: 'Ya existe una materia con este nombre en alguno de los cursos seleccionados.',
-      confirmButtonColor: '#d33'
-    });
+  if(duplicateCUPOF){
+    Swal.fire({ icon: 'error', title: 'Duplicado', text: 'El CUPOF ya está asignado a otra materia.', confirmButtonColor: '#d33' });
     return;
   }
-
   e.target.submit();
 });
 
-// === Validación con SweetAlert (EDITAR) ===
+// === Validación EDITAR ===
 document.getElementById('editSubjectForm').addEventListener('submit', async e => {
   e.preventDefault();
-
-  const name = e.target.name.value.trim();
   const subject_id = e.target.subject_id.value;
-  const course_ids = [e.target.course_id.value];
+  const name = e.target.name.value.trim();
+  const course_id = e.target.course_id.value;
+  const cupof = e.target.cupof.value.trim();
 
-  if(!name){
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campo obligatorio',
-      text: 'Debe ingresar un nombre de materia.',
-      confirmButtonColor: '#3085d6'
-    });
+  if(!name || !course_id || !cupof){
+    Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Complete todos los campos.', confirmButtonColor: '#3085d6' });
     return;
   }
 
-  if(!course_ids[0]){
-    Swal.fire({
-      icon: 'warning',
-      title: 'Curso no seleccionado',
-      text: 'Debe seleccionar un curso.',
-      confirmButtonColor: '#3085d6'
-    });
+  const duplicateName = await checkDuplicateSubject(name, course_id, subject_id);
+  const duplicateCUPOF = await checkDuplicateCUPOF(cupof, subject_id);
+  if(duplicateName){
+    Swal.fire({ icon: 'error', title: 'Duplicado', text: 'Ya existe otra materia con este nombre en ese curso.', confirmButtonColor: '#d33' });
     return;
   }
-
-  const exists = await checkDuplicateSubject(name, course_ids, subject_id);
-  if(exists){
-    Swal.fire({
-      icon: 'error',
-      title: 'Duplicado',
-      text: 'Ya existe otra materia con este nombre en este curso.',
-      confirmButtonColor: '#d33'
-    });
+  if(duplicateCUPOF){
+    Swal.fire({ icon: 'error', title: 'Duplicado', text: 'El CUPOF ya está asignado a otra materia.', confirmButtonColor: '#d33' });
     return;
   }
-
   e.target.submit();
 });
 </script>

@@ -5,7 +5,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $turno = $_POST['turno'] ?? '';
-    $course_ids = $_POST['course_id'] ?? [];
+    $course_id = $_POST['course_id'] ?? '';
+    $cupof = trim($_POST['cupof'] ?? ''); // nuevo campo
 
     if (!$name) {
         die('El nombre de la materia es obligatorio.');
@@ -15,32 +16,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die('El turno es obligatorio.');
     }
 
-    if (empty($course_ids)) {
-        die('Debes seleccionar al menos un curso.');
+    if (!$course_id) {
+        die('Debes seleccionar un curso.');
+    }
+
+    if (!$cupof) {
+        die('El campo CUPOF es obligatorio.');
     }
 
     try {
-        $conn->beginTransaction();
-
         $stmt = $conn->prepare("
-            INSERT INTO subjects (name, description, turno, course_id)
-            VALUES (:name, :description, :turno, :course_id)
+            INSERT INTO subjects (name, description, turno, course_id, CUPOF)
+            VALUES (:name, :description, :turno, :course_id, :cupof)
         ");
 
-        foreach ($course_ids as $course_id) {
-            $stmt->execute([
-                ':name' => $name,
-                ':description' => $description,
-                ':turno' => $turno,
-                ':course_id' => $course_id
-            ]);
-        }
+        $stmt->execute([
+            ':name' => $name,
+            ':description' => $description,
+            ':turno' => $turno,
+            ':course_id' => $course_id,
+            ':cupof' => $cupof
+        ]);
 
-        $conn->commit();
         header('Location: ../subjects.php');
         exit;
     } catch (PDOException $e) {
-        $conn->rollBack();
         die("Error al agregar materia: " . $e->getMessage());
     }
 }
