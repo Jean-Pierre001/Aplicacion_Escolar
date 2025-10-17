@@ -3,7 +3,28 @@ include 'includes/session.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 include 'includes/navbar.php';
-include 'includes/conn.php'; // Conexión PDO
+include 'includes/conn.php';
+/* por si alguno se manda la cagada de haber puesto materias con caracteres especiales o tildes, etc 
+comando sql para sanear la base de datos:
+UPDATE subjects
+SET
+name = REPLACE(
+REPLACE(
+REPLACE(
+REPLACE(
+REPLACE(
+name,
+'á', 'a'
+),
+'é', 'e'
+),
+'í', 'i'
+),
+'ó', 'o'
+),
+'ú', 'u'
+);
+*/
 ?>
 
 <div class="flex-1 md:ml-64 transition-all duration-300">
