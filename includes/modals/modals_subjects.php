@@ -69,19 +69,17 @@
         <textarea name="description" id="edit_description" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
       </div>
 
-      <!-- ✅ Selección múltiple moderna con checkboxes -->
+      <!-- ✅ Selección de curso único -->
       <div>
-        <label class="block mb-2 font-semibold">Cursos</label>
-        <div class="flex flex-wrap gap-2">
+        <label class="block mb-2 font-semibold">Curso</label>
+        <select name="course_id" id="edit_course_id" class="w-full border px-3 py-2 rounded" required>
+          <option value="">Seleccione un curso</option>
           <?php
           $stmt = $conn->query("SELECT course_id, name FROM courses ORDER BY name ASC");
           while ($row = $stmt->fetch(PDO::FETCH_ASSOC)): ?>
-            <label class="flex items-center gap-2 px-3 py-1 border rounded-full cursor-pointer hover:bg-blue-100">
-              <input type="checkbox" name="course_id[]" value="<?= htmlspecialchars($row['course_id']) ?>" class="accent-blue-600 edit-course-checkbox">
-              <span><?= htmlspecialchars($row['name']) ?></span>
-            </label>
+            <option value="<?= htmlspecialchars($row['course_id']) ?>"><?= htmlspecialchars($row['name']) ?></option>
           <?php endwhile; ?>
-        </div>
+        </select>
       </div>
 
       <div>
@@ -115,18 +113,7 @@ function openEditModalSubject(subject){
   document.getElementById('edit_name').value = subject.name;
   document.getElementById('edit_description').value = subject.description;
   document.getElementById('edit_turno').value = subject.turno;
-
-  // Limpiar selección anterior
-  document.querySelectorAll('.edit-course-checkbox').forEach(cb => cb.checked = false);
-
-  // Marcar los cursos que correspondan
-  if (subject.course_id) {
-    const ids = subject.course_id.toString().split(',').map(id => id.trim());
-    ids.forEach(id => {
-      const checkbox = document.querySelector(`.edit-course-checkbox[value="${id}"]`);
-      if (checkbox) checkbox.checked = true;
-    });
-  }
+  document.getElementById('edit_course_id').value = subject.course_id || '';
 
   openModal('editSubjectModal');
 }
@@ -190,7 +177,7 @@ document.getElementById('editSubjectForm').addEventListener('submit', async e =>
 
   const name = e.target.name.value.trim();
   const subject_id = e.target.subject_id.value;
-  const course_ids = Array.from(e.target.querySelectorAll('input[name="course_id[]"]:checked')).map(c => c.value);
+  const course_ids = [e.target.course_id.value];
 
   if(!name){
     Swal.fire({
@@ -202,11 +189,11 @@ document.getElementById('editSubjectForm').addEventListener('submit', async e =>
     return;
   }
 
-  if(course_ids.length === 0){
+  if(!course_ids[0]){
     Swal.fire({
       icon: 'warning',
       title: 'Curso no seleccionado',
-      text: 'Debe seleccionar al menos un curso.',
+      text: 'Debe seleccionar un curso.',
       confirmButtonColor: '#3085d6'
     });
     return;
@@ -217,7 +204,7 @@ document.getElementById('editSubjectForm').addEventListener('submit', async e =>
     Swal.fire({
       icon: 'error',
       title: 'Duplicado',
-      text: 'Ya existe otra materia con este nombre en alguno de los cursos seleccionados.',
+      text: 'Ya existe otra materia con este nombre en este curso.',
       confirmButtonColor: '#d33'
     });
     return;
@@ -226,4 +213,3 @@ document.getElementById('editSubjectForm').addEventListener('submit', async e =>
   e.target.submit();
 });
 </script>
-
