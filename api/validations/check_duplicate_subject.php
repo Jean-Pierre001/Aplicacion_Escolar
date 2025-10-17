@@ -3,30 +3,24 @@ include '../../includes/conn.php';
 
 if (isset($_POST['name']) && isset($_POST['course_ids'])) {
     $name = trim($_POST['name']);
-    $course_ids = json_decode($_POST['course_ids'], true);
+    $course_ids = json_decode($_POST['course_ids'], true); // sigue siendo array
     $subject_id = isset($_POST['subject_id']) ? intval($_POST['subject_id']) : 0;
 
-    if (empty($course_ids)) {
+    if(empty($course_ids)){
         echo json_encode(['exists' => false]);
         exit;
     }
 
-    // Verificar si existe una materia con el mismo nombre en alguno de los cursos seleccionados
-    $placeholders = implode(',', array_fill(0, count($course_ids), '?'));
+    $course_id = $course_ids[0]; // ahora solo tomamos un curso
 
-    $sql = "
-        SELECT COUNT(*) 
-        FROM subjects s
-        JOIN subject_courses sc ON s.subject_id = sc.subject_id
-        WHERE LOWER(s.name) = ?
-        AND sc.course_id IN ($placeholders)
-    ";
+    $sql = "SELECT COUNT(*) FROM subjects 
+            WHERE LOWER(name) = ? 
+            AND course_id = ?";
 
-    $params = [strtolower($name)];
-    $params = array_merge($params, $course_ids);
+    $params = [strtolower($name), $course_id];
 
     if ($subject_id > 0) {
-        $sql .= " AND s.subject_id != ?";
+        $sql .= " AND subject_id != ?";
         $params[] = $subject_id;
     }
 

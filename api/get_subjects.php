@@ -1,27 +1,74 @@
 <?php
 include '../includes/conn.php';
-header('Content-Type: application/json; charset=utf-8');
+date_default_timezone_set('America/Argentina/Salta');
 
-$course_id = isset($_GET['course_id']) ? intval($_GET['course_id']) : 0;
-if ($course_id <= 0) {
+$course_id = $_GET['course_id'] ?? null;
+$group_id = $_GET['group_id'] ?? null;
+
+if (!$course_id) {
     echo json_encode([]);
     exit;
 }
 
-try {
-    $stmt = $conn->prepare("
-        SELECT DISTINCT s.subject_id, s.name
-        FROM subjects s
-        JOIN subject_courses sc ON s.subject_id = sc.subject_id
-        WHERE sc.course_id = :course_id
-        ORDER BY s.name ASC
-    ");
-    $stmt->bindParam(':course_id', $course_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$today = (new DateTime())->format('Y-m-d');
+$weekday = strtolower((new DateTime())->format('l'));
 
-    echo json_encode($subjects);
+// Traemos las materias del curso (y grupo si aplica) que tengan clase hoy
+$sql = "
+    SELECT 
+        s.subject_id,
+        s.name AS subject_name,
+        t.teacher_id,
+        t.first_name AS teacher_fname,
+        t.last_name AS teacher_lname,
+        CASE 
+            WHEN sa.id IS NOT NULL THEN 'done'
+            ELSE 'pending'
+        END AS status
+    FROM schedules sch
+    JOIN subjects s 
+        ON s.subject_id = sch.subject_id
+    JOIN teachers t 
+        ON t.teacher_id = sch.teacher_id
+    LEFT JOIN student_attendance sa
+        ON sa.schedule_id = sch.schedule_id
+        AND sa.attendance_date = :today
+    WHERE sch.course_id = :course_id
+      AND sch.weekday = :weekday
+";
 
-} catch (PDOException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+// Filtrado por grupo
+if ($group_id) {
+    $sql .= " AND sch.group_id = :group_id";
+} else {
+    $sql .= " AND sch.group_id IS NULL";
 }
+
+$sql .= "
+    GROUP BY s.subject_id
+    ORDER BY s.name
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bindValue(':today', $today);
+$stmt->bindValue(':weekday', $weekday);
+$stmt->bindValue(':course_id', $course_id);
+if ($group_id) $stmt->bindValue(':group_id', $group_id);
+$stmt->execute();
+
+$subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Si no hay clases hoy, devolvemos "no_class"
+if (empty($subjects)) {
+    $allSubjects = $conn->query("SELECT subject_id, name FROM subjects WHERE course_id = $course_id ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($allSubjects as &$subj) {
+        $subj['status'] = 'no_class';
+        $subj['teacher_id'] = null;
+        $subj['teacher_fname'] = null;
+        $subj['teacher_lname'] = null;
+    }
+    $subjects = $allSubjects;
+}
+
+echo json_encode($subjects);
+?>

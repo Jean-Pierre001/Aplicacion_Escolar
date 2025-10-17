@@ -9,7 +9,6 @@ include 'includes/conn.php';
 $stmt = $conn->prepare("
     SELECT 
         sa.attendance_date,
-        sch.schedule_id,
         c.course_id,
         c.name AS course_name,
         s.subject_id,
@@ -23,7 +22,7 @@ $stmt = $conn->prepare("
     JOIN courses c ON sch.course_id = c.course_id
     JOIN subjects s ON sch.subject_id = s.subject_id
     LEFT JOIN groups g ON sch.group_id = g.group_id
-    GROUP BY sa.attendance_date, sch.schedule_id
+    GROUP BY sa.attendance_date, c.course_id, s.subject_id, sch.start_time, sch.end_time, g.group_id
     ORDER BY sa.attendance_date DESC
 ");
 $stmt->execute();
@@ -148,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     filterDate.addEventListener('input', filterRows);
-
     filterCourse.addEventListener('change', function() {
         const courseId = this.value;
         filterSubject.innerHTML = '<option value="">Filtrar por Materia</option>';
@@ -156,7 +154,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!courseId) { filterRows(); return; }
 
-        // ✅ Materias según relación subject_courses
         fetch(`api/get_subjects.php?course_id=${courseId}`)
             .then(res => res.json())
             .then(data => {
@@ -169,7 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 filterRows();
             });
 
-        // ✅ Grupos siguen igual
         fetch(`api/get_groups.php?course_id=${courseId}`)
             .then(res => res.json())
             .then(data => {
@@ -181,6 +177,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 filterRows();
             });
+
+        filterRows();
     });
 
     filterSubject.addEventListener('change', filterRows);
