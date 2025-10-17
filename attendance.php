@@ -18,9 +18,13 @@ include 'includes/conn.php';
       <select id="selectCourse" class="px-4 py-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
         <option value="">Seleccionar Curso</option>
         <?php
-        $courses = $conn->query("SELECT course_id, name FROM courses")->fetchAll();
-        foreach ($courses as $course) {
-            echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
+        try {
+            $stmt = $conn->query("SELECT course_id, name FROM courses ORDER BY name ASC");
+            foreach ($stmt as $course) {
+                echo "<option value='{$course['course_id']}'>{$course['name']}</option>";
+            }
+        } catch (PDOException $e) {
+            echo "<option disabled>Error al cargar cursos</option>";
         }
         ?>
       </select>

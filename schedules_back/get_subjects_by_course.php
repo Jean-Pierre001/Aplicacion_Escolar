@@ -8,15 +8,18 @@ if (!$course_id) {
 }
 
 try {
-    // Filtra materias que pertenecen al curso recibido
+    // 🔹 Ahora la relación es muchos a muchos, así que consultamos usando subject_courses
     $stmt = $conn->prepare("
-        SELECT subject_id, name
-        FROM subjects
-        WHERE course_id = ?
+        SELECT s.subject_id, s.name
+        FROM subjects s
+        INNER JOIN subject_courses sc ON s.subject_id = sc.subject_id
+        WHERE sc.course_id = ?
+        ORDER BY s.name ASC
     ");
     $stmt->execute([$course_id]);
-    
+
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
 } catch (PDOException $e) {
     echo json_encode(['error' => $e->getMessage()]);
 }
+?>
