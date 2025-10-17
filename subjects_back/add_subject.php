@@ -22,16 +22,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->beginTransaction();
 
+        // 1️⃣ Insertar materia
         $stmt = $conn->prepare("
-            INSERT INTO subjects (name, description, turno, course_id)
-            VALUES (:name, :description, :turno, :course_id)
+            INSERT INTO subjects (name, description, turno)
+            VALUES (:name, :description, :turno)
+        ");
+        $stmt->execute([
+            ':name' => $name,
+            ':description' => $description,
+            ':turno' => $turno
+        ]);
+
+        $subject_id = $conn->lastInsertId();
+
+        // 2️⃣ Asociar los cursos seleccionados
+        $stmtAssoc = $conn->prepare("
+            INSERT INTO subject_courses (subject_id, course_id)
+            VALUES (:subject_id, :course_id)
         ");
 
         foreach ($course_ids as $course_id) {
-            $stmt->execute([
-                ':name' => $name,
-                ':description' => $description,
-                ':turno' => $turno,
+            $stmtAssoc->execute([
+                ':subject_id' => $subject_id,
                 ':course_id' => $course_id
             ]);
         }
