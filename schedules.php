@@ -27,22 +27,19 @@ include 'includes/conn.php'; // Conexión PDO
       <input type="text" id="filterClassroom" placeholder="Filtrar por Aula" class="px-3 py-2 border rounded w-48">
     </div>
 
-    <!-- Sección de Exportación de Horarios - Turno Mañana -->
+    <!-- Secciones de Exportación (Mañana / Tarde) -->
     <div class="p-4 bg-white shadow-md rounded-lg mb-4">
       <h2 class="text-2xl font-bold text-gray-700 mb-3">📅 Exportar Horarios (Turno Mañana)</h2>
-      <button 
-        onclick="document.getElementById('modalExportarManiana').classList.remove('hidden')" 
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+      <button onclick="document.getElementById('modalExportarManiana').classList.remove('hidden')" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
         Exportar Distribucion del Día
       </button>
     </div>
 
-    <!-- 🔹 Sección de Exportación de Horarios -->
     <div class="p-4 bg-white shadow-md rounded-lg mb-4">
       <h2 class="text-2xl font-bold text-gray-700 mb-3">📅 Exportar Horarios del Día (Turno Tarde)</h2>
-      <button 
-        onclick="document.getElementById('modalExportar').classList.remove('hidden')" 
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+      <button onclick="document.getElementById('modalExportar').classList.remove('hidden')" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
         Exportar Distribucion del Día
       </button>
     </div>
@@ -87,7 +84,7 @@ include 'includes/conn.php'; // Conexión PDO
             ];
 
             foreach ($grouped as $course => $groups) {
-                echo "<div class='mb-6 border rounded-lg shadow-lg overflow-hidden'>";
+                echo "<div class='course-container mb-6 border rounded-lg shadow-lg overflow-hidden'>";
 
                 // Encabezado curso + Exportar Excel
                 echo "<div class='bg-indigo-500 text-white px-4 py-2 font-bold text-lg flex justify-between items-center'>";
@@ -99,6 +96,7 @@ include 'includes/conn.php'; // Conexión PDO
                 echo "</div>";
 
                 foreach ($groups as $group_name => $courseSchedules) {
+                    echo "<div class='group-container'>";
                     if ($group_name !== 'general') {
                         echo "<div class='bg-gray-200 px-4 py-1 font-semibold text-gray-700'>Grupo: {$group_name}</div>";
                     }
@@ -151,9 +149,10 @@ include 'includes/conn.php'; // Conexión PDO
                     }
 
                     echo "</tbody></table></div>";
+                    echo "</div>"; // cierre grupo-container
                 }
 
-                echo "</div>"; // cierre div curso
+                echo "</div>"; // cierre course-container
             }
 
         } else {
@@ -176,44 +175,60 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterWeekday = document.getElementById('filterWeekday');
     const filterShift = document.getElementById('filterShift');
     const filterClassroom = document.getElementById('filterClassroom');
-    const tables = document.querySelectorAll('.schedulesTable');
 
-    function filterRows() {
+    function filterSchedules() {
         const subjectVal = filterSubject.value.toLowerCase();
         const teacherVal = filterTeacher.value.toLowerCase();
         const weekdayVal = filterWeekday.value.toLowerCase();
         const shiftVal = filterShift.value.toLowerCase();
         const classroomVal = filterClassroom.value.toLowerCase();
 
-        tables.forEach(table => {
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const subject = cells[0].textContent.toLowerCase();
-                const shift = cells[1].textContent.toLowerCase();
-                const teacher = cells[2].textContent.toLowerCase();
-                const weekday = cells[5].textContent.toLowerCase();
-                const classroom = cells[4].textContent.toLowerCase();
+        const courseContainers = document.querySelectorAll('.course-container');
 
-                if (
-                    subject.includes(subjectVal) &&
-                    teacher.includes(teacherVal) &&
-                    weekday.includes(weekdayVal) &&
-                    shift.includes(shiftVal) &&
-                    classroom.includes(classroomVal)
-                ) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+        courseContainers.forEach(course => {
+            let anyGroupVisible = false;
+            const groupContainers = course.querySelectorAll('.group-container');
+
+            groupContainers.forEach(group => {
+                let anyRowVisible = false;
+                const rows = group.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const subject = cells[0].textContent.toLowerCase();
+                    const shift = cells[1].textContent.toLowerCase();
+                    const teacher = cells[2].textContent.toLowerCase();
+                    const weekday = cells[5].textContent.toLowerCase();
+                    const classroom = cells[4].textContent.toLowerCase();
+
+                    if (
+                        subject.includes(subjectVal) &&
+                        teacher.includes(teacherVal) &&
+                        weekday.includes(weekdayVal) &&
+                        shift.includes(shiftVal) &&
+                        classroom.includes(classroomVal)
+                    ) {
+                        row.style.display = '';
+                        anyRowVisible = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Ocultar grupo si no tiene filas visibles
+                group.style.display = anyRowVisible ? '' : 'none';
+                if (anyRowVisible) anyGroupVisible = true;
             });
+
+            // Ocultar curso si no tiene grupos visibles
+            course.style.display = anyGroupVisible ? '' : 'none';
         });
     }
 
-    filterSubject.addEventListener('input', filterRows);
-    filterTeacher.addEventListener('input', filterRows);
-    filterWeekday.addEventListener('input', filterRows);
-    filterShift.addEventListener('input', filterRows);
-    filterClassroom.addEventListener('input', filterRows);
+    filterSubject.addEventListener('input', filterSchedules);
+    filterTeacher.addEventListener('input', filterSchedules);
+    filterWeekday.addEventListener('input', filterSchedules);
+    filterShift.addEventListener('input', filterSchedules);
+    filterClassroom.addEventListener('input', filterSchedules);
 });
 </script>
